@@ -48,10 +48,6 @@ def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     quantity = int(request.form.get('quantity', 1))
     
-    if product.stock < quantity:
-        flash('Quantidade indisponível em estoque.', 'warning')
-        return redirect(url_for('main.product_detail', product_id=product_id))
-    
     cart_item = CartItem(user_id=current_user.id, product_id=product_id, quantity=quantity)
     db.session.add(cart_item)
     db.session.flush()
@@ -103,9 +99,6 @@ def update_cart(item_id):
     
     if quantity < 1:
         return jsonify({'success': False, 'message': 'Quantidade inválida'}), 400
-    
-    if cart_item.product.stock < quantity:
-        return jsonify({'success': False, 'message': 'Quantidade indisponível'}), 400
     
     cart_item.quantity = quantity
     db.session.commit()
@@ -225,11 +218,6 @@ def checkout():
     db.session.flush()
     
     for cart_item in cart_items:
-        if cart_item.product.stock < cart_item.quantity:
-            flash(f'Produto {cart_item.product.name} sem estoque suficiente.', 'danger')
-            db.session.rollback()
-            return redirect(url_for('cart.view_cart'))
-        
         order_item = OrderItem(
             order_id=order.id,
             product_id=cart_item.product_id,
@@ -248,7 +236,6 @@ def checkout():
             )
             db.session.add(order_item_extra)
         
-        cart_item.product.stock -= cart_item.quantity
         db.session.delete(cart_item)
     
     if applied_coupon:

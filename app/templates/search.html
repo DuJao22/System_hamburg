@@ -23,7 +23,6 @@
             <div class="product_code">Cód: {{ product.code }}</div>
             <div class="product_name">{{ product.name }}</div>
             <div class="product_price">R$ {{ "%.2f"|format(product.price) }}</div>
-            <div class="product_installments">12x de R$ {{ "%.2f"|format(product.price / 12) }}</div>
             <div class="product_pix">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
             <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy">VER DETALHES</a>
         </div>

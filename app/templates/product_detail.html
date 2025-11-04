@@ -40,29 +40,16 @@
             <p class="product-code-info"><strong>Código:</strong> {{ product.code }}</p>
             <p class="product-category-info"><strong>Categoria:</strong> {{ product.category.name }}</p>
             
-            {% if product.stock > 0 %}
-            <div class="stock-badge stock-available">
-                <i class="fa fa-check"></i> <strong>Em estoque:</strong> {{ product.stock }} unidades
-            </div>
-            {% else %}
-            <div class="stock-badge stock-unavailable">
-                <i class="fa fa-times"></i> <strong>Produto Indisponível</strong>
-            </div>
-            {% endif %}
-            
             <div class="price-section">
                 <div class="main-price">
                     R$ {{ "%.2f"|format(product.price) }}
-                </div>
-                <div class="installment-price">
-                    12x de R$ {{ "%.2f"|format(product.price / 12) }} sem juros
                 </div>
                 <div class="pix-price">
                     R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX (5% de desconto)
                 </div>
             </div>
             
-            {% if current_user.is_authenticated and product.stock > 0 %}
+            {% if current_user.is_authenticated %}
             <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="POST" class="add-to-cart-form">
                 {% if extras %}
                 <div class="extras-section">
@@ -96,7 +83,7 @@
                 
                 <div class="quantity-selector">
                     <label for="quantity">Quantidade:</label>
-                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="99">
                 </div>
                 <button type="submit" class="btn_buy btn-add-cart">
                     <i class="fa fa-shopping-cart"></i> ADICIONAR AO CARRINHO
@@ -270,29 +257,6 @@
     font-size: 15px;
 }
 
-.stock-badge {
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin: 25px 0;
-    font-size: 15px;
-    font-weight: 600;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-}
-
-.stock-available {
-    background: #d4edda;
-    color: #155724;
-    border: 2px solid #c3e6cb;
-}
-
-.stock-unavailable {
-    background: #f8d7da;
-    color: #721c24;
-    border: 2px solid #f5c6cb;
-}
-
 .price-section {
     margin: 25px 0;
     padding: 25px;
@@ -307,12 +271,6 @@
     color: #222;
     margin-bottom: 12px;
     letter-spacing: -1px;
-}
-
-.installment-price {
-    font-size: 15px;
-    color: #888;
-    margin-bottom: 8px;
 }
 
 .pix-price {
