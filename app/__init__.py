@@ -54,9 +54,9 @@ def create_app():
     def inject_store_settings():
         from app.models import StoreSettings
         store_settings = {
-            'store_name': StoreSettings.get_setting('store_name', 'Sandwich Gourmet'),
-            'store_logo': StoreSettings.get_setting('store_logo', ''),
-            'store_description': StoreSettings.get_setting('store_description', 'Os melhores sanduíches da cidade')
+            'store_name': StoreSettings.get_setting('store_name', 'TCB - The Country Burger Artesanal'),
+            'store_logo': StoreSettings.get_setting('store_logo', '/static/images/tcb_logo.jpg'),
+            'store_description': StoreSettings.get_setting('store_description', 'Hamburgueria Artesanal')
         }
         return dict(store_settings=store_settings)
     

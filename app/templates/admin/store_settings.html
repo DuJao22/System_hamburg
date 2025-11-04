@@ -131,6 +131,108 @@
                 </div>
             </div>
 
+            <div class="form_section">
+                <h2><i class="fa fa-clock"></i> Horários de Funcionamento</h2>
+                
+                <div class="form_group">
+                    <label for="opening_hours_monday">
+                        <i class="fa fa-calendar"></i> Segunda-feira
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_monday" 
+                        name="opening_hours_monday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_monday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_tuesday">
+                        <i class="fa fa-calendar"></i> Terça-feira
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_tuesday" 
+                        name="opening_hours_tuesday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_tuesday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_wednesday">
+                        <i class="fa fa-calendar"></i> Quarta-feira
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_wednesday" 
+                        name="opening_hours_wednesday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_wednesday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_thursday">
+                        <i class="fa fa-calendar"></i> Quinta-feira
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_thursday" 
+                        name="opening_hours_thursday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_thursday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_friday">
+                        <i class="fa fa-calendar"></i> Sexta-feira
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_friday" 
+                        name="opening_hours_friday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_friday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_saturday">
+                        <i class="fa fa-calendar"></i> Sábado
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_saturday" 
+                        name="opening_hours_saturday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_saturday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+
+                <div class="form_group">
+                    <label for="opening_hours_sunday">
+                        <i class="fa fa-calendar"></i> Domingo
+                    </label>
+                    <input 
+                        type="text" 
+                        id="opening_hours_sunday" 
+                        name="opening_hours_sunday" 
+                        class="form_control" 
+                        value="{{ settings.opening_hours_sunday }}"
+                        placeholder="18:00 - 23:59 ou Fechado"
+                    >
+                </div>
+            </div>
+
             <div class="form_actions">
                 <button type="submit" class="btn_primary">
                     <i class="fa fa-save"></i> Salvar Configurações

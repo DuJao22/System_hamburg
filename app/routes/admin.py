@@ -844,7 +844,7 @@ def toggle_extra(extra_id):
 @admin_required
 def store_settings():
     if request.method == 'POST':
-        StoreSettings.set_setting('store_name', request.form.get('store_name', 'Sandwich Gourmet'))
+        StoreSettings.set_setting('store_name', request.form.get('store_name', 'TCB - The Country Burger Artesanal'))
         StoreSettings.set_setting('store_logo', request.form.get('store_logo', ''))
         StoreSettings.set_setting('store_description', request.form.get('store_description', ''))
         StoreSettings.set_setting('pickup_enabled', 'true' if request.form.get('pickup_enabled') else 'false')
@@ -853,18 +853,33 @@ def store_settings():
         StoreSettings.set_setting('free_shipping_min', request.form.get('free_shipping_min', '300'))
         StoreSettings.set_setting('shipping_cost', request.form.get('shipping_cost', '15'))
         
+        StoreSettings.set_setting('opening_hours_monday', request.form.get('opening_hours_monday', '18:00 - 23:59'))
+        StoreSettings.set_setting('opening_hours_tuesday', request.form.get('opening_hours_tuesday', 'Fechado'))
+        StoreSettings.set_setting('opening_hours_wednesday', request.form.get('opening_hours_wednesday', '18:00 - 23:59'))
+        StoreSettings.set_setting('opening_hours_thursday', request.form.get('opening_hours_thursday', '18:00 - 23:59'))
+        StoreSettings.set_setting('opening_hours_friday', request.form.get('opening_hours_friday', '18:00 - 23:59'))
+        StoreSettings.set_setting('opening_hours_saturday', request.form.get('opening_hours_saturday', '18:00 - 23:59'))
+        StoreSettings.set_setting('opening_hours_sunday', request.form.get('opening_hours_sunday', '18:00 - 23:59'))
+        
         flash('Configurações atualizadas com sucesso!', 'success')
         return redirect(url_for('admin.store_settings'))
     
     settings = {
-        'store_name': StoreSettings.get_setting('store_name', 'Sandwich Gourmet'),
+        'store_name': StoreSettings.get_setting('store_name', 'TCB - The Country Burger Artesanal'),
         'store_logo': StoreSettings.get_setting('store_logo', ''),
-        'store_description': StoreSettings.get_setting('store_description', 'Os melhores sanduíches da cidade'),
+        'store_description': StoreSettings.get_setting('store_description', 'Hamburgueria Artesanal'),
         'pickup_enabled': StoreSettings.get_setting('pickup_enabled', 'true') == 'true',
         'pickup_address': StoreSettings.get_setting('pickup_address', ''),
         'delivery_enabled': StoreSettings.get_setting('delivery_enabled', 'true') == 'true',
         'free_shipping_min': float(StoreSettings.get_setting('free_shipping_min', '300')),
-        'shipping_cost': float(StoreSettings.get_setting('shipping_cost', '15'))
+        'shipping_cost': float(StoreSettings.get_setting('shipping_cost', '15')),
+        'opening_hours_monday': StoreSettings.get_setting('opening_hours_monday', '18:00 - 23:59'),
+        'opening_hours_tuesday': StoreSettings.get_setting('opening_hours_tuesday', 'Fechado'),
+        'opening_hours_wednesday': StoreSettings.get_setting('opening_hours_wednesday', '18:00 - 23:59'),
+        'opening_hours_thursday': StoreSettings.get_setting('opening_hours_thursday', '18:00 - 23:59'),
+        'opening_hours_friday': StoreSettings.get_setting('opening_hours_friday', '18:00 - 23:59'),
+        'opening_hours_saturday': StoreSettings.get_setting('opening_hours_saturday', '18:00 - 23:59'),
+        'opening_hours_sunday': StoreSettings.get_setting('opening_hours_sunday', '18:00 - 23:59')
     }
     
     return render_template('admin/store_settings.html', settings=settings)
