@@ -20,7 +20,11 @@ def create_app():
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor, faça login para acessar esta página.'
     
-    socketio.init_app(app, cors_allowed_origins="*", async_mode='threading')
+    cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '*')
+    if cors_origins != '*':
+        cors_origins = cors_origins.split(',')
+    
+    socketio.init_app(app, cors_allowed_origins=cors_origins, async_mode='threading')
     
     from app.models import User
     

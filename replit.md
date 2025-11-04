@@ -36,3 +36,16 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
 - **SQLAlchemy ORM:** Used for interacting with the database.
 - **Flask-Login:** Manages user sessions and authentication.
 - **Werkzeug:** Utilized for secure password hashing.
+
+## Environment Variables Required
+The following environment variables should be configured in production:
+
+- `SECRET_KEY`: Flask secret key for session encryption (required for production)
+- `ADMIN_PASSWORD`: Initial admin password (recommended to set)
+- `MERCADOPAGO_ACCESS_TOKEN`: Token for Mercado Pago payment integration
+- `CORS_ALLOWED_ORIGINS`: (Optional) Comma-separated list of allowed origins for CORS. Defaults to '*' for development. For production, specify domains like: `https://seudominio.com,https://www.seudominio.com`
+
+See `.env.example` for a template.
+
+## Recent Changes
+- **2025-11-04**: Improved CORS security configuration to support environment-based origin restrictions. CORS now uses `CORS_ALLOWED_ORIGINS` environment variable for production security instead of allowing all origins by default.
