@@ -181,18 +181,76 @@
                                 <label class="form-label">
                                     <i class="fa fa-map-pin"></i> CEP *
                                 </label>
-                                <input 
-                                    type="text" 
-                                    id="customer_cep" 
-                                    name="customer_cep" 
-                                    class="form-textarea" 
-                                    placeholder="00000-000"
-                                    maxlength="9"
-                                    style="padding: 12px; height: auto;"
-                                >
+                                <div style="display: flex; gap: 10px;">
+                                    <input 
+                                        type="text" 
+                                        id="customer_cep" 
+                                        name="customer_cep" 
+                                        class="form-textarea" 
+                                        placeholder="00000-000"
+                                        maxlength="9"
+                                        style="padding: 12px; height: auto; flex: 1;"
+                                    >
+                                    <button 
+                                        type="button" 
+                                        id="toggleSearchMode" 
+                                        onclick="toggleCEPSearchMode()"
+                                        style="padding: 12px 20px; background: #6c757d; color: white; border: none; border-radius: 5px; cursor: pointer; white-space: nowrap; font-size: 13px;"
+                                        title="Não sabe o CEP? Clique para buscar pelo endereço"
+                                    >
+                                        <i class="fa fa-search"></i> Buscar CEP
+                                    </button>
+                                </div>
                                 <small style="display: block; margin-top: 5px; color: #666; font-size: 12px;">
-                                    <i class="fa fa-info-circle"></i> O endereço será preenchido automaticamente
+                                    <i class="fa fa-info-circle"></i> O endereço será preenchido automaticamente. Não sabe o CEP? Clique em "Buscar CEP"
                                 </small>
+                            </div>
+
+                            <div id="reverseCEPSearch" style="display: none; margin-bottom: 15px; padding: 15px; background: #f8f9fa; border-radius: 5px; border-left: 4px solid #6c757d;">
+                                <h4 style="margin: 0 0 10px 0; font-size: 14px; color: #333;">
+                                    <i class="fa fa-search"></i> Buscar CEP pelo Endereço
+                                </h4>
+                                <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 10px;">
+                                    <div>
+                                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;">Estado (UF)</label>
+                                        <input 
+                                            type="text" 
+                                            id="search_state" 
+                                            placeholder="Ex: MG"
+                                            maxlength="2"
+                                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; text-transform: uppercase;"
+                                        >
+                                    </div>
+                                    <div>
+                                        <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;">Cidade</label>
+                                        <input 
+                                            type="text" 
+                                            id="search_city" 
+                                            placeholder="Ex: Contagem"
+                                            style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                        >
+                                    </div>
+                                </div>
+                                <div style="margin-bottom: 10px;">
+                                    <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;">Rua/Avenida</label>
+                                    <input 
+                                        type="text" 
+                                        id="search_street" 
+                                        placeholder="Ex: Rua Judith Naves de Lima (mínimo 3 caracteres)"
+                                        style="width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px;"
+                                    >
+                                </div>
+                                <button 
+                                    type="button" 
+                                    onclick="searchCEPByAddress()"
+                                    style="width: 100%; padding: 10px; background: var(--color-red); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: 600;"
+                                >
+                                    <i class="fa fa-search"></i> Buscar CEP
+                                </button>
+                                <div id="searchResults" style="margin-top: 10px; display: none;">
+                                    <label style="font-size: 12px; font-weight: 600; display: block; margin-bottom: 5px;">Resultados Encontrados:</label>
+                                    <div id="searchResultsList" style="max-height: 200px; overflow-y: auto;"></div>
+                                </div>
                             </div>
 
                             <div style="margin-bottom: 15px;">
@@ -373,6 +431,121 @@
             value = value.substring(0, 5) + '-' + value.substring(5, 8);
         }
         return value;
+    }
+
+    function toggleCEPSearchMode() {
+        const reverseSearch = document.getElementById('reverseCEPSearch');
+        const toggleBtn = document.getElementById('toggleSearchMode');
+        
+        if (reverseSearch.style.display === 'none') {
+            reverseSearch.style.display = 'block';
+            toggleBtn.innerHTML = '<i class="fa fa-times"></i> Fechar Busca';
+            toggleBtn.style.background = '#dc3545';
+        } else {
+            reverseSearch.style.display = 'none';
+            toggleBtn.innerHTML = '<i class="fa fa-search"></i> Buscar CEP';
+            toggleBtn.style.background = '#6c757d';
+            document.getElementById('searchResults').style.display = 'none';
+        }
+    }
+
+    function searchCEPByAddress() {
+        const estado = document.getElementById('search_state').value.trim().toUpperCase();
+        const cidade = document.getElementById('search_city').value.trim();
+        const logradouro = document.getElementById('search_street').value.trim();
+
+        if (!estado || !cidade || !logradouro) {
+            alert('Por favor, preencha Estado, Cidade e Rua/Avenida');
+            return;
+        }
+
+        if (logradouro.length < 3) {
+            alert('O nome da rua deve ter no mínimo 3 caracteres');
+            return;
+        }
+
+        const searchResults = document.getElementById('searchResults');
+        const searchResultsList = document.getElementById('searchResultsList');
+        
+        searchResultsList.innerHTML = '<div style="text-align: center; padding: 10px;"><i class="fa fa-spinner fa-spin"></i> Buscando...</div>';
+        searchResults.style.display = 'block';
+
+        fetch('/api/cep/buscar-endereco', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                estado: estado,
+                cidade: cidade,
+                logradouro: logradouro
+            })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success && data.data && data.data.length > 0) {
+                let html = '';
+                data.data.forEach((item, index) => {
+                    html += `
+                        <div style="padding: 10px; margin-bottom: 5px; background: white; border: 1px solid #ddd; border-radius: 4px; cursor: pointer;" 
+                             onclick="selectCEP('${item.cep}', '${item.logradouro}', '${item.bairro}', '${item.localidade}', '${item.uf}')">
+                            <div style="font-weight: 600; color: var(--color-red);">CEP: ${item.cep}</div>
+                            <div style="font-size: 12px; color: #666;">
+                                ${item.logradouro}${item.complemento ? ' - ' + item.complemento : ''}<br>
+                                ${item.bairro} - ${item.localidade}/${item.uf}
+                            </div>
+                        </div>
+                    `;
+                });
+                searchResultsList.innerHTML = html;
+            } else {
+                searchResultsList.innerHTML = `
+                    <div style="padding: 10px; text-align: center; color: #dc3545;">
+                        <i class="fa fa-exclamation-triangle"></i> Nenhum CEP encontrado. Tente refinar sua busca.
+                    </div>
+                `;
+            }
+        })
+        .catch(error => {
+            console.error('Erro ao buscar CEP:', error);
+            searchResultsList.innerHTML = `
+                <div style="padding: 10px; text-align: center; color: #dc3545;">
+                    <i class="fa fa-times-circle"></i> Erro ao buscar. Tente novamente.
+                </div>
+            `;
+        });
+    }
+
+    function selectCEP(cep, street, neighborhood, city, state) {
+        document.getElementById('customer_cep').value = cep;
+        document.getElementById('customer_street').value = street;
+        document.getElementById('customer_neighborhood').value = neighborhood;
+        document.getElementById('customer_city').value = city;
+        document.getElementById('customer_state').value = state;
+        
+        const streetInput = document.getElementById('customer_street');
+        const neighborhoodInput = document.getElementById('customer_neighborhood');
+        const cityInput = document.getElementById('customer_city');
+        const stateInput = document.getElementById('customer_state');
+        
+        streetInput.removeAttribute('readonly');
+        neighborhoodInput.removeAttribute('readonly');
+        cityInput.removeAttribute('readonly');
+        stateInput.removeAttribute('readonly');
+        
+        [streetInput, neighborhoodInput, cityInput, stateInput].forEach(input => {
+            input.style.backgroundColor = '#d4edda';
+        });
+        
+        setTimeout(() => {
+            [streetInput, neighborhoodInput, cityInput, stateInput].forEach(input => {
+                input.style.backgroundColor = '#f5f5f5';
+            });
+        }, 2000);
+        
+        toggleCEPSearchMode();
+        document.getElementById('customer_number').focus();
+        updateDeliveryAddress();
     }
 
     function updateDeliveryAddress() {
