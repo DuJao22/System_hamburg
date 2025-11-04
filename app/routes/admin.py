@@ -856,6 +856,12 @@ def store_settings():
         StoreSettings.set_setting('free_shipping_min', request.form.get('free_shipping_min', '300'))
         StoreSettings.set_setting('shipping_cost', request.form.get('shipping_cost', '15'))
         StoreSettings.set_setting('delivery_radius_enabled', 'true' if request.form.get('delivery_radius_enabled') else 'false')
+        StoreSettings.set_setting('store_cep', request.form.get('store_cep', ''))
+        StoreSettings.set_setting('store_street', request.form.get('store_street', ''))
+        StoreSettings.set_setting('store_number', request.form.get('store_number', ''))
+        StoreSettings.set_setting('store_neighborhood', request.form.get('store_neighborhood', ''))
+        StoreSettings.set_setting('store_city', request.form.get('store_city', ''))
+        StoreSettings.set_setting('store_state', request.form.get('store_state', ''))
         StoreSettings.set_setting('store_latitude', request.form.get('store_latitude', ''))
         StoreSettings.set_setting('store_longitude', request.form.get('store_longitude', ''))
         StoreSettings.set_setting('delivery_radius_km', request.form.get('delivery_radius_km', '10'))
@@ -884,6 +890,12 @@ def store_settings():
         'free_shipping_min': float(StoreSettings.get_setting('free_shipping_min', '300')),
         'shipping_cost': float(StoreSettings.get_setting('shipping_cost', '15')),
         'delivery_radius_enabled': StoreSettings.get_setting('delivery_radius_enabled', 'false') == 'true',
+        'store_cep': StoreSettings.get_setting('store_cep', ''),
+        'store_street': StoreSettings.get_setting('store_street', ''),
+        'store_number': StoreSettings.get_setting('store_number', ''),
+        'store_neighborhood': StoreSettings.get_setting('store_neighborhood', ''),
+        'store_city': StoreSettings.get_setting('store_city', ''),
+        'store_state': StoreSettings.get_setting('store_state', ''),
         'store_latitude': StoreSettings.get_setting('store_latitude', ''),
         'store_longitude': StoreSettings.get_setting('store_longitude', ''),
         'delivery_radius_km': StoreSettings.get_setting('delivery_radius_km', '10'),
