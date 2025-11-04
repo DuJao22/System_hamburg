@@ -36,12 +36,16 @@ def view_cart():
     delivery_enabled = StoreSettings.get_setting('delivery_enabled', 'true') == 'true'
     shipping_cost = float(StoreSettings.get_setting('shipping_cost', '15'))
     free_shipping_min = float(StoreSettings.get_setting('free_shipping_min', '300'))
+    delivery_radius_enabled = StoreSettings.get_setting('delivery_radius_enabled', 'false') == 'true'
+    delivery_radius_km = StoreSettings.get_setting('delivery_radius_km', '10')
     
     return render_template('cart.html', cart_items=cart_items, subtotal=subtotal, 
                          discount=discount, total=total, coupon=coupon,
                          pickup_enabled=pickup_enabled, pickup_address=pickup_address,
                          delivery_enabled=delivery_enabled, shipping_cost=shipping_cost,
-                         free_shipping_min=free_shipping_min)
+                         free_shipping_min=free_shipping_min,
+                         delivery_radius_enabled=delivery_radius_enabled,
+                         delivery_radius_km=delivery_radius_km)
 
 @cart_bp.route('/adicionar-carrinho/<int:product_id>', methods=['POST'])
 @login_required
