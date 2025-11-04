@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, redirect, url_for, flash, request,
 from flask_login import login_required, current_user
 from app import db
 from app.models import Product, CartItem, Order, OrderItem, Coupon, StoreSettings, Extra, CartItemExtra, OrderItemExtra
+from app.utils.geocoding import is_within_delivery_radius
 
 cart_bp = Blueprint('cart', __name__)
 
@@ -165,6 +166,47 @@ def checkout():
     if delivery_type == 'delivery' and not delivery_address:
         flash('Por favor, preencha o endereço de entrega.', 'warning')
         return redirect(url_for('cart.view_cart'))
+    
+    if delivery_type == 'delivery':
+        delivery_radius_enabled = StoreSettings.get_setting('delivery_radius_enabled', 'false') == 'true'
+        
+        if delivery_radius_enabled:
+            store_lat_str = StoreSettings.get_setting('store_latitude', '')
+            store_lon_str = StoreSettings.get_setting('store_longitude', '')
+            radius_km_str = StoreSettings.get_setting('delivery_radius_km', '10')
+            
+            if store_lat_str and store_lon_str:
+                try:
+                    store_lat = float(store_lat_str)
+                    store_lon = float(store_lon_str)
+                    radius_km = float(radius_km_str)
+                    
+                    is_within, distance = is_within_delivery_radius(
+                        delivery_address,
+                        store_lat,
+                        store_lon,
+                        radius_km
+                    )
+                    
+                    if distance is None:
+                        flash(
+                            'Não foi possível validar o endereço de entrega. '
+                            'Por favor, verifique se o endereço está completo e correto.',
+                            'warning'
+                        )
+                        return redirect(url_for('cart.view_cart'))
+                    
+                    if not is_within:
+                        flash(
+                            f'Desculpe, seu endereço está fora da nossa área de entrega. '
+                            f'A distância é de {distance:.1f} km e nosso raio máximo é de {radius_km} km. '
+                            f'Você pode optar pela retirada no local.',
+                            'danger'
+                        )
+                        return redirect(url_for('cart.view_cart'))
+                    
+                except ValueError:
+                    pass
     
     subtotal = sum(
         (item.product.price + sum(extra.extra.price * extra.quantity for extra in item.extras)) * item.quantity 
