@@ -1,0 +1,121 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Produtos - Admin{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+        <h2 style="font-size: 28px; color: #111;"><i class="fa fa-cube"></i> Gerenciar Produtos</h2>
+        <a href="{{ url_for('admin.add_product') }}" class="btn_buy" style="text-decoration: none; display: inline-block;">
+            <i class="fa fa-plus"></i> ADICIONAR PRODUTO
+        </a>
+    </div>
+
+    {% if low_stock_count > 0 %}
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin-bottom: 20px; border-radius: 5px;">
+        <i class="fa fa-exclamation-triangle" style="color: #856404;"></i>
+        <strong style="color: #856404;">Atenção:</strong> 
+        <span style="color: #856404;">Você tem {{ low_stock_count }} produto(s) com estoque baixo (menos de 10 unidades).</span>
+        <a href="?stock_alert=low" style="color: #856404; text-decoration: underline; margin-left: 10px;">Ver produtos</a>
+    </div>
+    {% endif %}
+    
+    <div style="background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <form method="GET" style="display: grid; grid-template-columns: 1fr 200px 200px 200px auto; gap: 15px; align-items: end;">
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #111;">Buscar</label>
+                <input type="text" name="search" value="{{ search }}" placeholder="Nome, código ou descrição..." style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #111;">Categoria</label>
+                <select name="category" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="">Todas</option>
+                    {% for cat in categories %}
+                    <option value="{{ cat.id }}" {% if category_id == cat.id|string %}selected{% endif %}>{{ cat.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #111;">Status</label>
+                <select name="status" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="">Todos</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Ativos</option>
+                    <option value="inactive" {% if status == 'inactive' %}selected{% endif %}>Inativos</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 5px; font-weight: 600; color: #111;">Estoque</label>
+                <select name="stock_alert" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; font-size: 14px;">
+                    <option value="">Todos</option>
+                    <option value="low" {% if stock_alert == 'low' %}selected{% endif %}>Estoque Baixo</option>
+                </select>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" style="padding: 10px 20px; background: var(--color-red); color: #fff; border: none; border-radius: 5px; cursor: pointer; font-weight: 600;">
+                    <i class="fa fa-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('admin.products') }}" style="padding: 10px 20px; background: #6c757d; color: #fff; border-radius: 5px; text-decoration: none; display: inline-block; font-weight: 600;">
+                    <i class="fa fa-times"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    {% if products %}
+    <div style="background: #fff; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: var(--color-red); color: #fff;">
+                <tr>
+                    <th style="padding: 15px; text-align: left;">Produto</th>
+                    <th style="padding: 15px; text-align: center;">Código</th>
+                    <th style="padding: 15px; text-align: center;">Preço</th>
+                    <th style="padding: 15px; text-align: center;">Estoque</th>
+                    <th style="padding: 15px; text-align: center;">Status</th>
+                    <th style="padding: 15px; text-align: center;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for product in products %}
+                <tr style="border-bottom: 1px solid #e0e0e0;">
+                    <td style="padding: 15px;">{{ product.name }}</td>
+                    <td style="padding: 15px; text-align: center;">{{ product.code }}</td>
+                    <td style="padding: 15px; text-align: center; font-weight: 600;">R$ {{ "%.2f"|format(product.price) }}</td>
+                    <td style="padding: 15px; text-align: center;">
+                        {{ product.stock }}
+                        {% if product.stock < 10 %}
+                        <i class="fa fa-exclamation-triangle" style="color: #ffc107; margin-left: 5px;" title="Estoque baixo!"></i>
+                        {% endif %}
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        <span style="padding: 5px 10px; background: {% if product.active %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if product.active %}#155724{% else %}#721c24{% endif %}; border-radius: 15px; font-size: 12px;">
+                            {% if product.active %}Ativo{% else %}Inativo{% endif %}
+                        </span>
+                    </td>
+                    <td style="padding: 15px; text-align: center;">
+                        <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" style="color: var(--color-red); text-decoration: none; margin-right: 10px;">
+                            <i class="fa fa-edit"></i> Editar
+                        </a>
+                        <form action="{{ url_for('admin.delete_product', product_id=product.id) }}" method="POST" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar?');">
+                            <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer;">
+                                <i class="fa fa-trash"></i> Deletar
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 8px;">
+        <i class="fa fa-cube" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 24px; margin-bottom: 15px; color: #333;">Nenhum produto cadastrado</h3>
+        <p style="color: #666; margin-bottom: 30px;">Clique em "Adicionar Produto" para começar</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

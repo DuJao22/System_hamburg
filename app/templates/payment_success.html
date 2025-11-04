@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento Aprovado - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 50px; max-width: 700px; margin-left: auto; margin-right: auto;">
+    <div style="text-align: center; padding: 60px 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(0,200,81,0.15); border: 2px solid var(--color-green);">
+        <div style="width: 100px; height: 100px; background: var(--color-green); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;">
+            <i class="fa fa-check" style="font-size: 50px; color: #fff;"></i>
+        </div>
+        
+        <h1 style="font-size: 32px; color: var(--color-green); margin-bottom: 15px; font-weight: 700;">
+            Pagamento Aprovado!
+        </h1>
+        
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+            Seu pedido foi confirmado com sucesso!
+        </p>
+        
+        {% if order %}
+        <div style="background: #f9f9f9; padding: 25px; border-radius: 8px; margin-bottom: 30px; text-align: left;">
+            <h3 style="font-size: 18px; margin-bottom: 15px; color: #333;">
+                <i class="fa fa-shopping-bag"></i> Detalhes do Pedido
+            </h3>
+            <div style="margin-bottom: 10px;">
+                <strong>Pedido:</strong> #{{ order.id }}
+            </div>
+            <div style="margin-bottom: 10px;">
+                <strong>Total:</strong> R$ {{ "%.2f"|format(order.total) }}
+            </div>
+            {% if payment_id %}
+            <div style="margin-bottom: 10px;">
+                <strong>ID do Pagamento:</strong> {{ payment_id }}
+            </div>
+            {% endif %}
+            <div style="margin-bottom: 10px;">
+                <strong>Tipo de Entrega:</strong> 
+                {% if order.delivery_type == 'pickup' %}
+                    <i class="fa fa-map-marker"></i> Retirada no Local
+                {% else %}
+                    <i class="fa fa-truck"></i> Entrega
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
+        
+        <p style="font-size: 14px; color: #999; margin-bottom: 30px;">
+            <i class="fa fa-envelope"></i> Um email de confirmação foi enviado para você com todos os detalhes do pedido.
+        </p>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            <a href="{{ url_for('cart.my_orders') }}" class="btn_buy" style="display: inline-flex; align-items: center; gap: 8px; text-decoration: none; padding: 12px 25px;">
+                <i class="fa fa-list"></i> Ver Meus Pedidos
+            </a>
+            <a href="{{ url_for('main.index') }}" style="display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--color-red); border: 2px solid var(--color-red); padding: 12px 25px; border-radius: 5px; font-weight: 700; text-decoration: none; transition: all 0.3s;">
+                <i class="fa fa-home"></i> Voltar à Loja
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Adicionais - Admin - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="min-height: 500px; padding: 40px 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; margin: 0; color: #111;">
+            <i class="fa fa-plus-square"></i> Gerenciar Adicionais
+        </h1>
+        <a href="{{ url_for('admin.add_extra') }}" class="btn_red">
+            <i class="fa fa-plus"></i> Novo Adicional
+        </a>
+    </div>
+    
+    {% if extras %}
+        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f5f5f5;">
+                    <tr>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Nome</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Descrição</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Preço</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #e0e0e0;">Status</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #e0e0e0;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for extra in extras %}
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 15px; font-weight: 700;">{{ extra.name }}</td>
+                        <td style="padding: 15px; color: #666;">{{ extra.description or '-' }}</td>
+                        <td style="padding: 15px; font-weight: 600; color: var(--color-red);">
+                            R$ {{ "%.2f"|format(extra.price) }}
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <form method="POST" action="{{ url_for('admin.toggle_extra', extra_id=extra.id) }}" style="display: inline;">
+                                <input type="hidden" name="csrf_token" value="{{ session.get('_csrf_token', '') }}">
+                                <button type="submit" style="padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; background: {% if extra.active %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if extra.active %}#155724{% else %}#721c24{% endif %};">
+                                    {% if extra.active %}Ativo{% else %}Inativo{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: 5px;">
+                                <a href="{{ url_for('admin.edit_extra', extra_id=extra.id) }}" style="padding: 8px 12px; background: #007bff; color: #fff; border-radius: 4px; text-decoration: none; font-size: 13px;">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.delete_extra', extra_id=extra.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este adicional?');">
+                                    <input type="hidden" name="csrf_token" value="{{ session.get('_csrf_token', '') }}">
+                                    <button type="submit" style="padding: 8px 12px; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px; background: #f5f5f5; border-radius: 8px;">
+            <i class="fa fa-plus-square" style="font-size: 60px; color: #ccc; margin-bottom: 15px;"></i>
+            <p style="color: #666;">Nenhum adicional cadastrado ainda.</p>
+            <a href="{{ url_for('admin.add_extra') }}" class="btn_red" style="margin-top: 15px; display: inline-block;">
+                <i class="fa fa-plus"></i> Cadastrar Primeiro Adicional
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

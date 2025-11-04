@@ -1,0 +1,635 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name }} - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section product-detail-page" style="margin-top: 30px;">
+    <div class="product-detail-container">
+        <div class="product-gallery-section">
+            {% set product_images = product.get_all_images() %}
+            
+            <div class="product-gallery">
+                <div class="main-image-container">
+                    {% if product_images %}
+                    <div class="zoom-container">
+                        <img id="mainImage" src="{{ product_images[0] }}" alt="{{ product.name }}" class="main-image">
+                        <div class="zoom-lens"></div>
+                    </div>
+                    {% else %}
+                    <div class="no-image-placeholder">
+                        <i class="fa fa-microchip"></i>
+                        <p>Sem imagem disponível</p>
+                    </div>
+                    {% endif %}
+                </div>
+                
+                {% if product_images|length > 1 %}
+                <div class="thumbnails-container">
+                    {% for image_url in product_images %}
+                    <div class="thumbnail {% if loop.first %}active{% endif %}" onclick="changeImage('{{ image_url }}', this)">
+                        <img src="{{ image_url }}" alt="{{ product.name }} - Imagem {{ loop.index }}">
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="product-info-section">
+            <h1 class="product-title">{{ product.name }}</h1>
+            <p class="product-code-info"><strong>Código:</strong> {{ product.code }}</p>
+            <p class="product-category-info"><strong>Categoria:</strong> {{ product.category.name }}</p>
+            
+            {% if product.stock > 0 %}
+            <div class="stock-badge stock-available">
+                <i class="fa fa-check"></i> <strong>Em estoque:</strong> {{ product.stock }} unidades
+            </div>
+            {% else %}
+            <div class="stock-badge stock-unavailable">
+                <i class="fa fa-times"></i> <strong>Produto Indisponível</strong>
+            </div>
+            {% endif %}
+            
+            <div class="price-section">
+                <div class="main-price">
+                    R$ {{ "%.2f"|format(product.price) }}
+                </div>
+                <div class="installment-price">
+                    12x de R$ {{ "%.2f"|format(product.price / 12) }} sem juros
+                </div>
+                <div class="pix-price">
+                    R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX (5% de desconto)
+                </div>
+            </div>
+            
+            {% if current_user.is_authenticated and product.stock > 0 %}
+            <form action="{{ url_for('cart.add_to_cart', product_id=product.id) }}" method="POST" class="add-to-cart-form">
+                {% if extras %}
+                <div class="extras-section">
+                    <h4 style="font-size: 18px; margin-bottom: 15px; color: #ffffff; font-weight: 700;">
+                        <i class="fa fa-plus-square" style="color: var(--color-red);"></i> Adicionais Disponíveis
+                    </h4>
+                    <div class="extras-grid">
+                        {% for extra in extras %}
+                        <label class="extra-item">
+                            <input type="checkbox" name="extras" value="{{ extra.id }}" class="extra-checkbox">
+                            <div class="extra-content">
+                                <span class="extra-name">{{ extra.name }}</span>
+                                <span class="extra-price">+ R$ {{ "%.2f"|format(extra.price) }}</span>
+                            </div>
+                            {% if extra.description %}
+                            <small class="extra-description">{{ extra.description }}</small>
+                            {% endif %}
+                        </label>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+                
+                <div class="quantity-selector">
+                    <label for="quantity">Quantidade:</label>
+                    <input type="number" name="quantity" id="quantity" value="1" min="1" max="{{ product.stock }}">
+                </div>
+                <button type="submit" class="btn_buy btn-add-cart">
+                    <i class="fa fa-shopping-cart"></i> ADICIONAR AO CARRINHO
+                </button>
+            </form>
+            {% elif not current_user.is_authenticated %}
+            <a href="{{ url_for('auth.login') }}" class="btn_buy btn-login">
+                FAÇA LOGIN PARA COMPRAR
+            </a>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="product-description-section">
+        <h3 class="description-title">Descrição do Produto</h3>
+        <p class="description-text">{{ product.description or 'Descrição não disponível.' }}</p>
+    </div>
+    
+    {% if related_products %}
+    <div class="related-products-section">
+        <h3 class="related-title">Produtos Relacionados</h3>
+        <div class="products_grid">
+            {% for related in related_products %}
+            <div class="product_card">
+                <div class="product_image">
+                    {% if related.image_url %}
+                    <img src="{{ related.image_url }}" alt="{{ related.name }}" style="max-width: 100%; max-height: 180px; object-fit: contain;">
+                    {% else %}
+                    <i class="fa fa-microchip"></i>
+                    {% endif %}
+                </div>
+                <div class="product_code">Cód: {{ related.code }}</div>
+                <div class="product_name">{{ related.name }}</div>
+                <div class="product_price">R$ {{ "%.2f"|format(related.price) }}</div>
+                <a href="{{ url_for('main.product_detail', product_id=related.id) }}" class="btn_buy">VER DETALHES</a>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<style>
+.product-detail-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 50px;
+    margin-bottom: 40px;
+}
+
+.product-gallery-section {
+    position: relative;
+}
+
+.product-gallery {
+    width: 100%;
+}
+
+.main-image-container {
+    width: 100%;
+    height: 500px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 6px 25px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    position: relative;
+}
+
+.zoom-container {
+    width: 100%;
+    height: 100%;
+    position: relative;
+    cursor: zoom-in;
+    overflow: hidden;
+}
+
+.main-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    transition: transform 0.3s ease;
+}
+
+.zoom-lens {
+    position: absolute;
+    border: 2px solid #DC143C;
+    width: 150px;
+    height: 150px;
+    pointer-events: none;
+    opacity: 0;
+    background: rgba(220, 20, 60, 0.1);
+    transition: opacity 0.2s;
+}
+
+.zoom-container:hover .zoom-lens {
+    opacity: 1;
+}
+
+.no-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: #ccc;
+}
+
+.no-image-placeholder i {
+    font-size: 120px;
+    margin-bottom: 15px;
+}
+
+.no-image-placeholder p {
+    font-size: 16px;
+    color: #999;
+}
+
+.thumbnails-container {
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 12px;
+}
+
+.thumbnail {
+    height: 90px;
+    border: 3px solid #e0e0e0;
+    border-radius: 8px;
+    overflow: hidden;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background: #fff;
+}
+
+.thumbnail:hover {
+    border-color: #DC143C;
+    transform: translateY(-3px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.thumbnail.active {
+    border-color: #DC143C;
+    box-shadow: 0 0 0 2px rgba(220, 20, 60, 0.2);
+}
+
+.thumbnail img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 5px;
+}
+
+.product-info-section {
+    display: flex;
+    flex-direction: column;
+}
+
+.product-title {
+    font-size: 32px;
+    color: #ffffff;
+    margin-bottom: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+}
+
+.product-code-info,
+.product-category-info {
+    color: #cccccc;
+    margin-bottom: 12px;
+    font-size: 15px;
+}
+
+.stock-badge {
+    padding: 15px 20px;
+    border-radius: 8px;
+    margin: 25px 0;
+    font-size: 15px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.stock-available {
+    background: #d4edda;
+    color: #155724;
+    border: 2px solid #c3e6cb;
+}
+
+.stock-unavailable {
+    background: #f8d7da;
+    color: #721c24;
+    border: 2px solid #f5c6cb;
+}
+
+.price-section {
+    margin: 25px 0;
+    padding: 25px;
+    background: #f8f8f8;
+    border-radius: 10px;
+    border-left: 4px solid #DC143C;
+}
+
+.main-price {
+    font-size: 42px;
+    font-weight: 800;
+    color: #222;
+    margin-bottom: 12px;
+    letter-spacing: -1px;
+}
+
+.installment-price {
+    font-size: 15px;
+    color: #888;
+    margin-bottom: 8px;
+}
+
+.pix-price {
+    font-size: 18px;
+    color: #00C851;
+    font-weight: 700;
+}
+
+.add-to-cart-form {
+    margin-top: 30px;
+}
+
+.extras-section {
+    margin-bottom: 25px;
+    padding: 20px;
+    background: #fff;
+    border: 2px solid #f0f0f0;
+    border-radius: 8px;
+}
+
+.extras-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+}
+
+.extra-item {
+    display: flex;
+    flex-direction: column;
+    padding: 12px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: #fafafa;
+}
+
+.extra-item:hover {
+    border-color: var(--color-red);
+    background: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(220, 20, 60, 0.1);
+}
+
+.extra-checkbox {
+    display: none;
+}
+
+.extra-checkbox:checked + .extra-content {
+    background: var(--color-red);
+    color: #fff;
+}
+
+.extra-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: #fff;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.extra-name {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+.extra-price {
+    font-weight: 700;
+    font-size: 14px;
+    color: var(--color-red);
+}
+
+.extra-checkbox:checked + .extra-content .extra-price {
+    color: #fff;
+}
+
+.extra-description {
+    display: block;
+    margin-top: 6px;
+    font-size: 12px;
+    color: #888;
+    font-style: italic;
+}
+
+.quantity-selector {
+    margin-bottom: 20px;
+}
+
+.quantity-selector label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #ffffff;
+}
+
+.quantity-selector input {
+    padding: 12px 15px;
+    font-size: 18px;
+    width: 120px;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-weight: 600;
+}
+
+.quantity-selector input:focus {
+    outline: none;
+    border-color: #DC143C;
+}
+
+.btn-add-cart,
+.btn-login {
+    width: 100%;
+    padding: 18px;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    display: inline-block;
+    text-align: center;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.btn-add-cart:hover,
+.btn-login:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(220, 20, 60, 0.4);
+}
+
+.product-description-section {
+    margin-top: 50px;
+    padding: 35px;
+    background: #f9f9f9;
+    border-radius: 12px;
+    border: 1px solid #e8e8e8;
+}
+
+.description-title {
+    font-size: 24px;
+    margin-bottom: 20px;
+    color: #222;
+    font-weight: 700;
+    border-bottom: 3px solid #DC143C;
+    padding-bottom: 10px;
+}
+
+.description-text {
+    line-height: 1.9;
+    color: #666;
+    font-size: 16px;
+}
+
+.related-products-section {
+    margin-top: 50px;
+}
+
+.related-title {
+    font-size: 24px;
+    margin-bottom: 25px;
+    color: #ffffff;
+    font-weight: 700;
+    border-bottom: 3px solid #DC143C;
+    padding-bottom: 10px;
+}
+
+@media (max-width: 992px) {
+    .product-detail-container {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+    
+    .main-image-container {
+        height: 400px;
+    }
+    
+    .thumbnails-container {
+        grid-template-columns: repeat(5, 1fr);
+        gap: 10px;
+    }
+    
+    .thumbnail {
+        height: 70px;
+    }
+    
+    .product-title {
+        font-size: 26px;
+    }
+    
+    .main-price {
+        font-size: 36px;
+    }
+}
+
+@media (max-width: 768px) {
+    .main-image-container {
+        height: 350px;
+    }
+    
+    .thumbnails-container {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .product-title {
+        font-size: 24px;
+    }
+    
+    .main-price {
+        font-size: 32px;
+    }
+    
+    .price-section {
+        padding: 20px;
+    }
+}
+
+@media (max-width: 576px) {
+    .main-image-container {
+        height: 300px;
+        border-radius: 8px;
+    }
+    
+    .thumbnails-container {
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+    }
+    
+    .thumbnail {
+        height: 60px;
+        border-radius: 6px;
+    }
+    
+    .product-title {
+        font-size: 20px;
+    }
+    
+    .main-price {
+        font-size: 28px;
+    }
+    
+    .installment-price {
+        font-size: 13px;
+    }
+    
+    .pix-price {
+        font-size: 16px;
+    }
+    
+    .product-description-section {
+        padding: 25px;
+    }
+    
+    .description-title {
+        font-size: 20px;
+    }
+    
+    .description-text {
+        font-size: 14px;
+    }
+}
+</style>
+
+<script>
+function changeImage(imageUrl, thumbnail) {
+    const mainImage = document.getElementById('mainImage');
+    mainImage.src = imageUrl;
+    
+    document.querySelectorAll('.thumbnail').forEach(thumb => {
+        thumb.classList.remove('active');
+    });
+    
+    thumbnail.classList.add('active');
+}
+
+const zoomContainer = document.querySelector('.zoom-container');
+const mainImage = document.getElementById('mainImage');
+const zoomLens = document.querySelector('.zoom-lens');
+
+if (zoomContainer && mainImage && zoomLens) {
+    zoomContainer.addEventListener('mousemove', function(e) {
+        const rect = zoomContainer.getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        
+        const lensWidth = zoomLens.offsetWidth / 2;
+        const lensHeight = zoomLens.offsetHeight / 2;
+        
+        let posX = x - lensWidth;
+        let posY = y - lensHeight;
+        
+        if (posX < 0) posX = 0;
+        if (posY < 0) posY = 0;
+        if (posX > rect.width - zoomLens.offsetWidth) posX = rect.width - zoomLens.offsetWidth;
+        if (posY > rect.height - zoomLens.offsetHeight) posY = rect.height - zoomLens.offsetHeight;
+        
+        zoomLens.style.left = posX + 'px';
+        zoomLens.style.top = posY + 'px';
+        
+        const zoomLevel = 2;
+        const bgPosX = -(posX * zoomLevel);
+        const bgPosY = -(posY * zoomLevel);
+        
+        mainImage.style.transform = `scale(${zoomLevel})`;
+        mainImage.style.transformOrigin = `${x}px ${y}px`;
+    });
+    
+    zoomContainer.addEventListener('mouseleave', function() {
+        mainImage.style.transform = 'scale(1)';
+    });
+    
+    zoomContainer.addEventListener('touchstart', function(e) {
+        const touch = e.touches[0];
+        const rect = zoomContainer.getBoundingClientRect();
+        const x = touch.clientX - rect.left;
+        const y = touch.clientY - rect.top;
+        
+        mainImage.style.transform = 'scale(2)';
+        mainImage.style.transformOrigin = `${x}px ${y}px`;
+    });
+    
+    zoomContainer.addEventListener('touchend', function() {
+        mainImage.style.transform = 'scale(1)';
+    });
+}
+</script>
+{% endblock %}

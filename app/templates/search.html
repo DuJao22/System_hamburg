@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Buscar - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <h2 style="font-size: 28px; margin-bottom: 10px; color: #ffffff;">
+        Resultados da busca por: "{{ query }}"
+    </h2>
+    <p style="color: #cccccc; margin-bottom: 30px;">{{ products|length }} produto(s) encontrado(s)</p>
+    
+    {% if products %}
+    <div class="products_grid">
+        {% for product in products %}
+        <div class="product_card">
+            <div class="product_image">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 180px; object-fit: contain;">
+                {% else %}
+                <i class="fa fa-microchip"></i>
+                {% endif %}
+            </div>
+            <div class="product_code">Cód: {{ product.code }}</div>
+            <div class="product_name">{{ product.name }}</div>
+            <div class="product_price">R$ {{ "%.2f"|format(product.price) }}</div>
+            <div class="product_installments">12x de R$ {{ "%.2f"|format(product.price / 12) }}</div>
+            <div class="product_pix">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
+            <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy">VER DETALHES</a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 8px;">
+        <i class="fa fa-search" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 24px; margin-bottom: 15px; color: #222;">Nenhum produto encontrado para "{{ query }}"</h3>
+        <p style="color: #777; margin-bottom: 30px;">Tente buscar com outras palavras ou veja nossas categorias</p>
+        <a href="{{ url_for('main.index') }}" class="btn_buy" style="display: inline-block; text-decoration: none;">Ver todos os produtos</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

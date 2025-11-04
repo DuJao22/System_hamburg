@@ -1,0 +1,401 @@
+{% extends "base.html" %}
+
+{% block title %}Gestão de Pedidos - Admin{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-list"></i> Gestão de Pedidos
+        </h2>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="toggleView()" class="btn_buy" id="viewToggle" style="padding: 12px 24px; font-size: 14px; background: #667eea;">
+                <i class="fa fa-th"></i> Cards
+            </button>
+            <a href="{{ url_for('admin.export_orders', **request.args) }}" class="btn_buy" style="padding: 12px 24px; font-size: 14px; text-decoration: none; display: inline-block;">
+                <i class="fa fa-download"></i> Exportar CSV
+            </a>
+            <button onclick="toggleFilters()" class="btn_buy" style="padding: 12px 24px; font-size: 14px; background: #555;">
+                <i class="fa fa-filter"></i> Filtros
+            </button>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 30px;">
+        <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; border-radius: 10px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Total de Pedidos</div>
+            <div style="font-size: 32px; font-weight: 700;">{{ total_orders }}</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); padding: 20px; border-radius: 10px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Receita Total</div>
+            <div style="font-size: 32px; font-weight: 700;">R$ {{ "%.2f"|format(total_revenue) }}</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); padding: 20px; border-radius: 10px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Pedidos Pendentes</div>
+            <div style="font-size: 32px; font-weight: 700;">{{ pending_orders }}</div>
+        </div>
+        <div style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); padding: 20px; border-radius: 10px; color: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+            <div style="font-size: 14px; opacity: 0.9; margin-bottom: 8px;">Confirmados</div>
+            <div style="font-size: 32px; font-weight: 700;">{{ status_counts['Confirmado'] }}</div>
+        </div>
+    </div>
+    
+    <div id="filtersPanel" style="display: none; background: #f9f9f9; padding: 25px; border-radius: 10px; margin-bottom: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+        <form method="GET" action="{{ url_for('admin.orders') }}" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px;">
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Buscar</label>
+                <input type="text" name="search" value="{{ request.args.get('search', '') }}" placeholder="Nome, email, CPF, telefone, ID..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Status do Pedido</label>
+                <select name="status" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <option value="">Todos os Status</option>
+                    <option value="Pendente" {% if request.args.get('status') == 'Pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="Confirmado" {% if request.args.get('status') == 'Confirmado' %}selected{% endif %}>Confirmado</option>
+                    <option value="Enviado" {% if request.args.get('status') == 'Enviado' %}selected{% endif %}>Enviado</option>
+                    <option value="Entregue" {% if request.args.get('status') == 'Entregue' %}selected{% endif %}>Entregue</option>
+                    <option value="Cancelado" {% if request.args.get('status') == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Status Pagamento</label>
+                <select name="payment_status" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <option value="">Todos</option>
+                    <option value="Pendente" {% if request.args.get('payment_status') == 'Pendente' %}selected{% endif %}>Pendente</option>
+                    <option value="Aprovado" {% if request.args.get('payment_status') == 'Aprovado' %}selected{% endif %}>Aprovado</option>
+                    <option value="Recusado" {% if request.args.get('payment_status') == 'Recusado' %}selected{% endif %}>Recusado</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Tipo de Entrega</label>
+                <select name="delivery_type" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+                    <option value="">Todos</option>
+                    <option value="delivery" {% if request.args.get('delivery_type') == 'delivery' %}selected{% endif %}>Entrega</option>
+                    <option value="pickup" {% if request.args.get('delivery_type') == 'pickup' %}selected{% endif %}>Retirada</option>
+                </select>
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Data Inicial</label>
+                <input type="date" name="date_from" value="{{ request.args.get('date_from', '') }}" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Data Final</label>
+                <input type="date" name="date_to" value="{{ request.args.get('date_to', '') }}" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Valor Mínimo</label>
+                <input type="number" step="0.01" name="min_value" value="{{ request.args.get('min_value', '') }}" placeholder="R$ 0,00" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            
+            <div>
+                <label style="display: block; margin-bottom: 8px; font-weight: 600; color: #555;">Valor Máximo</label>
+                <input type="number" step="0.01" name="max_value" value="{{ request.args.get('max_value', '') }}" placeholder="R$ 9999,00" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px;">
+            </div>
+            
+            <div style="display: flex; gap: 10px; align-items: end;">
+                <button type="submit" class="btn_buy" style="flex: 1; padding: 12px; font-size: 14px; white-space: nowrap;">
+                    <i class="fa fa-search"></i> Filtrar
+                </button>
+                <a href="{{ url_for('admin.orders') }}" class="btn_buy" style="flex: 1; padding: 12px; font-size: 14px; background: #666; text-decoration: none; text-align: center; white-space: nowrap;">
+                    <i class="fa fa-times"></i> Limpar
+                </a>
+            </div>
+        </form>
+    </div>
+    
+    <div id="quickFilters" style="display: flex; gap: 10px; margin-bottom: 20px; flex-wrap: wrap;">
+        <button onclick="filterByStatus('')" class="status-chip {% if not request.args.get('status') %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #ddd; background: {% if not request.args.get('status') %}var(--color-red){% else %}#fff{% endif %}; color: {% if not request.args.get('status') %}#fff{% else %}#666{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-list"></i> Todos
+        </button>
+        <button onclick="filterByStatus('Pendente')" class="status-chip {% if request.args.get('status') == 'Pendente' %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #ffc107; background: {% if request.args.get('status') == 'Pendente' %}#ffc107{% else %}#fff{% endif %}; color: {% if request.args.get('status') == 'Pendente' %}#fff{% else %}#856404{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-clock-o"></i> Pendente <span id="pendingCounter" class="pending-badge" style="background: #fff; color: #856404; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 5px;">{{ pending_orders }}</span>
+        </button>
+        <button onclick="filterByStatus('Confirmado')" class="status-chip {% if request.args.get('status') == 'Confirmado' %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #28a745; background: {% if request.args.get('status') == 'Confirmado' %}#28a745{% else %}#fff{% endif %}; color: {% if request.args.get('status') == 'Confirmado' %}#fff{% else %}#155724{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-check"></i> Confirmado
+        </button>
+        <button onclick="filterByStatus('Enviado')" class="status-chip {% if request.args.get('status') == 'Enviado' %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #17a2b8; background: {% if request.args.get('status') == 'Enviado' %}#17a2b8{% else %}#fff{% endif %}; color: {% if request.args.get('status') == 'Enviado' %}#fff{% else %}#0c5460{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-truck"></i> Enviado
+        </button>
+        <button onclick="filterByStatus('Entregue')" class="status-chip {% if request.args.get('status') == 'Entregue' %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #28a745; background: {% if request.args.get('status') == 'Entregue' %}#28a745{% else %}#fff{% endif %}; color: {% if request.args.get('status') == 'Entregue' %}#fff{% else %}#155724{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-check-circle"></i> Entregue
+        </button>
+        <button onclick="filterByStatus('Cancelado')" class="status-chip {% if request.args.get('status') == 'Cancelado' %}active{% endif %}" style="padding: 10px 20px; border-radius: 25px; border: 2px solid #dc3545; background: {% if request.args.get('status') == 'Cancelado' %}#dc3545{% else %}#fff{% endif %}; color: {% if request.args.get('status') == 'Cancelado' %}#fff{% else %}#721c24{% endif %}; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+            <i class="fa fa-times-circle"></i> Cancelado
+        </button>
+    </div>
+    
+    {% if orders %}
+    <div id="kanbanView" style="display: none; margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px;">
+            {% set statuses = ['Pendente', 'Confirmado', 'Enviado', 'Entregue', 'Cancelado'] %}
+            {% for status in statuses %}
+            <div class="kanban-column" style="background: #f9f9f9; border-radius: 10px; padding: 15px;">
+                <h3 style="margin: 0 0 15px 0; padding: 10px; background: {% if status == 'Pendente' %}#ffc107{% elif status == 'Confirmado' %}#28a745{% elif status == 'Enviado' %}#17a2b8{% elif status == 'Entregue' %}#28a745{% else %}#dc3545{% endif %}; color: #fff; border-radius: 6px; font-size: 14px;">
+                    {{ status }} ({{ orders|selectattr('status', 'equalto', status)|list|length }})
+                </h3>
+                <div class="kanban-cards">
+                    {% for order in orders|selectattr('status', 'equalto', status) %}
+                    <div class="order-card" data-order-id="{{ order.id }}" style="background: #fff; border-radius: 8px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); transition: transform 0.2s;" onmouseover="this.style.transform='translateY(-2px)'" onmouseout="this.style.transform='translateY(0)'">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                            <div style="font-weight: 700; color: var(--color-red); font-size: 16px;">#{{ order.id }}</div>
+                            <span class="order-status" style="padding: 4px 10px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% elif order.status == 'Entregue' %}#d4edda{% elif order.status == 'Cancelado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% elif order.status == 'Entregue' %}#155724{% elif order.status == 'Cancelado' %}#721c24{% else %}#856404{% endif %}; border-radius: 12px; font-size: 10px; font-weight: 700; text-transform: uppercase;">
+                                {{ order.status }}
+                            </span>
+                        </div>
+                        <div style="margin-bottom: 8px; font-weight: 600; color: #333;">{{ order.user.username }}</div>
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">{{ order.user.email }}</div>
+                        {% if order.customer_phone or order.user.phone %}
+                        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            <i class="fa fa-phone"></i> {{ order.customer_phone or order.user.phone }}
+                        </div>
+                        {% endif %}
+                        <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                            <i class="fa fa-shopping-bag"></i> {{ order.get_total_items() if order.get_total_items else order.items|length }} itens
+                        </div>
+                        <div style="font-size: 18px; font-weight: 700; color: var(--color-red); margin-bottom: 10px;">
+                            R$ {{ "%.2f"|format(order.total) }}
+                        </div>
+                        <div style="font-size: 11px; color: #999; margin-bottom: 15px;">
+                            <i class="fa fa-clock-o"></i> {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        
+                        {% if order.status == 'Pendente' %}
+                        <div style="display: flex; gap: 8px; margin-bottom: 10px;">
+                            <button onclick="acceptOrder({{ order.id }})" style="flex: 1; padding: 8px; background: #28a745; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;" onmouseover="this.style.background='#218838'" onmouseout="this.style.background='#28a745'">
+                                <i class="fa fa-check"></i> Aceitar
+                            </button>
+                            <button onclick="rejectOrder({{ order.id }})" style="flex: 1; padding: 8px; background: #dc3545; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; font-size: 12px; transition: all 0.3s;" onmouseover="this.style.background='#c82333'" onmouseout="this.style.background='#dc3545'">
+                                <i class="fa fa-times"></i> Rejeitar
+                            </button>
+                        </div>
+                        {% endif %}
+                        
+                        <div style="display: flex; gap: 8px;">
+                            <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" style="flex: 1; text-align: center; padding: 8px; background: var(--color-red); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 12px; transition: all 0.3s;">
+                                <i class="fa fa-eye"></i> Ver
+                            </a>
+                            <a href="{{ url_for('admin.print_order', order_id=order.id) }}" target="_blank" style="flex: 1; text-align: center; padding: 8px; background: #28a745; color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600; font-size: 12px; transition: all 0.3s;">
+                                <i class="fa fa-print"></i> Imprimir
+                            </a>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    
+    <div id="tableView" style="background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse; min-width: 1200px;">
+                <thead style="background: var(--color-red); color: #fff;">
+                    <tr>
+                        <th style="padding: 15px; text-align: left; font-weight: 600;">ID</th>
+                        <th style="padding: 15px; text-align: left; font-weight: 600;">Cliente</th>
+                        <th style="padding: 15px; text-align: left; font-weight: 600;">Contato</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Itens</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Total</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Status</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Pagamento</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Data</th>
+                        <th style="padding: 15px; text-align: center; font-weight: 600;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                    <tr style="border-bottom: 1px solid #e0e0e0; transition: background 0.3s;" onmouseover="this.style.background='#f9f9f9'" onmouseout="this.style.background='#fff'">
+                        <td style="padding: 15px; font-weight: 700; color: var(--color-red);">#{{ order.id }}</td>
+                        <td style="padding: 15px;">
+                            <div style="font-weight: 600; margin-bottom: 4px;">{{ order.user.username }}</div>
+                            <div style="font-size: 12px; color: #666;">{{ order.user.email }}</div>
+                        </td>
+                        <td style="padding: 15px;">
+                            {% if order.user.cpf %}
+                            <div style="font-size: 12px; color: #666; margin-bottom: 2px;">
+                                CPF: {% set cpf = order.user.cpf %}{% if cpf|length == 11 %}{{ cpf[0:3] }}.{{ cpf[3:6] }}.{{ cpf[6:9] }}-{{ cpf[9:11] }}{% else %}{{ cpf }}{% endif %}
+                            </div>
+                            {% endif %}
+                            {% if order.customer_phone or order.user.phone %}
+                            <div style="font-size: 12px; color: #666;">
+                                Tel: {{ order.customer_phone or order.user.phone }}
+                            </div>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 600; color: #555;">
+                            {{ order.get_total_items() if order.get_total_items else order.items|length }}
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700; color: var(--color-red); font-size: 16px;">
+                            R$ {{ "%.2f"|format(order.total) }}
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="padding: 6px 14px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% elif order.status == 'Entregue' %}#d4edda{% elif order.status == 'Cancelado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% elif order.status == 'Entregue' %}#155724{% elif order.status == 'Cancelado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+                                {{ order.status }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <span style="padding: 6px 14px; background: {% if order.payment_status == 'Aprovado' %}#d4edda{% elif order.payment_status == 'Recusado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.payment_status == 'Aprovado' %}#155724{% elif order.payment_status == 'Recusado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 11px; font-weight: 700;">
+                                {{ order.payment_status }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-size: 13px; color: #666; white-space: nowrap;">
+                            {{ order.created_at.strftime('%d/%m/%Y') }}<br>
+                            <span style="font-size: 11px; opacity: 0.8;">{{ order.created_at.strftime('%H:%M') }}</span>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <div style="display: flex; gap: 5px; justify-content: center;">
+                                <a href="{{ url_for('admin.order_detail', order_id=order.id) }}" style="color: #fff; background: var(--color-red); padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 12px; display: inline-block; transition: all 0.3s;">
+                                    <i class="fa fa-eye"></i> Detalhes
+                                </a>
+                                <a href="{{ url_for('admin.print_order', order_id=order.id) }}" target="_blank" style="color: #fff; background: #28a745; padding: 8px 16px; border-radius: 6px; text-decoration: none; font-weight: 600; font-size: 12px; display: inline-block; transition: all 0.3s;">
+                                    <i class="fa fa-print"></i>
+                                </a>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+    {% if pagination.pages > 1 %}
+    <div style="display: flex; justify-content: center; gap: 10px; margin-top: 30px;">
+        {% if pagination.has_prev %}
+        <a href="{{ url_for('admin.orders', page=pagination.prev_num, **request.args) }}" style="padding: 10px 20px; background: var(--color-red); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            <i class="fa fa-chevron-left"></i> Anterior
+        </a>
+        {% endif %}
+        
+        <div style="display: flex; gap: 5px; align-items: center;">
+            {% for page_num in pagination.iter_pages(left_edge=1, right_edge=1, left_current=2, right_current=2) %}
+                {% if page_num %}
+                    {% if page_num == pagination.page %}
+                    <span style="padding: 10px 16px; background: var(--color-red); color: #fff; border-radius: 6px; font-weight: 700;">{{ page_num }}</span>
+                    {% else %}
+                    <a href="{{ url_for('admin.orders', page=page_num, **request.args) }}" style="padding: 10px 16px; background: #f0f0f0; color: #333; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.3s;">{{ page_num }}</a>
+                    {% endif %}
+                {% else %}
+                    <span style="padding: 10px;">...</span>
+                {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if pagination.has_next %}
+        <a href="{{ url_for('admin.orders', page=pagination.next_num, **request.args) }}" style="padding: 10px 20px; background: var(--color-red); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            Próximo <i class="fa fa-chevron-right"></i>
+        </a>
+        {% endif %}
+    </div>
+    <div style="text-align: center; margin-top: 15px; color: #666; font-size: 14px;">
+        Página {{ pagination.page }} de {{ pagination.pages }} | Total: {{ pagination.total }} pedidos
+    </div>
+    {% endif %}
+    
+    {% else %}
+    <div style="text-align: center; padding: 60px 20px; background: #f9f9f9; border-radius: 10px;">
+        <i class="fa fa-inbox" style="font-size: 64px; color: #ddd; margin-bottom: 20px;"></i>
+        <p style="font-size: 18px; color: #666; margin: 0;">Nenhum pedido encontrado</p>
+        {% if request.args %}
+        <a href="{{ url_for('admin.orders') }}" style="display: inline-block; margin-top: 20px; padding: 12px 24px; background: var(--color-red); color: #fff; text-decoration: none; border-radius: 6px; font-weight: 600;">
+            Limpar Filtros
+        </a>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+
+<script>
+function toggleFilters() {
+    const panel = document.getElementById('filtersPanel');
+    panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+let currentView = 'table';
+
+function toggleView() {
+    const tableView = document.getElementById('tableView');
+    const kanbanView = document.getElementById('kanbanView');
+    const toggleBtn = document.getElementById('viewToggle');
+    
+    if (currentView === 'table') {
+        tableView.style.display = 'none';
+        kanbanView.style.display = 'block';
+        toggleBtn.innerHTML = '<i class="fa fa-table"></i> Tabela';
+        currentView = 'kanban';
+    } else {
+        tableView.style.display = 'block';
+        kanbanView.style.display = 'none';
+        toggleBtn.innerHTML = '<i class="fa fa-th"></i> Cards';
+        currentView = 'table';
+    }
+}
+
+function filterByStatus(status) {
+    const url = new URL(window.location.href);
+    if (status) {
+        url.searchParams.set('status', status);
+    } else {
+        url.searchParams.delete('status');
+    }
+    url.searchParams.delete('page');
+    window.location.href = url.toString();
+}
+
+function acceptOrder(orderId) {
+    if (!confirm('Deseja aceitar este pedido?')) return;
+    
+    fetch(`/admin/pedidos/${orderId}/aceitar`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erro ao aceitar pedido');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao aceitar pedido');
+    });
+}
+
+function rejectOrder(orderId) {
+    if (!confirm('Deseja rejeitar este pedido?')) return;
+    
+    fetch(`/admin/pedidos/${orderId}/rejeitar`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        credentials: 'same-origin'
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert(data.message);
+            window.location.reload();
+        } else {
+            alert(data.message || 'Erro ao rejeitar pedido');
+        }
+    })
+    .catch(error => {
+        console.error('Erro:', error);
+        alert('Erro ao rejeitar pedido');
+    });
+}
+</script>
+{% endblock %}

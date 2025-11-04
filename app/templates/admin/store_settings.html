@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações da Loja - Admin - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="admin_container">
+    <div class="admin_header">
+        <h1><i class="fa fa-cog"></i> Configurações da Loja</h1>
+        <a href="{{ url_for('admin.dashboard') }}" class="btn_secondary">
+            <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+    </div>
+
+    <div class="admin_content">
+        <form method="POST" class="admin_form">
+            <div class="form_section">
+                <h2><i class="fa fa-building"></i> Informações da Loja</h2>
+                
+                <div class="form_group">
+                    <label for="store_name">
+                        <i class="fa fa-store"></i> Nome da Loja
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_name" 
+                        name="store_name" 
+                        class="form_control" 
+                        value="{{ settings.store_name }}"
+                        required
+                    >
+                    <small class="form_text">Nome que aparecerá no topo do site</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_logo">
+                        <i class="fa fa-image"></i> URL do Logo
+                    </label>
+                    <input 
+                        type="url" 
+                        id="store_logo" 
+                        name="store_logo" 
+                        class="form_control" 
+                        value="{{ settings.store_logo }}"
+                        placeholder="https://exemplo.com/logo.png"
+                    >
+                    <small class="form_text">URL do logotipo da sua loja (deixe em branco para usar apenas texto)</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_description">
+                        <i class="fa fa-info-circle"></i> Descrição da Loja
+                    </label>
+                    <textarea 
+                        id="store_description" 
+                        name="store_description" 
+                        rows="2" 
+                        class="form_control"
+                        placeholder="Slogan ou descrição curta da sua loja"
+                    >{{ settings.store_description }}</textarea>
+                    <small class="form_text">Descrição que aparece no site</small>
+                </div>
+            </div>
+
+            <div class="form_section">
+                <h2><i class="fa fa-store"></i> Retirada no Local</h2>
+                
+                <div class="form_group checkbox_group">
+                    <label class="checkbox_label">
+                        <input type="checkbox" name="pickup_enabled" {% if settings.pickup_enabled %}checked{% endif %}>
+                        <span>Habilitar retirada no local</span>
+                    </label>
+                </div>
+
+                <div class="form_group">
+                    <label for="pickup_address">
+                        <i class="fa fa-map-marker"></i> Endereço para Retirada
+                    </label>
+                    <textarea 
+                        id="pickup_address" 
+                        name="pickup_address" 
+                        rows="3" 
+                        class="form_control"
+                        placeholder="Av. Exemplo, 123 - Centro - São Paulo, SP - CEP 01000-000"
+                    >{{ settings.pickup_address }}</textarea>
+                    <small class="form_text">Este endereço será exibido para os clientes que escolherem retirada no local</small>
+                </div>
+            </div>
+
+            <div class="form_section">
+                <h2><i class="fa fa-truck"></i> Entrega</h2>
+                
+                <div class="form_group checkbox_group">
+                    <label class="checkbox_label">
+                        <input type="checkbox" name="delivery_enabled" {% if settings.delivery_enabled %}checked{% endif %}>
+                        <span>Habilitar entrega</span>
+                    </label>
+                </div>
+
+                <div class="form_group">
+                    <label for="shipping_cost">
+                        <i class="fa fa-dollar"></i> Custo de Entrega (R$)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="shipping_cost" 
+                        name="shipping_cost" 
+                        class="form_control" 
+                        step="0.01" 
+                        min="0"
+                        value="{{ settings.shipping_cost }}"
+                        required
+                    >
+                    <small class="form_text">Valor fixo de entrega</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="free_shipping_min">
+                        <i class="fa fa-gift"></i> Compra Mínima para Frete Grátis (R$)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="free_shipping_min" 
+                        name="free_shipping_min" 
+                        class="form_control" 
+                        step="0.01" 
+                        min="0"
+                        value="{{ settings.free_shipping_min }}"
+                        required
+                    >
+                    <small class="form_text">Valor mínimo de compra para frete grátis</small>
+                </div>
+            </div>
+
+            <div class="form_actions">
+                <button type="submit" class="btn_primary">
+                    <i class="fa fa-save"></i> Salvar Configurações
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.admin_container {
+    max-width: 900px;
+    margin: 30px auto;
+    padding: 0 20px;
+}
+
+.admin_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 15px;
+    border-bottom: 2px solid #e0e0e0;
+}
+
+.admin_header h1 {
+    font-size: 28px;
+    color: #333;
+}
+
+.admin_content {
+    background: #fff;
+    border-radius: 8px;
+    padding: 30px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.form_section {
+    margin-bottom: 35px;
+    padding-bottom: 25px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.form_section:last-of-type {
+    border-bottom: none;
+    margin-bottom: 0;
+}
+
+.form_section h2 {
+    font-size: 20px;
+    color: #333;
+    margin-bottom: 20px;
+}
+
+.form_group {
+    margin-bottom: 20px;
+}
+
+.form_group label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 8px;
+    color: #555;
+}
+
+.form_control {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s;
+}
+
+.form_control:focus {
+    outline: none;
+    border-color: var(--color-red);
+}
+
+.form_text {
+    display: block;
+    margin-top: 5px;
+    font-size: 12px;
+    color: #999;
+}
+
+.checkbox_group {
+    margin-bottom: 15px;
+}
+
+.checkbox_label {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    font-weight: normal;
+}
+
+.checkbox_label input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    cursor: pointer;
+}
+
+.checkbox_label span {
+    font-size: 15px;
+    color: #333;
+}
+
+.form_actions {
+    margin-top: 30px;
+    text-align: right;
+}
+
+.btn_primary {
+    background: var(--color-red);
+    color: #fff;
+    border: none;
+    padding: 12px 30px;
+    border-radius: 5px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s;
+}
+
+.btn_primary:hover {
+    background: var(--color-red-dark);
+}
+
+.btn_secondary {
+    background: #6c757d;
+    color: #fff;
+    padding: 10px 20px;
+    border-radius: 5px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: background 0.3s;
+}
+
+.btn_secondary:hover {
+    background: #5a6268;
+}
+</style>
+{% endblock %}

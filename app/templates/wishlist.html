@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Minha Lista de Desejos - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="min-height: 500px; padding: 40px 20px;">
+    <h1 style="font-size: 28px; margin-bottom: 30px; color: #ffffff;">
+        <i class="fa fa-heart"></i> Minha Lista de Desejos
+    </h1>
+    
+    {% if wishlists %}
+        <div class="products_grid">
+            {% for wishlist_item in wishlists %}
+            <div class="product_card">
+                <div class="product_image">
+                    {% if wishlist_item.product.image_url %}
+                    <img src="{{ wishlist_item.product.image_url }}" alt="{{ wishlist_item.product.name }}" style="max-width: 100%; max-height: 180px; object-fit: contain;">
+                    {% else %}
+                    <i class="fa fa-microchip"></i>
+                    {% endif %}
+                </div>
+                <div class="product_code">Cód: {{ wishlist_item.product.code }}</div>
+                <div class="product_name">{{ wishlist_item.product.name }}</div>
+                <div class="product_price">R$ {{ "%.2f"|format(wishlist_item.product.price) }}</div>
+                <div class="product_pix">R$ {{ "%.2f"|format(wishlist_item.product.price * 0.95) }} no PIX</div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 15px;">
+                    <a href="{{ url_for('main.product_detail', product_id=wishlist_item.product.id) }}" class="btn_buy" style="flex: 1; text-decoration: none; text-align: center;">
+                        VER PRODUTO
+                    </a>
+                    <form method="POST" action="{{ url_for('wishlist.remove_from_wishlist', wishlist_id=wishlist_item.id) }}" style="flex: 0;">
+                        <button type="submit" style="background: #721c24; color: #fff; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer;">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </form>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fa fa-heart-o" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
+            <h2 style="color: #777; margin-bottom: 15px;">Sua lista de desejos está vazia</h2>
+            <p style="color: #aaa; margin-bottom: 30px;">Adicione produtos à sua lista de desejos para comprá-los depois!</p>
+            <a href="{{ url_for('main.index') }}" class="btn_red">Continuar Comprando</a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}Editar Produto - Admin{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin: 30px auto; max-width: 900px;">
+    <h2 style="font-size: 28px; margin-bottom: 30px; color: #111;">
+        <i class="fa fa-edit"></i> Editar Produto
+    </h2>
+    
+    <div style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.id) }}">
+            <div style="margin-bottom: 20px;">
+                <label for="name" style="display: block; margin-bottom: 5px; font-weight: 600;">Nome do Produto:</label>
+                <input type="text" id="name" name="name" value="{{ product.name }}" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="code" style="display: block; margin-bottom: 5px; font-weight: 600;">Código:</label>
+                <input type="text" id="code" name="code" value="{{ product.code }}" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="description" style="display: block; margin-bottom: 5px; font-weight: 600;">Descrição:</label>
+                <textarea id="description" name="description" rows="4" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">{{ product.description }}</textarea>
+            </div>
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-bottom: 20px;">
+                <div>
+                    <label for="price" style="display: block; margin-bottom: 5px; font-weight: 600;">Preço (R$):</label>
+                    <input type="number" step="0.01" id="price" name="price" value="{{ product.price }}" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                </div>
+                <div>
+                    <label for="stock" style="display: block; margin-bottom: 5px; font-weight: 600;">Estoque:</label>
+                    <input type="number" id="stock" name="stock" value="{{ product.stock }}" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="category_id" style="display: block; margin-bottom: 5px; font-weight: 600;">Categoria:</label>
+                <select id="category_id" name="category_id" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% for category in categories %}
+                    <option value="{{ category.id }}" {% if category.id == product.category_id %}selected{% endif %}>{{ category.name }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div style="background: #f8f9fa; padding: 25px; border-radius: 8px; margin-bottom: 25px; border: 2px solid #e9ecef;">
+                <h3 style="font-size: 18px; font-weight: 700; margin-bottom: 20px; color: #DC143C; display: flex; align-items: center; gap: 8px;">
+                    <i class="fa fa-images"></i> Imagens do Produto (até 5)
+                </h3>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="image_url" style="display: block; margin-bottom: 5px; font-weight: 600;">
+                        <i class="fa fa-image"></i> Imagem Principal (Imagem 1):
+                    </label>
+                    <input type="url" id="image_url" name="image_url" value="{{ product.image_url or '' }}" placeholder="https://exemplo.com/imagem1.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% if product.image_url %}
+                    <div style="margin-top: 10px;">
+                        <img src="{{ product.image_url }}" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 6px; border: 2px solid #ddd;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="image_url_2" style="display: block; margin-bottom: 5px; font-weight: 600;">
+                        <i class="fa fa-image"></i> Imagem 2 (opcional):
+                    </label>
+                    <input type="url" id="image_url_2" name="image_url_2" value="{{ product.image_url_2 or '' }}" placeholder="https://exemplo.com/imagem2.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% if product.image_url_2 %}
+                    <div style="margin-top: 10px;">
+                        <img src="{{ product.image_url_2 }}" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 6px; border: 2px solid #ddd;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="image_url_3" style="display: block; margin-bottom: 5px; font-weight: 600;">
+                        <i class="fa fa-image"></i> Imagem 3 (opcional):
+                    </label>
+                    <input type="url" id="image_url_3" name="image_url_3" value="{{ product.image_url_3 or '' }}" placeholder="https://exemplo.com/imagem3.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% if product.image_url_3 %}
+                    <div style="margin-top: 10px;">
+                        <img src="{{ product.image_url_3 }}" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 6px; border: 2px solid #ddd;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="image_url_4" style="display: block; margin-bottom: 5px; font-weight: 600;">
+                        <i class="fa fa-image"></i> Imagem 4 (opcional):
+                    </label>
+                    <input type="url" id="image_url_4" name="image_url_4" value="{{ product.image_url_4 or '' }}" placeholder="https://exemplo.com/imagem4.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% if product.image_url_4 %}
+                    <div style="margin-top: 10px;">
+                        <img src="{{ product.image_url_4 }}" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 6px; border: 2px solid #ddd;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <label for="image_url_5" style="display: block; margin-bottom: 5px; font-weight: 600;">
+                        <i class="fa fa-image"></i> Imagem 5 (opcional):
+                    </label>
+                    <input type="url" id="image_url_5" name="image_url_5" value="{{ product.image_url_5 or '' }}" placeholder="https://exemplo.com/imagem5.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+                    {% if product.image_url_5 %}
+                    <div style="margin-top: 10px;">
+                        <img src="{{ product.image_url_5 }}" alt="Preview" style="max-width: 150px; max-height: 150px; border-radius: 6px; border: 2px solid #ddd;">
+                    </div>
+                    {% endif %}
+                </div>
+                
+                <div style="background: #e7f3ff; padding: 15px; border-radius: 6px; border-left: 4px solid #0066cc; margin-top: 20px;">
+                    <p style="margin: 0; font-size: 13px; color: #004085;">
+                        <i class="fa fa-info-circle"></i> 
+                        <strong>Dica:</strong> Cole as URLs das imagens hospedadas em serviços como Imgur, ImgBB ou seu próprio servidor. A primeira imagem será a imagem principal do produto.
+                    </p>
+                </div>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: flex; align-items: center; cursor: pointer; margin-bottom: 10px;">
+                    <input type="checkbox" name="featured" {% if product.featured %}checked{% endif %} style="margin-right: 10px; width: 20px; height: 20px;">
+                    <span style="font-weight: 600;">Produto em Destaque</span>
+                </label>
+                <label style="display: flex; align-items: center; cursor: pointer;">
+                    <input type="checkbox" name="active" {% if product.active %}checked{% endif %} style="margin-right: 10px; width: 20px; height: 20px;">
+                    <span style="font-weight: 600;">Produto Ativo</span>
+                </label>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn_buy" style="flex: 1; padding: 15px; font-size: 16px;">
+                    <i class="fa fa-check"></i> SALVAR ALTERAÇÕES
+                </button>
+                <a href="{{ url_for('admin.products') }}" style="flex: 1; padding: 15px; text-align: center; background: #ccc; color: #333; border-radius: 5px; font-weight: 700; text-decoration: none;">
+                    <i class="fa fa-times"></i> CANCELAR
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

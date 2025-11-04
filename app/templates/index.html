@@ -1,0 +1,176 @@
+{% extends "base.html" %}
+
+{% block title %}{{ store_settings.store_name }} - {{ store_settings.store_description }}{% endblock %}
+
+{% block content %}
+<div class="sidebar_wrapper">
+    <button class="categories_toggle_btn" onclick="toggleCategories()">
+        <i class="fa fa-bars"></i>
+        <span id="toggleText">VER CATEGORIAS</span>
+    </button>
+    
+    <aside class="sidebar_categories" id="sidebarCategories">
+        <div class="sidebar_header">
+            <i class="fa fa-bars"></i> CATEGORIAS
+        </div>
+        <ul class="sidebar_menu">
+            {% for category in categories %}
+            <li>
+                <a href="{{ url_for('main.category_products', category_id=category.id) }}">
+                    <span><i class="fa fa-cutlery fa-fw"></i> {{ category.name }}</span>
+                    <i class="fa fa-chevron-right"></i>
+                </a>
+                
+                {% if category.image_url %}
+                <div class="category_image_hover">
+                    <img src="{{ category.image_url }}" alt="{{ category.name }}">
+                    <div class="category_overlay">
+                        <h3>{{ category.name }}</h3>
+                        <a href="{{ url_for('main.category_products', category_id=category.id) }}" class="view_category_btn">
+                            Ver Produtos <i class="fa fa-arrow-right"></i>
+                        </a>
+                    </div>
+                </div>
+                {% endif %}
+            </li>
+            {% endfor %}
+        </ul>
+    </aside>
+    
+    <section class="fullbanner_section">
+        <div class="carousel">
+            <div class="carousel_track" id="carouselTrack">
+                {% if slides %}
+                    {% for slide in slides %}
+                    <div class="carousel_slide" style="background-image: url('{{ slide.image_url }}'); background-size: cover; background-position: center;">
+                        {% if slide.link %}
+                        <a href="{{ slide.link }}" style="display: block; width: 100%; height: 100%;"></a>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="carousel_slide slide1"></div>
+                    <div class="carousel_slide slide2"></div>
+                    <div class="carousel_slide slide3"></div>
+                {% endif %}
+            </div>
+            <button class="carousel_btn prev" onclick="prevSlide()">&#10094;</button>
+            <button class="carousel_btn next" onclick="nextSlide()">&#10095;</button>
+        </div>
+        <div class="carousel_dots">
+            {% if slides %}
+                {% for slide in slides %}
+                <button class="carousel_dot {% if loop.first %}active{% endif %}" onclick="goToSlide({{ loop.index0 }})"></button>
+                {% endfor %}
+            {% else %}
+                <button class="carousel_dot active" onclick="goToSlide(0)"></button>
+                <button class="carousel_dot" onclick="goToSlide(1)"></button>
+                <button class="carousel_dot" onclick="goToSlide(2)"></button>
+            {% endif %}
+        </div>
+    </section>
+</div>
+
+<div class="content_section">
+    <div class="features">
+        <div class="features_grid">
+            <div class="feature_item">
+                <i class="fa fa-motorcycle feature_icon"></i>
+                <div class="feature_text">
+                    <strong>Delivery no Bairro</strong>
+                    <span>Acima de R$ 30</span>
+                </div>
+            </div>
+            <div class="feature_item">
+                <i class="fa fa-money feature_icon"></i>
+                <div class="feature_text">
+                    <strong>Pague na Entrega</strong>
+                    <span>Dinheiro, Pix ou Cartão</span>
+                </div>
+            </div>
+            <div class="feature_item">
+                <i class="fa fa-thumbs-up feature_icon"></i>
+                <div class="feature_text">
+                    <strong>Qualidade Garantida</strong>
+                    <span>Ingredientes frescos</span>
+                </div>
+            </div>
+            <div class="feature_item">
+                <i class="fa fa-cutlery feature_icon"></i>
+                <div class="feature_text">
+                    <strong>Feito na Hora</strong>
+                    <span>Quentinho pra você</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <section class="products_section" id="produtos">
+        <div class="section_header">
+            <h2 class="section_title">Produtos em Destaque</h2>
+        </div>
+        
+        <div class="products_grid">
+            {% for product in products %}
+            <div class="product_card">
+                <div class="product_image">
+                    {% if product.image_url %}
+                    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 180px; object-fit: contain;">
+                    {% else %}
+                    <i class="fa fa-cutlery"></i>
+                    {% endif %}
+                </div>
+                <div class="product_code">Cód: {{ product.code }}</div>
+                <div class="product_name">{{ product.name }}</div>
+                <div class="product_price">R$ {{ "%.2f"|format(product.price) }}</div>
+                <div class="product_installments">12x de R$ {{ "%.2f"|format(product.price / 12) }}</div>
+                <div class="product_pix">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
+                <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy">VER DETALHES</a>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+</div>
+
+<script>
+let currentSlide = 0;
+const slides = document.querySelectorAll('.carousel_slide');
+const dots = document.querySelectorAll('.carousel_dot');
+const track = document.getElementById('carouselTrack');
+
+function showSlide(n) {
+    currentSlide = (n + slides.length) % slides.length;
+    track.style.transform = `translateX(-${currentSlide * 100}%)`;
+    
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentSlide);
+    });
+}
+
+function nextSlide() {
+    showSlide(currentSlide + 1);
+}
+
+function prevSlide() {
+    showSlide(currentSlide - 1);
+}
+
+function goToSlide(n) {
+    showSlide(n);
+}
+
+function toggleCategories() {
+    const sidebar = document.getElementById('sidebarCategories');
+    const toggleText = document.getElementById('toggleText');
+    sidebar.classList.toggle('active');
+    
+    if (sidebar.classList.contains('active')) {
+        toggleText.textContent = 'OCULTAR CATEGORIAS';
+    } else {
+        toggleText.textContent = 'VER CATEGORIAS';
+    }
+}
+
+setInterval(nextSlide, 5000);
+</script>
+{% endblock %}

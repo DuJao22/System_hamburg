@@ -1,0 +1,40 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Categorias - Admin{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111;"><i class="fa fa-folder"></i> Gerenciar Categorias</h2>
+        <a href="{{ url_for('admin.add_category') }}" class="btn_buy" style="text-decoration: none; display: inline-block;">
+            <i class="fa fa-plus"></i> ADICIONAR CATEGORIA
+        </a>
+    </div>
+    
+    {% if categories %}
+    <div class="products_grid">
+        {% for category in categories %}
+        <div class="product_card" style="text-align: left;">
+            <h3 style="font-size: 18px; margin-bottom: 10px; color: var(--color-red);">{{ category.name }}</h3>
+            <p style="color: #666; margin-bottom: 15px; min-height: 60px;">{{ category.description }}</p>
+            <div style="font-size: 14px; margin-bottom: 15px; color: #999;">
+                {{ category.products|length }} produto(s)
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('admin.edit_category', category_id=category.id) }}" class="btn_buy" style="flex: 1; text-align: center; text-decoration: none; font-size: 14px; padding: 10px;">
+                    <i class="fa fa-edit"></i> Editar
+                </a>
+                <form action="{{ url_for('admin.delete_category', category_id=category.id) }}" method="POST" style="flex: 1;" onsubmit="return confirm('Tem certeza?');">
+                    <button type="submit" style="width: 100%; padding: 10px; background: #dc3545; color: #fff; border: none; border-radius: 5px; font-weight: 700; cursor: pointer; font-size: 14px;">
+                        <i class="fa fa-trash"></i> Deletar
+                    </button>
+                </form>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px;">Nenhuma categoria cadastrada</p>
+    {% endif %}
+</div>
+{% endblock %}

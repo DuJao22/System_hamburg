@@ -1,0 +1,265 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido #{{ order.id }} - Detalhes{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-file-text"></i> Pedido #{{ order.id }}
+        </h2>
+        <div style="display: flex; gap: 10px;">
+            <button onclick="window.print()" class="btn_buy" style="padding: 12px 24px; font-size: 14px; background: #555;">
+                <i class="fa fa-print"></i> Imprimir
+            </button>
+            <a href="{{ url_for('admin.orders') }}" class="btn_buy" style="padding: 12px 24px; font-size: 14px; background: #666; text-decoration: none;">
+                <i class="fa fa-arrow-left"></i> Voltar
+            </a>
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 30px; margin-bottom: 30px;">
+        <div style="background: #fff; border-radius: 10px; padding: 30px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="font-size: 20px; margin-bottom: 20px; color: var(--color-red); padding-bottom: 10px; border-bottom: 2px solid var(--color-red);">
+                <i class="fa fa-user"></i> Informações do Cliente
+            </h3>
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <div style="margin-bottom: 15px;">
+                    <strong style="display: inline-block; min-width: 120px; color: #666;">Nome:</strong>
+                    <span style="color: #111; font-weight: 600;">{{ order.user.username }}</span>
+                </div>
+                {% if order.user.cpf %}
+                <div style="margin-bottom: 15px;">
+                    <strong style="display: inline-block; min-width: 120px; color: #666;">CPF:</strong>
+                    <span style="color: #111;">
+                        {% set cpf = order.user.cpf %}
+                        {% if cpf|length == 11 %}
+                            {{ cpf[0:3] }}.{{ cpf[3:6] }}.{{ cpf[6:9] }}-{{ cpf[9:11] }}
+                        {% else %}
+                            {{ cpf }}
+                        {% endif %}
+                    </span>
+                </div>
+                {% endif %}
+                <div style="margin-bottom: 15px;">
+                    <strong style="display: inline-block; min-width: 120px; color: #666;">Email:</strong>
+                    <span style="color: #111;">{{ order.user.email }}</span>
+                </div>
+                {% if order.customer_phone or order.user.phone %}
+                <div style="margin-bottom: 0;">
+                    <strong style="display: inline-block; min-width: 120px; color: #666;">Telefone:</strong>
+                    <span style="color: #111;">{{ order.customer_phone or order.user.phone }}</span>
+                </div>
+                {% endif %}
+            </div>
+            
+            {% if order.delivery_address and order.delivery_type == 'delivery' %}
+            <h3 style="font-size: 20px; margin-bottom: 20px; color: var(--color-red); padding-bottom: 10px; border-bottom: 2px solid var(--color-red);">
+                <i class="fa fa-map-marker"></i> Endereço de Entrega
+            </h3>
+            <div style="background: #f9f9f9; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+                <p style="color: #111; line-height: 1.8; margin: 0;">{{ order.delivery_address }}</p>
+                {% if order.shipping_cost and order.shipping_cost > 0 %}
+                <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #ddd;">
+                    <strong style="color: #666;">Taxa de Entrega:</strong>
+                    <span style="color: var(--color-red); font-weight: 700; font-size: 18px; margin-left: 10px;">R$ {{ "%.2f"|format(order.shipping_cost) }}</span>
+                </div>
+                {% endif %}
+            </div>
+            {% endif %}
+            
+            <h3 style="font-size: 20px; margin-bottom: 20px; color: var(--color-red); padding-bottom: 10px; border-bottom: 2px solid var(--color-red);">
+                <i class="fa fa-shopping-cart"></i> Itens do Pedido
+            </h3>
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead style="background: #f9f9f9;">
+                    <tr>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Produto</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Qtd</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Preço</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #e0e0e0; font-weight: 600;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in order.items %}
+                    <tr style="border-bottom: 1px solid #e0e0e0;">
+                        <td style="padding: 12px; color: #333;">{{ item.product.name }}</td>
+                        <td style="padding: 12px; text-align: center; font-weight: 600; color: #555;">{{ item.quantity }}</td>
+                        <td style="padding: 12px; text-align: center; color: #666;">R$ {{ "%.2f"|format(item.price) }}</td>
+                        <td style="padding: 12px; text-align: center; font-weight: 700; color: var(--color-red);">R$ {{ "%.2f"|format(item.price * item.quantity) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot style="background: #f9f9f9;">
+                    {% if order.discount_amount and order.discount_amount > 0 %}
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: right; font-weight: 600;">Subtotal:</td>
+                        <td style="padding: 12px; text-align: center; color: #666;">R$ {{ "%.2f"|format(order.get_subtotal() if order.get_subtotal else order.total) }}</td>
+                    </tr>
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: right; font-weight: 600; color: green;">Desconto:</td>
+                        <td style="padding: 12px; text-align: center; color: green; font-weight: 700;">- R$ {{ "%.2f"|format(order.discount_amount) }}</td>
+                    </tr>
+                    {% endif %}
+                    {% if order.shipping_cost and order.shipping_cost > 0 %}
+                    <tr>
+                        <td colspan="3" style="padding: 12px; text-align: right; font-weight: 600;">Frete:</td>
+                        <td style="padding: 12px; text-align: center; color: #666;">R$ {{ "%.2f"|format(order.shipping_cost) }}</td>
+                    </tr>
+                    {% endif %}
+                    <tr style="border-top: 2px solid var(--color-red);">
+                        <td colspan="3" style="padding: 15px; text-align: right; font-weight: 700; font-size: 18px;">TOTAL:</td>
+                        <td style="padding: 15px; text-align: center; color: var(--color-red); font-weight: 700; font-size: 22px;">R$ {{ "%.2f"|format(order.total) }}</td>
+                    </tr>
+                </tfoot>
+            </table>
+        </div>
+        
+        <div>
+            <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 20px; color: #111;">
+                    <i class="fa fa-info-circle"></i> Resumo do Pedido
+                </h3>
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Número do Pedido</div>
+                    <div style="font-weight: 700; font-size: 20px; color: var(--color-red);">#{{ order.id }}</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Data do Pedido</div>
+                    <div style="font-weight: 600; color: #333;">{{ order.created_at.strftime('%d/%m/%Y às %H:%M') }}</div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Tipo de Entrega</div>
+                    <div style="font-weight: 600; color: #333;">
+                        {% if order.delivery_type == 'pickup' %}
+                        <i class="fa fa-shopping-bag"></i> Retirada no Local
+                        {% else %}
+                        <i class="fa fa-truck"></i> Entrega em Domicílio
+                        {% endif %}
+                    </div>
+                </div>
+                <div style="margin-bottom: 15px;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Status do Pedido</div>
+                    <div>
+                        <span style="padding: 8px 16px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% elif order.status == 'Entregue' %}#d4edda{% elif order.status == 'Cancelado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% elif order.status == 'Entregue' %}#155724{% elif order.status == 'Cancelado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block;">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                </div>
+                <div style="margin-bottom: 0;">
+                    <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Status do Pagamento</div>
+                    <div>
+                        <span style="padding: 8px 16px; background: {% if order.payment_status == 'Aprovado' %}#d4edda{% elif order.payment_status == 'Recusado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.payment_status == 'Aprovado' %}#155724{% elif order.payment_status == 'Recusado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 13px; font-weight: 700; display: inline-block;">
+                            {{ order.payment_status }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 15px; color: #111;">
+                    <i class="fa fa-refresh"></i> Atualizar Status
+                </h3>
+                <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
+                    <select name="status" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px;">
+                        <option value="Pendente" {% if order.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                        <option value="Confirmado" {% if order.status == 'Confirmado' %}selected{% endif %}>Confirmado</option>
+                        <option value="Enviado" {% if order.status == 'Enviado' %}selected{% endif %}>Enviado</option>
+                        <option value="Entregue" {% if order.status == 'Entregue' %}selected{% endif %}>Entregue</option>
+                        <option value="Cancelado" {% if order.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                    </select>
+                    <textarea name="notes" placeholder="Observações sobre a mudança (opcional)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px; min-height: 80px; font-family: inherit;"></textarea>
+                    <button type="submit" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px;">
+                        <i class="fa fa-check"></i> ATUALIZAR STATUS
+                    </button>
+                </form>
+            </div>
+            
+            {% if order.status_history %}
+            <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 15px; color: #111;">
+                    <i class="fa fa-history"></i> Histórico de Status
+                </h3>
+                <div style="max-height: 300px; overflow-y: auto;">
+                    {% for history in order.status_history %}
+                    <div style="padding: 12px; background: #f9f9f9; border-left: 4px solid var(--color-red); margin-bottom: 10px; border-radius: 4px;">
+                        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">
+                            {{ history.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        <div style="font-weight: 600; color: #333; margin-bottom: 5px;">
+                            {% if history.old_status %}
+                            <span style="color: #999;">{{ history.old_status }}</span> 
+                            <i class="fa fa-arrow-right" style="color: #666; font-size: 12px;"></i> 
+                            {% endif %}
+                            <span style="color: var(--color-red);">{{ history.new_status }}</span>
+                        </div>
+                        {% if history.changed_by %}
+                        <div style="font-size: 12px; color: #666;">Por: {{ history.changed_by }}</div>
+                        {% endif %}
+                        {% if history.notes %}
+                        <div style="margin-top: 8px; padding: 8px; background: #fff; border-radius: 4px; font-size: 12px; color: #555;">
+                            {{ history.notes }}
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div style="display: grid; grid-template-columns: 1fr; gap: 30px;">
+        <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+            <h3 style="font-size: 18px; margin-bottom: 20px; color: #111;">
+                <i class="fa fa-sticky-note"></i> Notas e Observações
+            </h3>
+            
+            <form method="POST" action="{{ url_for('admin.add_order_note', order_id=order.id) }}" style="margin-bottom: 30px;">
+                <textarea name="note" required placeholder="Adicionar uma nota sobre este pedido..." style="width: 100%; padding: 15px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; min-height: 100px; font-family: inherit; margin-bottom: 10px;"></textarea>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <label style="display: flex; align-items: center; gap: 8px; cursor: pointer;">
+                        <input type="checkbox" name="is_internal" checked style="width: 18px; height: 18px;">
+                        <span style="font-size: 14px; color: #666;">Nota interna (não visível para o cliente)</span>
+                    </label>
+                    <button type="submit" class="btn_buy" style="padding: 12px 24px; font-size: 14px;">
+                        <i class="fa fa-plus"></i> Adicionar Nota
+                    </button>
+                </div>
+            </form>
+            
+            {% if order.notes %}
+            <div style="border-top: 2px solid #e0e0e0; padding-top: 20px;">
+                <h4 style="font-size: 16px; margin-bottom: 15px; color: #666;">Histórico de Notas</h4>
+                {% for note in order.notes %}
+                <div style="padding: 15px; background: {% if note.is_internal %}#fff3cd{% else %}#e7f3ff{% endif %}; border-left: 4px solid {% if note.is_internal %}#ffc107{% else %}#2196F3{% endif %}; margin-bottom: 15px; border-radius: 4px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                        <div style="font-size: 12px; color: #666;">
+                            <i class="fa fa-user"></i> {{ note.created_by }} | {{ note.created_at.strftime('%d/%m/%Y %H:%M') }}
+                        </div>
+                        {% if note.is_internal %}
+                        <span style="font-size: 11px; padding: 4px 8px; background: #ffc107; color: #000; border-radius: 4px; font-weight: 600;">INTERNA</span>
+                        {% else %}
+                        <span style="font-size: 11px; padding: 4px 8px; background: #2196F3; color: #fff; border-radius: 4px; font-weight: 600;">PÚBLICA</span>
+                        {% endif %}
+                    </div>
+                    <div style="color: #333; line-height: 1.6; font-size: 14px;">{{ note.note }}</div>
+                </div>
+                {% endfor %}
+            </div>
+            {% else %}
+            <div style="text-align: center; padding: 40px; background: #f9f9f9; border-radius: 8px; color: #999;">
+                <i class="fa fa-sticky-note-o" style="font-size: 48px; margin-bottom: 15px; opacity: 0.3;"></i>
+                <p style="margin: 0;">Nenhuma nota adicionada ainda</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<style media="print">
+    .btn_buy, button, form {
+        display: none !important;
+    }
+</style>
+{% endblock %}

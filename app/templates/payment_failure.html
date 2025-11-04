@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Pagamento Recusado - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 50px; max-width: 700px; margin-left: auto; margin-right: auto;">
+    <div style="text-align: center; padding: 60px 30px; background: #fff; border-radius: 12px; box-shadow: 0 4px 20px rgba(220,20,60,0.15); border: 2px solid #dc3545;">
+        <div style="width: 100px; height: 100px; background: #dc3545; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 30px;">
+            <i class="fa fa-times" style="font-size: 50px; color: #fff;"></i>
+        </div>
+        
+        <h1 style="font-size: 32px; color: #dc3545; margin-bottom: 15px; font-weight: 700;">
+            Pagamento Recusado
+        </h1>
+        
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+            Não foi possível processar seu pagamento.
+        </p>
+        
+        {% if order %}
+        <div style="background: #f9f9f9; padding: 25px; border-radius: 8px; margin-bottom: 30px; text-align: left;">
+            <h3 style="font-size: 18px; margin-bottom: 15px; color: #333;">
+                <i class="fa fa-info-circle"></i> Informações
+            </h3>
+            <div style="margin-bottom: 10px;">
+                <strong>Pedido:</strong> #{{ order.id }}
+            </div>
+            <div style="color: #666; font-size: 14px;">
+                Seu pedido ainda está em aberto. Você pode tentar efetuar o pagamento novamente.
+            </div>
+        </div>
+        {% endif %}
+        
+        <div style="background: #fff3cd; padding: 20px; border-radius: 8px; border-left: 4px solid #ffc107; margin-bottom: 30px; text-align: left;">
+            <h4 style="font-size: 16px; margin-bottom: 10px; color: #856404;">
+                <i class="fa fa-exclamation-triangle"></i> Possíveis Causas:
+            </h4>
+            <ul style="color: #856404; font-size: 14px; margin-left: 20px;">
+                <li>Saldo ou limite insuficiente</li>
+                <li>Dados do cartão incorretos</li>
+                <li>Cartão bloqueado ou vencido</li>
+                <li>Problema na validação de segurança</li>
+            </ul>
+        </div>
+        
+        <div style="display: flex; gap: 15px; justify-content: center; flex-wrap: wrap;">
+            {% if order %}
+            <form method="POST" action="{{ url_for('payment.create_preference', order_id=order.id) }}" style="display: inline-block;">
+                <button type="submit" class="btn_buy" style="display: inline-flex; align-items: center; gap: 8px; padding: 12px 25px; cursor: pointer; border: none;">
+                    <i class="fa fa-refresh"></i> Tentar Novamente
+                </button>
+            </form>
+            {% endif %}
+            <a href="{{ url_for('main.index') }}" style="display: inline-flex; align-items: center; gap: 8px; background: #fff; color: var(--color-red); border: 2px solid var(--color-red); padding: 12px 25px; border-radius: 5px; font-weight: 700; text-decoration: none; transition: all 0.3s;">
+                <i class="fa fa-home"></i> Voltar à Loja
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

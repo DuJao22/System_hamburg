@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar Categoria - Admin{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin: 30px auto; max-width: 600px;">
+    <h2 style="font-size: 28px; margin-bottom: 30px; color: #111;">
+        <i class="fa fa-plus"></i> Adicionar Categoria
+    </h2>
+    
+    <div style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <form method="POST" action="{{ url_for('admin.add_category') }}" enctype="multipart/form-data">
+            <div style="margin-bottom: 20px;">
+                <label for="name" style="display: block; margin-bottom: 5px; font-weight: 600;">Nome da Categoria:</label>
+                <input type="text" id="name" name="name" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="description" style="display: block; margin-bottom: 5px; font-weight: 600;">Descrição:</label>
+                <textarea id="description" name="description" rows="4" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px;"></textarea>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 10px; font-weight: 600;">
+                    <i class="fa fa-image"></i> Imagem da Categoria:
+                </label>
+                
+                <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; border: 2px dashed #ddd;">
+                    <div style="margin-bottom: 15px;">
+                        <label for="image_file" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            📤 Upload de Imagem:
+                        </label>
+                        <input type="file" id="image_file" name="image_file" accept="image/*" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px; background: #fff;">
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            <i class="fa fa-info-circle"></i> Faça upload de uma imagem (JPG, PNG, GIF)
+                        </small>
+                    </div>
+                    
+                    <div style="text-align: center; margin: 15px 0; color: #999;">
+                        <strong>OU</strong>
+                    </div>
+                    
+                    <div>
+                        <label for="image_url" style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">
+                            🔗 URL da Imagem:
+                        </label>
+                        <input type="url" id="image_url" name="image_url" placeholder="https://exemplo.com/imagem.jpg" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 4px; font-size: 14px; background: #fff;">
+                        <small style="color: #666; display: block; margin-top: 5px;">
+                            <i class="fa fa-info-circle"></i> Ou cole uma URL de imagem externa
+                        </small>
+                    </div>
+                </div>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn_buy" style="flex: 1; padding: 15px; font-size: 16px;">
+                    <i class="fa fa-check"></i> SALVAR CATEGORIA
+                </button>
+                <a href="{{ url_for('admin.categories') }}" style="flex: 1; padding: 15px; text-align: center; background: #ccc; color: #333; border-radius: 5px; font-weight: 700; text-decoration: none;">
+                    <i class="fa fa-times"></i> CANCELAR
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

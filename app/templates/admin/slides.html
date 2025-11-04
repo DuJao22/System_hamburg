@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Slides - Admin - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="min-height: 500px; padding: 40px 20px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="font-size: 28px; margin: 0; color: #111;">
+            <i class="fa fa-images"></i> Gerenciar Slides do Carrossel
+        </h1>
+        <a href="{{ url_for('admin.add_slide') }}" class="btn_red">
+            <i class="fa fa-plus"></i> Novo Slide
+        </a>
+    </div>
+    
+    {% if slides %}
+        <div style="background: #fff; border: 1px solid #e0e0e0; border-radius: 8px; overflow: hidden;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead style="background: #f5f5f5;">
+                    <tr>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Preview</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Título</th>
+                        <th style="padding: 15px; text-align: left; border-bottom: 2px solid #e0e0e0;">Link</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #e0e0e0;">Ordem</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #e0e0e0;">Status</th>
+                        <th style="padding: 15px; text-align: center; border-bottom: 2px solid #e0e0e0;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for slide in slides %}
+                    <tr style="border-bottom: 1px solid #f0f0f0;">
+                        <td style="padding: 15px;">
+                            <img src="{{ slide.image_url }}" alt="{{ slide.title }}" style="width: 120px; height: 60px; object-fit: cover; border-radius: 4px;">
+                        </td>
+                        <td style="padding: 15px; font-weight: 700;">{{ slide.title }}</td>
+                        <td style="padding: 15px;">
+                            {% if slide.link %}
+                                <a href="{{ slide.link }}" target="_blank" style="color: #DC143C; text-decoration: none;">
+                                    <i class="fa fa-external-link-alt"></i> Ver link
+                                </a>
+                            {% else %}
+                                <span style="color: #999;">Sem link</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: center; font-weight: 700;">{{ slide.order }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <form method="POST" action="{{ url_for('admin.toggle_slide', slide_id=slide.id) }}" style="display: inline;">
+                                <button type="submit" style="padding: 5px 10px; border-radius: 15px; font-size: 12px; font-weight: 700; border: none; cursor: pointer; background: {% if slide.active %}#d4edda{% else %}#f8d7da{% endif %}; color: {% if slide.active %}#155724{% else %}#721c24{% endif %};">
+                                    {% if slide.active %}Ativo{% else %}Inativo{% endif %}
+                                </button>
+                            </form>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <div style="display: flex; justify-content: center; gap: 5px;">
+                                <a href="{{ url_for('admin.edit_slide', slide_id=slide.id) }}" style="padding: 8px 12px; background: #007bff; color: #fff; border-radius: 4px; text-decoration: none; font-size: 13px;">
+                                    <i class="fa fa-edit"></i>
+                                </a>
+                                <form method="POST" action="{{ url_for('admin.delete_slide', slide_id=slide.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este slide?');">
+                                    <button type="submit" style="padding: 8px 12px; background: #dc3545; color: #fff; border: none; border-radius: 4px; cursor: pointer; font-size: 13px;">
+                                        <i class="fa fa-trash"></i>
+                                    </button>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div style="text-align: center; padding: 60px 20px; background: #f5f5f5; border-radius: 8px;">
+            <i class="fa fa-images" style="font-size: 60px; color: #ccc; margin-bottom: 15px;"></i>
+            <p style="color: #666;">Nenhum slide cadastrado ainda.</p>
+            <p style="color: #999; font-size: 14px;">Os slides aparecerão no carrossel da página inicial.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

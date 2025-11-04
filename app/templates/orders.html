@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Meus Pedidos - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <h2 style="font-size: 28px; margin-bottom: 30px; color: #ffffff;">
+        <i class="fa fa-list"></i> Meus Pedidos
+    </h2>
+    
+    {% if orders %}
+    {% for order in orders %}
+    <div style="background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+            <div>
+                <h3 style="font-size: 20px; color: #222;">Pedido #{{ order.id }}</h3>
+                <p style="color: #777; font-size: 14px;">Data: {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+            </div>
+            <div style="text-align: right;">
+                <div style="font-size: 24px; font-weight: 700; color: var(--color-red);">R$ {{ "%.2f"|format(order.total) }}</div>
+                <div style="padding: 5px 15px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% else %}#856404{% endif %}; border-radius: 15px; font-size: 12px; font-weight: 600; margin-top: 5px;">
+                    {{ order.status }}
+                </div>
+            </div>
+        </div>
+        <div>
+            <h4 style="margin-bottom: 10px;">Itens:</h4>
+            {% for item in order.items %}
+            <div style="padding: 10px; background: #f9f9f9; border-radius: 5px; margin-bottom: 8px;">
+                <strong>{{ item.product.name }}</strong> - 
+                Quantidade: {{ item.quantity }} - 
+                R$ {{ "%.2f"|format(item.price) }} cada
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endfor %}
+    {% else %}
+    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 8px;">
+        <i class="fa fa-list" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
+        <h3 style="font-size: 24px; margin-bottom: 15px;">Você ainda não fez nenhum pedido</h3>
+        <p style="color: #777; margin-bottom: 30px;">Comece a comprar agora!</p>
+        <a href="{{ url_for('main.index') }}" class="btn_buy" style="display: inline-block; text-decoration: none;">
+            <i class="fa fa-shopping-bag"></i> IR ÀS COMPRAS
+        </a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

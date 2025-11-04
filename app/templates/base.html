@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}{{ store_settings.store_name }}{% endblock %}</title>
+    <meta name="description" content="{{ store_settings.store_name }} - {{ store_settings.store_description }}">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="icon" type="image/png" href="https://cdn.awsli.com.br/95/95881/favicon/67e2dbfe25.png">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <nav class="top_nav">
+        <div class="top_nav_container">
+            <ul class="top_nav_left">
+                <li><a href="{{ url_for('main.index') }}">Início</a></li>
+                <li><a href="{{ url_for('main.index') }}#produtos">Produtos</a></li>
+                {% if current_user.is_authenticated and current_user.is_admin %}
+                <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
+                {% endif %}
+                <li><a href="#contato">Contato</a></li>
+            </ul>
+            <div class="top_nav_right">
+                <span><i class="fa fa-phone"></i> (11) 98765-4321 / (11) 3456-7890</span>
+                <a href="mailto:contato@sandwichgourmet.com.br"><i class="fa fa-envelope"></i> contato@sandwichgourmet.com.br</a>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Menu Mobile -->
+    <div class="mobile-menu-overlay" id="mobileMenuOverlay"></div>
+    <div class="mobile-menu" id="mobileMenu">
+        <div class="mobile-menu-header">
+            <h2><i class="fa fa-bars"></i> Menu</h2>
+            <button class="mobile-menu-close" id="mobileMenuClose">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        <nav class="mobile-menu-nav">
+            <ul>
+                <li><a href="{{ url_for('main.index') }}"><i class="fa fa-home"></i> Início</a></li>
+                <li><a href="{{ url_for('main.index') }}#produtos"><i class="fa fa-shopping-bag"></i> Produtos</a></li>
+                {% if current_user.is_authenticated %}
+                    <li><a href="{{ url_for('cart.view_cart') }}"><i class="fa fa-shopping-cart"></i> Carrinho</a></li>
+                    <li><a href="{{ url_for('cart.my_orders') }}"><i class="fa fa-list"></i> Meus Pedidos</a></li>
+                    <li><a href="{{ url_for('auth.change_password') }}"><i class="fa fa-lock"></i> Alterar Senha</a></li>
+                    {% if current_user.is_admin %}
+                        <li><a href="{{ url_for('admin.dashboard') }}"><i class="fa fa-user-secret"></i> Admin</a></li>
+                    {% endif %}
+                    <li><a href="{{ url_for('auth.logout') }}"><i class="fa fa-sign-out"></i> Sair</a></li>
+                {% else %}
+                    <li><a href="{{ url_for('auth.login') }}"><i class="fa fa-user"></i> Login</a></li>
+                    <li><a href="{{ url_for('auth.register') }}"><i class="fa fa-user-plus"></i> Cadastrar</a></li>
+                {% endif %}
+                <li><a href="#contato"><i class="fa fa-envelope"></i> Contato</a></li>
+            </ul>
+        </nav>
+    </div>
+
+    <header class="header_main">
+        <div class="header_main_container">
+            <button class="mobile-menu-toggle" id="mobileMenuToggle">
+                <i class="fa fa-bars"></i>
+            </button>
+            
+            <a href="{{ url_for('main.index') }}" class="logo">
+                {% if store_settings.store_logo %}
+                    <img src="{{ store_settings.store_logo }}" alt="{{ store_settings.store_name }}" style="height: 50px;">
+                {% else %}
+                    <h1 style="color: var(--color-red); font-size: 24px; font-weight: 700; margin: 0;">{{ store_settings.store_name }}</h1>
+                {% endif %}
+            </a>
+            
+            <form class="search-form" action="{{ url_for('main.search') }}" method="GET">
+                <input type="text" name="q" class="search-input" placeholder="Buscar produtos, categorias..." value="{{ request.args.get('q', '') }}">
+                <button type="submit" class="search-btn">
+                    <i class="fa fa-search"></i> Buscar
+                </button>
+            </form>
+            
+            <div class="header_actions">
+                {% if current_user.is_authenticated %}
+                    {% if current_user.is_admin %}
+                        <a href="{{ url_for('admin.dashboard') }}" class="header_action" style="color: #FFD700;">
+                            <i class="fa fa-user-secret"></i>
+                            <span>Admin</span>
+                        </a>
+                    {% endif %}
+                    <a href="{{ url_for('cart.view_cart') }}" class="header_action">
+                        <i class="fa fa-shopping-cart"></i>
+                        <span>Carrinho</span>
+                    </a>
+                    <a href="{{ url_for('cart.my_orders') }}" class="header_action">
+                        <i class="fa fa-list"></i>
+                        <span>Pedidos</span>
+                    </a>
+                    <a href="{{ url_for('auth.change_password') }}" class="header_action">
+                        <i class="fa fa-lock"></i>
+                        <span>Senha</span>
+                    </a>
+                    <a href="{{ url_for('auth.logout') }}" class="header_action">
+                        <i class="fa fa-sign-out"></i>
+                        <span>Sair</span>
+                    </a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" class="header_action">
+                        <i class="fa fa-user"></i>
+                        <span>Login</span>
+                    </a>
+                    <a href="{{ url_for('auth.register') }}" class="header_action">
+                        <i class="fa fa-user-plus"></i>
+                        <span>Cadastrar</span>
+                    </a>
+                {% endif %}
+            </div>
+        </div>
+    </header>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <div style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 10px; border-radius: 5px; background: {% if category == 'success' %}#d4edda{% elif category == 'danger' %}#f8d7da{% elif category == 'warning' %}#fff3cd{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'danger' %}#721c24{% elif category == 'warning' %}#856404{% else %}#0c5460{% endif %}; border: 1px solid {% if category == 'success' %}#c3e6cb{% elif category == 'danger' %}#f5c6cb{% elif category == 'warning' %}#ffeeba{% else %}#bee5eb{% endif %};">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+    {% endwith %}
+
+    {% block content %}{% endblock %}
+
+    <!-- Botão flutuante do WhatsApp -->
+    <a href="https://wa.me/5531993739746" target="_blank" class="whatsapp-float" title="Fale conosco no WhatsApp">
+        <img src="{{ url_for('static', filename='images/sandwich_whatsapp_mascot.png') }}" alt="Mascote Sanduíche - WhatsApp">
+    </a>
+
+    <footer class="footer">
+        <div class="footer_container">
+            <div class="footer_about">
+                <h3>CONHEÇA-NOS</h3>
+                <p>O {{ store_settings.store_name }} é especializado em sanduíches gourmet de alta qualidade. Nossos ingredientes são selecionados com cuidado e nossas receitas são desenvolvidas por chefs experientes. Oferecemos desde hambúrgueres artesanais até opções vegetarianas e wraps saudáveis. Fazemos entregas rápidas e você também pode retirar no local. Qualidade, sabor e atendimento diferenciado é o que nos move!</p>
+            </div>
+            
+            <div class="footer_grid">
+                <div class="footer_column">
+                    <h3>Categorias</h3>
+                    <ul>
+                        {% for category in categories %}
+                        <li><a href="{{ url_for('main.category_products', category_id=category.id) }}">{{ category.name|upper }}</a></li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                <div class="footer_column">
+                    <h3>Conteúdo</h3>
+                    <ul>
+                        <li><a href="#contato">Fale Conosco</a></li>
+                        <li><a href="{{ url_for('main.index') }}">Cardápio</a></li>
+                        <li><a href="{{ url_for('main.index') }}#produtos">Promoções</a></li>
+                        <li><a href="#">Combos</a></li>
+                        <li><a href="#">Sobre Nossos Ingredientes</a></li>
+                    </ul>
+                </div>
+                <div class="footer_column">
+                    <h3>Informações</h3>
+                    <ul>
+                        <li><a href="#">Formas de Entrega</a></li>
+                        <li><a href="#">Formas de Envio</a></li>
+                        <li><a href="#">Política de Troca e Devolução</a></li>
+                        <li><a href="#">Sobre Nós</a></li>
+                        <li><a href="#">Sobre a loja</a></li>
+                    </ul>
+                </div>
+                <div class="footer_column">
+                    <h3>Atendimento</h3>
+                    <ul>
+                        <li><strong>Segunda a Sexta:</strong> 10h às 22h</li>
+                        <li><strong>Sábado e Domingo:</strong> 11h às 23h</li>
+                        <li><i class="fa fa-whatsapp"></i> (11) 98765-4321</li>
+                        <li><i class="fa fa-phone"></i> (11) 3456-7890</li>
+                        <li><i class="fa fa-envelope"></i> contato@sandwichgourmet.com.br</li>
+                    </ul>
+                    <div class="footer_social">
+                        <a href="#" title="Facebook"><i class="fa fa-facebook"></i></a>
+                        <a href="#" title="Instagram"><i class="fa fa-instagram"></i></a>
+                        <a href="#" title="YouTube"><i class="fa fa-youtube"></i></a>
+                        <a href="#" title="Twitter"><i class="fa fa-twitter"></i></a>
+                    </div>
+                </div>
+            </div>
+            <div class="footer_bottom">
+                <p>&copy; 2025 {{ store_settings.store_name }}. Todos os direitos reservados.</p>
+                <p style="margin-top: 10px;">
+                    <strong>Sistema desenvolvido por:</strong> 
+                    <a href="https://dujao22.github.io/Apresentacao_Solucoes_Digitais-/" target="_blank" style="color: var(--color-red); font-weight: bold;">
+                        João Layon - Desenvolvedor Fullstack
+                    </a>
+                </p>
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Menu Hamburguer Mobile
+        const mobileMenuToggle = document.getElementById('mobileMenuToggle');
+        const mobileMenu = document.getElementById('mobileMenu');
+        const mobileMenuClose = document.getElementById('mobileMenuClose');
+        const mobileMenuOverlay = document.getElementById('mobileMenuOverlay');
+
+        function openMobileMenu() {
+            mobileMenu.classList.add('active');
+            mobileMenuOverlay.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMobileMenu() {
+            mobileMenu.classList.remove('active');
+            mobileMenuOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        if (mobileMenuToggle) {
+            mobileMenuToggle.addEventListener('click', openMobileMenu);
+        }
+
+        if (mobileMenuClose) {
+            mobileMenuClose.addEventListener('click', closeMobileMenu);
+        }
+
+        if (mobileMenuOverlay) {
+            mobileMenuOverlay.addEventListener('click', closeMobileMenu);
+        }
+
+        // Fechar menu ao clicar em um link
+        const mobileMenuLinks = document.querySelectorAll('.mobile-menu-nav a');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', closeMobileMenu);
+        });
+
+        // Fechar menu ao pressionar ESC
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && mobileMenu.classList.contains('active')) {
+                closeMobileMenu();
+            }
+        });
+    </script>
+
+    <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+    <script src="{{ url_for('static', filename='js/order_notifications.js') }}"></script>
+    
+    {% block extra_js %}{% endblock %}
+</body>
+</html>

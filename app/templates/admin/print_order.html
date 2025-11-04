@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Comanda #{{ order.id }} - {{ store_settings.store_name }}</title>
+    <style>
+        @media print {
+            @page {
+                size: 80mm auto;
+                margin: 5mm;
+            }
+            body {
+                width: 70mm;
+            }
+            .no-print {
+                display: none !important;
+            }
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.4;
+            color: #000;
+            background: #fff;
+            padding: 10px;
+        }
+        
+        .header {
+            text-align: center;
+            border-bottom: 2px dashed #000;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+        
+        .header p {
+            font-size: 10px;
+            margin: 2px 0;
+        }
+        
+        .section {
+            margin: 10px 0;
+            border-bottom: 1px dashed #000;
+            padding-bottom: 10px;
+        }
+        
+        .section:last-child {
+            border-bottom: 2px dashed #000;
+        }
+        
+        .label {
+            font-weight: bold;
+            display: inline-block;
+            width: 120px;
+        }
+        
+        .order-id {
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin: 10px 0;
+            border: 3px solid #000;
+            padding: 10px;
+        }
+        
+        .items {
+            margin: 10px 0;
+        }
+        
+        .item {
+            margin: 8px 0;
+            padding: 5px 0;
+            border-bottom: 1px dotted #666;
+        }
+        
+        .item:last-child {
+            border-bottom: none;
+        }
+        
+        .item-name {
+            font-weight: bold;
+            font-size: 13px;
+        }
+        
+        .item-qty {
+            font-size: 14px;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .item-price {
+            float: right;
+            font-weight: bold;
+        }
+        
+        .total {
+            font-size: 16px;
+            font-weight: bold;
+            text-align: right;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 2px solid #000;
+        }
+        
+        .notes {
+            background: #f0f0f0;
+            padding: 8px;
+            margin: 10px 0;
+            border: 1px solid #666;
+            font-size: 11px;
+        }
+        
+        .notes strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+        
+        .footer {
+            text-align: center;
+            margin-top: 15px;
+            padding-top: 10px;
+            font-size: 10px;
+        }
+        
+        .print-btn {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 24px;
+            background: #f39c12;
+            color: #fff;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: bold;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        
+        .print-btn:hover {
+            background: #e67e22;
+        }
+        
+        .priority {
+            background: #ff0000;
+            color: #fff;
+            padding: 5px 10px;
+            text-align: center;
+            font-weight: bold;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <button class="print-btn no-print" onclick="window.print()">🖨️ Imprimir</button>
+    
+    <div class="header">
+        <h1>{{ store_settings.store_name }}</h1>
+        <p>{{ order.created_at.strftime('%d/%m/%Y - %H:%M') }}</p>
+    </div>
+    
+    <div class="order-id">
+        PEDIDO #{{ order.id }}
+    </div>
+    
+    {% if order.status == 'Pendente' %}
+    <div class="priority">
+        ⚠️ URGENTE - NOVO PEDIDO ⚠️
+    </div>
+    {% endif %}
+    
+    <div class="section">
+        <div><span class="label">Cliente:</span> {{ order.user.username }}</div>
+        {% if order.customer_phone or order.user.phone %}
+        <div><span class="label">Telefone:</span> {{ order.customer_phone or order.user.phone }}</div>
+        {% endif %}
+        <div><span class="label">Tipo:</span> {{ 'ENTREGA' if order.delivery_type == 'delivery' else 'RETIRADA' }}</div>
+        {% if order.delivery_type == 'delivery' and order.shipping_address %}
+        <div><span class="label">Endereço:</span></div>
+        <div style="margin-left: 10px; margin-top: 5px;">
+            {{ order.shipping_address.street }}, {{ order.shipping_address.number }}
+            {% if order.shipping_address.complement %}
+            <br>{{ order.shipping_address.complement }}
+            {% endif %}
+            <br>{{ order.shipping_address.neighborhood }} - {{ order.shipping_address.city }}/{{ order.shipping_address.state }}
+            <br>CEP: {{ order.shipping_address.zip_code }}
+        </div>
+        {% endif %}
+    </div>
+    
+    <div class="section items">
+        <h3 style="margin-bottom: 10px; font-size: 14px;">ITENS DO PEDIDO:</h3>
+        {% for item in order.items %}
+        <div class="item">
+            <div>
+                <span class="item-qty">{{ item.quantity }}x</span>
+                <span class="item-name">{{ item.product.name }}</span>
+                <span class="item-price">R$ {{ "%.2f"|format(item.price * item.quantity) }}</span>
+            </div>
+            {% if item.product.description %}
+            <div style="font-size: 10px; color: #666; margin-left: 30px; margin-top: 2px;">
+                {{ item.product.description[:60] }}{% if item.product.description|length > 60 %}...{% endif %}
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    
+    <div class="section">
+        <div class="total">
+            TOTAL: R$ {{ "%.2f"|format(order.total) }}
+        </div>
+        <div style="text-align: right; font-size: 11px; margin-top: 5px;">
+            Pagamento: {{ order.payment_status }}
+            {% if order.payment_method %}
+            ({{ order.payment_method }})
+            {% endif %}
+        </div>
+    </div>
+    
+    {% if order.customer_notes %}
+    <div class="notes">
+        <strong>📝 OBSERVAÇÕES DO CLIENTE:</strong>
+        {{ order.customer_notes }}
+    </div>
+    {% endif %}
+    
+    {% if order.estimated_prep_time %}
+    <div class="section">
+        <div style="text-align: center; font-weight: bold;">
+            ⏱️ Tempo Estimado: {{ order.estimated_prep_time }} minutos
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="footer">
+        <p>─────────────────────────────</p>
+        <p>Este documento é uma comanda interna</p>
+        <p>Não possui valor fiscal</p>
+        <p>─────────────────────────────</p>
+        <p style="margin-top: 10px;">Impresso em: {{ now().strftime('%d/%m/%Y %H:%M:%S') }}</p>
+    </div>
+    
+    <script>
+        window.onload = function() {
+            if (window.location.search.includes('auto=1')) {
+                setTimeout(() => window.print(), 500);
+            }
+        };
+    </script>
+</body>
+</html>
