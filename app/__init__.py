@@ -56,7 +56,18 @@ def create_app():
         store_settings = {
             'store_name': StoreSettings.get_setting('store_name', 'TCB - The Country Burger Artesanal'),
             'store_logo': StoreSettings.get_setting('store_logo', '/static/images/tcb_logo.jpg'),
-            'store_description': StoreSettings.get_setting('store_description', 'Hamburgueria Artesanal')
+            'store_description': StoreSettings.get_setting('store_description', 'Hamburgueria Artesanal'),
+            'store_phone': StoreSettings.get_setting('store_phone', '(31) 98765-4321'),
+            'store_whatsapp': StoreSettings.get_setting('store_whatsapp', '5531987654321'),
+            'store_email': StoreSettings.get_setting('store_email', 'contato@tcb.com.br'),
+            'store_address': StoreSettings.get_setting('pickup_address', 'R. Judith Naves de Lima, 469 – Santa Edwiges, Contagem – MG, 32040-275, Brasil'),
+            'opening_hours_monday': StoreSettings.get_setting('opening_hours_monday', '18:00 - 23:59'),
+            'opening_hours_tuesday': StoreSettings.get_setting('opening_hours_tuesday', 'Fechado'),
+            'opening_hours_wednesday': StoreSettings.get_setting('opening_hours_wednesday', '18:00 - 23:59'),
+            'opening_hours_thursday': StoreSettings.get_setting('opening_hours_thursday', '18:00 - 23:59'),
+            'opening_hours_friday': StoreSettings.get_setting('opening_hours_friday', '18:00 - 23:59'),
+            'opening_hours_saturday': StoreSettings.get_setting('opening_hours_saturday', '18:00 - 23:59'),
+            'opening_hours_sunday': StoreSettings.get_setting('opening_hours_sunday', '18:00 - 23:59')
         }
         return dict(store_settings=store_settings)
     

@@ -23,8 +23,8 @@
                 <li><a href="#contato">Contato</a></li>
             </ul>
             <div class="top_nav_right">
-                <span><i class="fa fa-phone"></i> (11) 98765-4321 / (11) 3456-7890</span>
-                <a href="mailto:contato@sandwichgourmet.com.br"><i class="fa fa-envelope"></i> contato@sandwichgourmet.com.br</a>
+                <span><i class="fa fa-whatsapp"></i> {{ store_settings.store_phone }}</span>
+                <a href="mailto:{{ store_settings.store_email }}"><i class="fa fa-envelope"></i> {{ store_settings.store_email }}</a>
             </div>
         </div>
     </nav>
@@ -133,7 +133,7 @@
     {% block content %}{% endblock %}
 
     <!-- Botão flutuante do WhatsApp -->
-    <a href="https://wa.me/5531993739746" target="_blank" class="whatsapp-float" title="Fale conosco no WhatsApp">
+    <a href="https://wa.me/{{ store_settings.store_whatsapp }}" target="_blank" class="whatsapp-float" title="Fale conosco no WhatsApp">
         <img src="{{ url_for('static', filename='images/sandwich_whatsapp_mascot.png') }}" alt="Mascote Sanduíche - WhatsApp">
     </a>
 
@@ -141,7 +141,7 @@
         <div class="footer_container">
             <div class="footer_about">
                 <h3>CONHEÇA-NOS</h3>
-                <p>O {{ store_settings.store_name }} é especializado em sanduíches gourmet de alta qualidade. Nossos ingredientes são selecionados com cuidado e nossas receitas são desenvolvidas por chefs experientes. Oferecemos desde hambúrgueres artesanais até opções vegetarianas e wraps saudáveis. Fazemos entregas rápidas e você também pode retirar no local. Qualidade, sabor e atendimento diferenciado é o que nos move!</p>
+                <p>A {{ store_settings.store_name }} é uma hamburgueria artesanal especializada em hambúrgueres gourmet de alta qualidade. Nossos ingredientes são selecionados com cuidado e nossas receitas são desenvolvidas com paixão. Oferecemos hambúrgueres artesanais, opções vegetarianas e acompanhamentos deliciosos. Fazemos entregas rápidas e você também pode retirar no local. Qualidade, sabor e atendimento diferenciado é o que nos move!</p>
             </div>
             
             <div class="footer_grid">
@@ -174,19 +174,24 @@
                     </ul>
                 </div>
                 <div class="footer_column">
-                    <h3>Atendimento</h3>
+                    <h3>Horários de Funcionamento</h3>
                     <ul>
-                        <li><strong>Segunda a Sexta:</strong> 10h às 22h</li>
-                        <li><strong>Sábado e Domingo:</strong> 11h às 23h</li>
-                        <li><i class="fa fa-whatsapp"></i> (11) 98765-4321</li>
-                        <li><i class="fa fa-phone"></i> (11) 3456-7890</li>
-                        <li><i class="fa fa-envelope"></i> contato@sandwichgourmet.com.br</li>
+                        <li><strong>Segunda:</strong> {{ store_settings.opening_hours_monday }}</li>
+                        <li><strong>Terça:</strong> {{ store_settings.opening_hours_tuesday }}</li>
+                        <li><strong>Quarta a Domingo:</strong> {{ store_settings.opening_hours_wednesday }}</li>
+                    </ul>
+                </div>
+                <div class="footer_column">
+                    <h3>Contato</h3>
+                    <ul>
+                        <li><i class="fa fa-map-marker"></i> {{ store_settings.store_address }}</li>
+                        <li><i class="fa fa-whatsapp"></i> {{ store_settings.store_phone }}</li>
+                        <li><i class="fa fa-envelope"></i> {{ store_settings.store_email }}</li>
                     </ul>
                     <div class="footer_social">
                         <a href="#" title="Facebook"><i class="fa fa-facebook"></i></a>
                         <a href="#" title="Instagram"><i class="fa fa-instagram"></i></a>
-                        <a href="#" title="YouTube"><i class="fa fa-youtube"></i></a>
-                        <a href="#" title="Twitter"><i class="fa fa-twitter"></i></a>
+                        <a href="https://wa.me/{{ store_settings.store_whatsapp }}" target="_blank" title="WhatsApp"><i class="fa fa-whatsapp"></i></a>
                     </div>
                 </div>
             </div>

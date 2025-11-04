@@ -847,6 +847,9 @@ def store_settings():
         StoreSettings.set_setting('store_name', request.form.get('store_name', 'TCB - The Country Burger Artesanal'))
         StoreSettings.set_setting('store_logo', request.form.get('store_logo', ''))
         StoreSettings.set_setting('store_description', request.form.get('store_description', ''))
+        StoreSettings.set_setting('store_phone', request.form.get('store_phone', ''))
+        StoreSettings.set_setting('store_whatsapp', request.form.get('store_whatsapp', ''))
+        StoreSettings.set_setting('store_email', request.form.get('store_email', ''))
         StoreSettings.set_setting('pickup_enabled', 'true' if request.form.get('pickup_enabled') else 'false')
         StoreSettings.set_setting('pickup_address', request.form.get('pickup_address', ''))
         StoreSettings.set_setting('delivery_enabled', 'true' if request.form.get('delivery_enabled') else 'false')
@@ -868,6 +871,9 @@ def store_settings():
         'store_name': StoreSettings.get_setting('store_name', 'TCB - The Country Burger Artesanal'),
         'store_logo': StoreSettings.get_setting('store_logo', ''),
         'store_description': StoreSettings.get_setting('store_description', 'Hamburgueria Artesanal'),
+        'store_phone': StoreSettings.get_setting('store_phone', ''),
+        'store_whatsapp': StoreSettings.get_setting('store_whatsapp', ''),
+        'store_email': StoreSettings.get_setting('store_email', ''),
         'pickup_enabled': StoreSettings.get_setting('pickup_enabled', 'true') == 'true',
         'pickup_address': StoreSettings.get_setting('pickup_address', ''),
         'delivery_enabled': StoreSettings.get_setting('delivery_enabled', 'true') == 'true',
