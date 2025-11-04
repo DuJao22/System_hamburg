@@ -39,6 +39,7 @@ def create_app():
     from app.routes.wishlist import wishlist_bp
     from app.routes.reviews import reviews_bp
     from app.routes.payment import payment_bp
+    from app.routes.cep_api import cep_api_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -47,6 +48,7 @@ def create_app():
     app.register_blueprint(wishlist_bp)
     app.register_blueprint(reviews_bp)
     app.register_blueprint(payment_bp, url_prefix='/pagamento')
+    app.register_blueprint(cep_api_bp)
     
     @app.context_processor
     def inject_categories():
