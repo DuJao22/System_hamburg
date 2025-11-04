@@ -166,21 +166,126 @@
                         </h3>
 
                         <div id="delivery_address_field" class="form-group" style="display: none;">
-                            <label class="form-label">
-                                <i class="fa fa-map-marker"></i> Endereço Completo para Entrega *
-                            </label>
-                            <textarea name="delivery_address" rows="4" placeholder="Rua, número, complemento, bairro, cidade, estado, CEP" class="form-textarea"></textarea>
-                            
                             {% if delivery_radius_enabled %}
-                            <div style="margin-top: 10px; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
+                            <div style="margin-bottom: 15px; padding: 12px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
                                 <div style="display: flex; align-items: flex-start; gap: 8px;">
                                     <i class="fa fa-info-circle" style="color: #856404; margin-top: 2px;"></i>
                                     <div style="font-size: 13px; color: #856404; line-height: 1.5;">
-                                        <strong>Área de Cobertura:</strong> Realizamos entregas em um raio de até <strong>{{ delivery_radius_km }} km</strong> a partir da nossa localização. Seu endereço será validado automaticamente ao finalizar o pedido.
+                                        <strong>Área de Cobertura:</strong> Realizamos entregas em um raio de até <strong>{{ delivery_radius_km }} km</strong> a partir da nossa localização. Digite o CEP e o número para validarmos automaticamente.
                                     </div>
                                 </div>
                             </div>
                             {% endif %}
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label">
+                                    <i class="fa fa-map-pin"></i> CEP *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="customer_cep" 
+                                    name="customer_cep" 
+                                    class="form-textarea" 
+                                    placeholder="00000-000"
+                                    maxlength="9"
+                                    style="padding: 12px; height: auto;"
+                                >
+                                <small style="display: block; margin-top: 5px; color: #666; font-size: 12px;">
+                                    <i class="fa fa-info-circle"></i> O endereço será preenchido automaticamente
+                                </small>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label">
+                                    <i class="fa fa-road"></i> Rua/Avenida *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="customer_street" 
+                                    name="customer_street" 
+                                    class="form-textarea" 
+                                    placeholder="Ex: Rua Judith Naves de Lima"
+                                    readonly
+                                    style="padding: 12px; height: auto; background-color: #f5f5f5;"
+                                >
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 10px; margin-bottom: 15px;">
+                                <div>
+                                    <label class="form-label">
+                                        <i class="fa fa-hashtag"></i> Número *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="customer_number" 
+                                        name="customer_number" 
+                                        class="form-textarea" 
+                                        placeholder="Ex: 469"
+                                        style="padding: 12px; height: auto;"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="form-label">
+                                        <i class="fa fa-building"></i> Complemento (Opcional)
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="customer_complement" 
+                                        name="customer_complement" 
+                                        class="form-textarea" 
+                                        placeholder="Ex: Apto 201, Bloco A"
+                                        style="padding: 12px; height: auto;"
+                                    >
+                                </div>
+                            </div>
+
+                            <div style="margin-bottom: 15px;">
+                                <label class="form-label">
+                                    <i class="fa fa-map"></i> Bairro *
+                                </label>
+                                <input 
+                                    type="text" 
+                                    id="customer_neighborhood" 
+                                    name="customer_neighborhood" 
+                                    class="form-textarea" 
+                                    placeholder="Ex: Santa Edwiges"
+                                    readonly
+                                    style="padding: 12px; height: auto; background-color: #f5f5f5;"
+                                >
+                            </div>
+
+                            <div style="display: grid; grid-template-columns: 2fr 1fr; gap: 10px; margin-bottom: 15px;">
+                                <div>
+                                    <label class="form-label">
+                                        <i class="fa fa-building"></i> Cidade *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="customer_city" 
+                                        name="customer_city" 
+                                        class="form-textarea" 
+                                        placeholder="Ex: Contagem"
+                                        readonly
+                                        style="padding: 12px; height: auto; background-color: #f5f5f5;"
+                                    >
+                                </div>
+                                <div>
+                                    <label class="form-label">
+                                        <i class="fa fa-flag"></i> Estado *
+                                    </label>
+                                    <input 
+                                        type="text" 
+                                        id="customer_state" 
+                                        name="customer_state" 
+                                        class="form-textarea" 
+                                        placeholder="Ex: MG"
+                                        readonly
+                                        style="padding: 12px; height: auto; background-color: #f5f5f5;"
+                                    >
+                                </div>
+                            </div>
+
+                            <input type="hidden" id="delivery_address_hidden" name="delivery_address">
                         </div>
 
                         <div class="form-group">
@@ -223,18 +328,29 @@
         const deliveryAddressField = document.getElementById('delivery_address_field');
 
         if (deliveryAddressField && deliveryType) {
-            const deliveryAddressInput = deliveryAddressField.querySelector('textarea');
+            const cepInput = document.getElementById('customer_cep');
+            const streetInput = document.getElementById('customer_street');
+            const numberInput = document.getElementById('customer_number');
+            const neighborhoodInput = document.getElementById('customer_neighborhood');
+            const cityInput = document.getElementById('customer_city');
+            const stateInput = document.getElementById('customer_state');
 
             if (deliveryType.value === 'delivery') {
                 deliveryAddressField.style.display = 'block';
-                if (deliveryAddressInput) {
-                    deliveryAddressInput.required = true;
-                }
+                if (cepInput) cepInput.required = true;
+                if (streetInput) streetInput.required = true;
+                if (numberInput) numberInput.required = true;
+                if (neighborhoodInput) neighborhoodInput.required = true;
+                if (cityInput) cityInput.required = true;
+                if (stateInput) stateInput.required = true;
             } else {
                 deliveryAddressField.style.display = 'none';
-                if (deliveryAddressInput) {
-                    deliveryAddressInput.required = false;
-                }
+                if (cepInput) cepInput.required = false;
+                if (streetInput) streetInput.required = false;
+                if (numberInput) numberInput.required = false;
+                if (neighborhoodInput) neighborhoodInput.required = false;
+                if (cityInput) cityInput.required = false;
+                if (stateInput) stateInput.required = false;
             }
         }
 
@@ -251,8 +367,105 @@
         });
     }
 
+    function formatCEP(value) {
+        value = value.replace(/\D/g, '');
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5, 8);
+        }
+        return value;
+    }
+
+    function updateDeliveryAddress() {
+        const street = document.getElementById('customer_street').value;
+        const number = document.getElementById('customer_number').value;
+        const complement = document.getElementById('customer_complement').value;
+        const neighborhood = document.getElementById('customer_neighborhood').value;
+        const city = document.getElementById('customer_city').value;
+        const state = document.getElementById('customer_state').value;
+        const cep = document.getElementById('customer_cep').value;
+
+        let fullAddress = '';
+        if (street) fullAddress += street;
+        if (number) fullAddress += ', ' + number;
+        if (complement) fullAddress += ', ' + complement;
+        if (neighborhood) fullAddress += ' - ' + neighborhood;
+        if (city) fullAddress += ', ' + city;
+        if (state) fullAddress += ' - ' + state;
+        if (cep) fullAddress += ', CEP ' + cep;
+
+        document.getElementById('delivery_address_hidden').value = fullAddress;
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
         toggleDeliveryFields();
+
+        const cepInput = document.getElementById('customer_cep');
+        const streetInput = document.getElementById('customer_street');
+        const neighborhoodInput = document.getElementById('customer_neighborhood');
+        const cityInput = document.getElementById('customer_city');
+        const stateInput = document.getElementById('customer_state');
+        const numberInput = document.getElementById('customer_number');
+        const complementInput = document.getElementById('customer_complement');
+
+        if (cepInput) {
+            cepInput.addEventListener('input', function(e) {
+                e.target.value = formatCEP(e.target.value);
+            });
+
+            cepInput.addEventListener('blur', function() {
+                const cep = this.value.replace(/\D/g, '');
+                
+                if (cep.length === 8) {
+                    fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                        .then(response => response.json())
+                        .then(data => {
+                            if (!data.erro) {
+                                streetInput.value = data.logradouro;
+                                neighborhoodInput.value = data.bairro;
+                                cityInput.value = data.localidade;
+                                stateInput.value = data.uf;
+                                
+                                streetInput.style.backgroundColor = '#d4edda';
+                                neighborhoodInput.style.backgroundColor = '#d4edda';
+                                cityInput.style.backgroundColor = '#d4edda';
+                                stateInput.style.backgroundColor = '#d4edda';
+                                
+                                setTimeout(() => {
+                                    streetInput.style.backgroundColor = '#f5f5f5';
+                                    neighborhoodInput.style.backgroundColor = '#f5f5f5';
+                                    cityInput.style.backgroundColor = '#f5f5f5';
+                                    stateInput.style.backgroundColor = '#f5f5f5';
+                                }, 2000);
+
+                                numberInput.focus();
+                                updateDeliveryAddress();
+                            } else {
+                                alert('CEP não encontrado. Por favor, verifique o CEP digitado.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Erro ao buscar CEP:', error);
+                            alert('Erro ao buscar o CEP. Tente novamente.');
+                        });
+                }
+            });
+        }
+
+        [numberInput, complementInput].forEach(input => {
+            if (input) {
+                input.addEventListener('blur', updateDeliveryAddress);
+            }
+        });
+
+        const checkoutForm = document.querySelector('form');
+        if (checkoutForm) {
+            checkoutForm.addEventListener('submit', function(e) {
+                const deliveryType = document.querySelector('input[name="delivery_type"]:checked');
+                if (deliveryType && deliveryType.value === 'delivery') {
+                    updateDeliveryAddress();
+                }
+            });
+        }
     });
 </script>
 {% endblock %}
