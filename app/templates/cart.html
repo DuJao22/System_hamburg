@@ -3,355 +3,217 @@
 {% block title %}Meu Carrinho - {{ store_settings.store_name }}{% endblock %}
 
 {% block content %}
-<style>
-    .cart_table_wrapper {
-        background: #fff;
-        border-radius: 8px;
-        overflow: hidden;
-        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
-    }
-    
-    .cart_table {
-        width: 100%;
-        border-collapse: collapse;
-    }
-    
-    .cart_table thead {
-        background: var(--color-red);
-        color: #fff;
-    }
-    
-    .cart_table thead th {
-        padding: 15px;
-        text-align: left;
-    }
-    
-    .cart_table tbody tr {
-        border-bottom: 1px solid #e0e0e0;
-    }
-    
-    @media (max-width: 768px) {
-        .content_section {
-            padding: 0 10px !important;
-        }
-        
-        .cart_table_wrapper {
-            background: transparent;
-            box-shadow: none;
-        }
-        
-        .cart_table thead {
-            display: none;
-        }
-        
-        .cart_table tbody,
-        .cart_table tr {
-            display: block;
-        }
-        
-        .cart_table tr {
-            margin-bottom: 15px;
-            background: #fff;
-            border-radius: 8px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-            border-bottom: none !important;
-        }
-        
-        .cart_table td {
-            display: block;
-            text-align: left !important;
-            padding: 15px !important;
-            border: none;
-        }
-        
-        .cart_table td:before {
-            content: attr(data-label);
-            font-weight: 700;
-            color: var(--color-red);
-            display: block;
-            margin-bottom: 8px;
-            font-size: 12px;
-            text-transform: uppercase;
-        }
-        
-        .cart_table td.product_cell:before {
-            display: none;
-        }
-        
-        .cart_table td.actions_cell {
-            border-top: 1px solid #e0e0e0;
-            background: #f9f9f9;
-        }
-        
-        .cart_table td.actions_cell a {
-            width: 100%;
-            text-align: center;
-        }
-        
-        .cart_checkout_box {
-            padding: 20px !important;
-            margin: 15px 0 !important;
-        }
-        
-        .cart_checkout_box h2,
-        .cart_checkout_box h3 {
-            font-size: 16px !important;
-        }
-    }
-</style>
-
-<div class="content_section" style="margin-top: 30px; margin-bottom: 60px;">
-    <h2 style="font-size: 28px; margin-bottom: 30px; color: #ffffff;">
+<div class="cart-container">
+    <h1 class="cart-title">
         <i class="fa fa-shopping-cart"></i> Meu Carrinho
-    </h2>
+    </h1>
 
     {% if cart_items %}
-    <div class="cart_table_wrapper">
-        <table class="cart_table">
-            <thead>
-                <tr>
-                    <th style="text-align: left;">Produto</th>
-                    <th style="text-align: center;">Preço</th>
-                    <th style="text-align: center;">Quantidade</th>
-                    <th style="text-align: center;">Subtotal</th>
-                    <th style="text-align: center;">Ações</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for item in cart_items %}
-                <tr>
-                    <td class="product_cell" style="padding: 20px;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            {% if item.product.image_url %}
-                            <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}"
-                                style="width: 80px; height: 80px; object-fit: contain; flex-shrink: 0;">
-                            {% else %}
-                            <i class="fa fa-cutlery" style="font-size: 60px; color: #ccc;"></i>
-                            {% endif %}
-                            <div style="flex: 1; min-width: 0;">
-                                <div style="font-weight: 600; margin-bottom: 5px; color: #222;">{{ item.product.name }}</div>
-                                <div style="font-size: 12px; color: #777;">Cód: {{ item.product.code }}</div>
-                                {% if item.extras %}
-                                <div style="margin-top: 8px; padding: 8px; background: #f0f8ff; border-left: 3px solid var(--color-red); border-radius: 4px;">
-                                    <div style="font-size: 11px; font-weight: 700; color: var(--color-red); margin-bottom: 5px; text-transform: uppercase;">
-                                        <i class="fa fa-plus-circle"></i> Adicionais:
-                                    </div>
-                                    {% for cart_extra in item.extras %}
-                                    <div style="font-size: 12px; color: #555; margin-bottom: 3px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 5px;">
-                                        <span>
-                                            <i class="fa fa-check" style="color: #28a745; font-size: 10px;"></i>
-                                            {{ cart_extra.quantity }}x {{ cart_extra.extra.name }}
-                                        </span>
-                                        <span style="font-weight: 600; color: #222;">
-                                            + R$ {{ "%.2f"|format(cart_extra.extra.price * cart_extra.quantity) }}
-                                        </span>
-                                    </div>
-                                    {% endfor %}
-                                </div>
-                                {% endif %}
-                            </div>
-                        </div>
-                    </td>
-                    <td data-label="Preço" style="padding: 20px; text-align: center; font-weight: 600; color: #222;">
-                        R$ {{ "%.2f"|format(item.product.price) }}
-                        {% if item.extras %}
-                        {% set extras_total = namespace(value=0) %}
-                        {% for extra in item.extras %}
-                            {% set extras_total.value = extras_total.value + (extra.extra.price * extra.quantity) %}
-                        {% endfor %}
-                        <div style="font-size: 11px; color: #888; margin-top: 5px;">
-                            + R$ {{ "%.2f"|format(extras_total.value) }}
-                        </div>
-                        {% endif %}
-                    </td>
-                    <td data-label="Quantidade" style="padding: 20px; text-align: center; color: #222; font-weight: 600; font-size: 16px;">
-                        {{ item.quantity }}
-                    </td>
-                    <td data-label="Subtotal" style="padding: 20px; text-align: center; font-weight: 700; font-size: 18px; color: var(--color-red);">
-                        {% set item_extras_total = namespace(value=0) %}
-                        {% for extra in item.extras %}
-                            {% set item_extras_total.value = item_extras_total.value + (extra.extra.price * extra.quantity) %}
-                        {% endfor %}
-                        R$ {{ "%.2f"|format((item.product.price + item_extras_total.value) * item.quantity) }}
-                    </td>
-                    <td data-label="Ações" class="actions_cell" style="padding: 20px; text-align: center;">
-                        <a href="{{ url_for('cart.remove_from_cart', item_id=item.id) }}"
-                            style="color: #dc3545; text-decoration: none; font-weight: 600; display: inline-block; padding: 8px 15px; background: #fff; border: 2px solid #dc3545; border-radius: 5px; transition: all 0.3s;">
-                            <i class="fa fa-trash"></i> Remover
-                        </a>
-                    </td>
-                </tr>
+    <div class="cart-items-wrapper">
+        {% for item in cart_items %}
+        <div class="cart-item">
+            <div class="cart-item__image-wrapper">
+                {% if item.product.image_url %}
+                <img src="{{ item.product.image_url }}" alt="{{ item.product.name }}" class="cart-item__image">
+                {% else %}
+                <i class="fa fa-cutlery cart-item__image-placeholder"></i>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item__details">
+                <div class="cart-item__name">{{ item.product.name }}</div>
+                <div class="cart-item__code">Cód: {{ item.product.code }}</div>
+                
+                {% if item.extras %}
+                <div class="cart-item__extras">
+                    <div class="cart-item__extras-title">
+                        <i class="fa fa-plus-circle"></i> Adicionais:
+                    </div>
+                    {% for cart_extra in item.extras %}
+                    <div class="cart-item__extra-item">
+                        <span class="cart-item__extra-name">
+                            <i class="fa fa-check" style="color: #28a745; font-size: 10px;"></i>
+                            {{ cart_extra.quantity }}x {{ cart_extra.extra.name }}
+                        </span>
+                        <span class="cart-item__extra-price">
+                            + R$ {{ "%.2f"|format(cart_extra.extra.price * cart_extra.quantity) }}
+                        </span>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item__price" data-label="Preço">
+                <div class="cart-item__price-main">
+                    R$ {{ "%.2f"|format(item.product.price) }}
+                </div>
+                {% if item.extras %}
+                {% set extras_total = namespace(value=0) %}
+                {% for extra in item.extras %}
+                    {% set extras_total.value = extras_total.value + (extra.extra.price * extra.quantity) %}
                 {% endfor %}
-            </tbody>
-        </table>
+                <div class="cart-item__price-extras">
+                    + R$ {{ "%.2f"|format(extras_total.value) }}
+                </div>
+                {% endif %}
+            </div>
+            
+            <div class="cart-item__quantity" data-label="Quantidade">
+                {{ item.quantity }}
+            </div>
+            
+            <div class="cart-item__subtotal" data-label="Subtotal">
+                {% set item_extras_total = namespace(value=0) %}
+                {% for extra in item.extras %}
+                    {% set item_extras_total.value = item_extras_total.value + (extra.extra.price * extra.quantity) %}
+                {% endfor %}
+                <div class="cart-item__subtotal-amount">
+                    R$ {{ "%.2f"|format((item.product.price + item_extras_total.value) * item.quantity) }}
+                </div>
+            </div>
+            
+            <div class="cart-item__actions">
+                <a href="{{ url_for('cart.remove_from_cart', item_id=item.id) }}" class="btn-outline-danger">
+                    <i class="fa fa-trash"></i> Remover
+                </a>
+            </div>
+        </div>
+        {% endfor %}
     </div>
 
-    <div style="margin-top: 30px; display: flex; justify-content: flex-end;">
-        <div class="cart_checkout_box"
-            style="background: #f9f9f9; padding: 30px; border-radius: 8px; width: 100%; max-width: 600px;">
-            <div
-                style="display: flex; justify-content: space-between; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #ddd;">
-                <span style="font-size: 20px; font-weight: 700; color:black; ">TOTAL:</span>
-                <span style="font-size: 24px; font-weight: 700; color: var(--color-red);">R$ {{ "%.2f"|format(total)
-                    }}</span>
-            </div>
-            <div style="font-size: 14px; color: #888888; margin-bottom: 20px;">
-                <i class="fa fa-money"></i> R$ {{ "%.2f"|format(total * 0.95) }} no PIX (5% de desconto)
-            </div>
+    <div class="summary-box">
+        <div class="summary-box__inner">
+            <div class="cart-summary">
+                <h2 class="cart-summary__title">Resumo do Pedido</h2>
+                
+                <div class="cart-summary__row">
+                    <span class="cart-summary__label">Subtotal:</span>
+                    <span class="cart-summary__value">R$ {{ "%.2f"|format(subtotal) }}</span>
+                </div>
+                
+                {% if coupon %}
+                <div class="cart-summary__row">
+                    <span class="cart-summary__label">Desconto ({{ coupon.code }}):</span>
+                    <span class="cart-summary__value" style="color: var(--color-green);">
+                        - R$ {{ "%.2f"|format(discount) }}
+                    </span>
+                </div>
+                {% endif %}
+                
+                <div class="cart-summary__row cart-summary__total">
+                    <span class="cart-summary__label">TOTAL:</span>
+                    <span class="cart-summary__value">R$ {{ "%.2f"|format(total) }}</span>
+                </div>
+                
+                <div class="pix-discount-banner">
+                    <i class="fa fa-money"></i>
+                    <strong>R$ {{ "%.2f"|format(total * 0.95) }}</strong> no PIX (5% de desconto)
+                </div>
 
-            <form method="POST" action="{{ url_for('cart.checkout') }}" id="checkoutForm" style="overflow: visible;">
-                <div
-                    style="margin-bottom: 25px; padding: 25px; background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3
-                        style="font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa fa-truck" style="color: var(--color-red);"></i> Tipo de Entrega
-                    </h3>
+                <form method="POST" action="{{ url_for('cart.checkout') }}" id="checkoutForm">
+                    <div class="form-section">
+                        <h3 class="form-section__title">
+                            <i class="fa fa-truck" style="color: var(--color-red);"></i> Tipo de Entrega
+                        </h3>
 
-                    {% if pickup_enabled %}
-                    <div style="margin-bottom: 15px;">
-                        <label
-                            style="display: flex; align-items: flex-start; cursor: pointer; padding: 20px; border: 3px solid #e0e0e0; border-radius: 10px; transition: all 0.3s; background: #fff; min-height: 90px;"
-                            class="delivery-option">
-                            <input type="radio" name="delivery_type" value="pickup"
-                                style="margin-top: 5px; margin-right: 15px; flex-shrink: 0; width: 20px; height: 20px; cursor: pointer;"
-                                onchange="toggleDeliveryFields()" required>
-                            <div style="flex: 1; min-width: 0;">
-                                <strong
-                                    style="font-size: 17px; display: block; margin-bottom: 10px; color: #222; line-height: 1.4; font-weight: 700;">
-                                    <i class="fa fa-map-marker" style="color: var(--color-red); margin-right: 5px;"></i>
+                        {% if pickup_enabled %}
+                        <label class="delivery-option">
+                            <input type="radio" name="delivery_type" value="pickup" onchange="toggleDeliveryFields()" required>
+                            <div class="delivery-option__content">
+                                <strong class="delivery-option__title">
+                                    <i class="fa fa-map-marker" style="color: var(--color-red);"></i>
                                     Retirada no Local
                                 </strong>
-                                <div
-                                    style="color: #666; font-size: 14px; display: block; line-height: 1.6; word-wrap: break-word; margin-bottom: 8px;">
+                                <div class="delivery-option__description">
                                     {{ pickup_address }}
                                 </div>
-                                <div
-                                    style="color: var(--color-green); font-size: 14px; display: inline-block; padding: 4px 10px; background: #e8f5e9; border-radius: 5px; font-weight: 700;">
+                                <span class="badge badge-success">
                                     <i class="fa fa-check-circle"></i> Sem custo de frete
-                                </div>
+                                </span>
                             </div>
                         </label>
-                    </div>
-                    {% endif %}
+                        {% endif %}
 
-                    {% if delivery_enabled %}
-                    <div>
-                        <label
-                            style="display: flex; align-items: flex-start; cursor: pointer; padding: 20px; border: 3px solid #e0e0e0; border-radius: 10px; transition: all 0.3s; background: #fff; min-height: 90px;"
-                            class="delivery-option">
-                            <input type="radio" name="delivery_type" value="delivery" {% if not pickup_enabled
-                                %}checked{% endif %}
-                                style="margin-top: 5px; margin-right: 15px; flex-shrink: 0; width: 20px; height: 20px; cursor: pointer;"
-                                onchange="toggleDeliveryFields()" required>
-                            <div style="flex: 1; min-width: 0;">
-                                <strong
-                                    style="font-size: 17px; display: block; margin-bottom: 10px; color: #222; line-height: 1.4; font-weight: 700;">
-                                    <i class="fa fa-truck" style="color: var(--color-red); margin-right: 5px;"></i>
+                        {% if delivery_enabled %}
+                        <label class="delivery-option">
+                            <input type="radio" name="delivery_type" value="delivery" {% if not pickup_enabled %}checked{% endif %} onchange="toggleDeliveryFields()" required>
+                            <div class="delivery-option__content">
+                                <strong class="delivery-option__title">
+                                    <i class="fa fa-truck" style="color: var(--color-red);"></i>
                                     Entrega em Domicílio
                                 </strong>
-                                <div
-                                    style="color: #666; font-size: 14px; display: block; line-height: 1.6; word-wrap: break-word;">
+                                <div class="delivery-option__description">
                                     {% if total >= free_shipping_min %}
-                                    <div
-                                        style="color: var(--color-green); font-weight: 700; font-size: 15px; padding: 4px 10px; background: #e8f5e9; border-radius: 5px; display: inline-block;">
+                                    <span class="badge badge-success">
                                         <i class="fa fa-check-circle"></i> FRETE GRÁTIS!
-                                    </div>
+                                    </span>
                                     {% else %}
-                                    <div style="margin-bottom: 5px;">
-                                        Valor do frete: <strong style="color: #222; font-size: 15px;">R$ {{
-                                            "%.2f"|format(shipping_cost) }}</strong>
-                                    </div>
-                                    <div style="color: #aaa; font-size: 13px;">
-                                        <i class="fa fa-info-circle"></i> Frete grátis acima de R$ {{
-                                        "%.2f"|format(free_shipping_min) }}
+                                    Valor do frete: <strong>R$ {{ "%.2f"|format(shipping_cost) }}</strong>
+                                    <div class="text-muted">
+                                        <i class="fa fa-info-circle"></i> Frete grátis acima de R$ {{ "%.2f"|format(free_shipping_min) }}
                                     </div>
                                     {% endif %}
                                 </div>
                             </div>
                         </label>
-                    </div>
-                    {% endif %}
-                </div>
-
-                <div
-                    style="margin-bottom: 25px; padding: 25px; background: #fff; border-radius: 10px; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <h3
-                        style="font-size: 18px; margin-bottom: 20px; color: #222; font-weight: 700; display: flex; align-items: center; gap: 10px;">
-                        <i class="fa fa-user" style="color: var(--color-red);"></i> Dados para Entrega
-                    </h3>
-
-                    <div style="margin-bottom: 18px;">
-                        <label
-                            style="display: block; font-size: 16px; font-weight: 900; margin-bottom: 10px; color: #000; background: #FFF3CD; padding: 8px 12px; border-radius: 5px; border-left: 4px solid #FFA500;">
-                            <i class="fa fa-user-circle"
-                                style="color: #FFA500; margin-right: 8px; font-size: 18px;"></i> Nome Completo *
-                        </label>
-                        <input type="text" name="customer_name" required placeholder="Digite seu nome completo"
-                            style="width: 100%; padding: 14px; border: 3px solid #FFA500; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border 0.3s; font-weight: 500;"
-                            onfocus="this.style.borderColor='#FF4500'; this.style.boxShadow='0 0 10px rgba(255,69,0,0.3)'"
-                            onblur="this.style.borderColor='#FFA500'; this.style.boxShadow='none'">
+                        {% endif %}
                     </div>
 
-                    <div style="margin-bottom: 18px;">
-                        <label
-                            style="display: block; font-size: 16px; font-weight: 900; margin-bottom: 10px; color: #000; background: #FFF3CD; padding: 8px 12px; border-radius: 5px; border-left: 4px solid #FFA500;">
-                            <i class="fa fa-phone" style="color: #FFA500; margin-right: 8px; font-size: 18px;"></i>
-                            Telefone *
-                        </label>
-                        <input type="tel" name="customer_phone" required placeholder="(11) 99999-9999"
-                            style="width: 100%; padding: 14px; border: 3px solid #FFA500; border-radius: 8px; font-size: 16px; box-sizing: border-box; transition: border 0.3s; font-weight: 500;"
-                            onfocus="this.style.borderColor='#FF4500'; this.style.boxShadow='0 0 10px rgba(255,69,0,0.3)'"
-                            onblur="this.style.borderColor='#FFA500'; this.style.boxShadow='none'">
+                    <div class="form-section">
+                        <h3 class="form-section__title">
+                            <i class="fa fa-user" style="color: var(--color-red);"></i> Dados para Entrega
+                        </h3>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fa fa-user-circle"></i> Nome Completo *
+                            </label>
+                            <input type="text" name="customer_name" required placeholder="Digite seu nome completo" class="form-input">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fa fa-phone"></i> Telefone *
+                            </label>
+                            <input type="tel" name="customer_phone" required placeholder="(11) 99999-9999" class="form-input">
+                        </div>
+
+                        <div id="delivery_address_field" class="form-group" style="display: none;">
+                            <label class="form-label">
+                                <i class="fa fa-map-marker"></i> Endereço Completo para Entrega *
+                            </label>
+                            <textarea name="delivery_address" rows="4" placeholder="Rua, número, complemento, bairro, cidade, estado, CEP" class="form-textarea"></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">
+                                <i class="fa fa-comment"></i> Observações (Opcional)
+                            </label>
+                            <textarea name="observations" rows="4" placeholder="Ex: Sem cebola, ponto da carne mal passado, etc." class="form-textarea"></textarea>
+                            <small class="form-hint">
+                                <i class="fa fa-info-circle"></i> Use este campo para fazer solicitações especiais.
+                            </small>
+                        </div>
                     </div>
 
-                    <div id="delivery_address_field" style="display: none; margin-bottom: 18px;">
-                        <label
-                            style="display: block; font-size: 16px; font-weight: 900; margin-bottom: 10px; color: #000; background: #FFF3CD; padding: 8px 12px; border-radius: 5px; border-left: 4px solid #FFA500;">
-                            <i class="fa fa-map-marker" style="color: #FFA500; margin-right: 8px; font-size: 18px;"></i>
-                            Endereço Completo para Entrega *
-                        </label>
-                        <textarea name="delivery_address" rows="4"
-                            placeholder="Rua, número, complemento, bairro, cidade, estado, CEP"
-                            style="width: 100%; padding: 14px; border: 3px solid #FFA500; border-radius: 8px; font-size: 16px; resize: vertical; box-sizing: border-box; line-height: 1.5; transition: border 0.3s; font-weight: 500;"
-                            onfocus="this.style.borderColor='#FF4500'; this.style.boxShadow='0 0 10px rgba(255,69,0,0.3)'"
-                            onblur="this.style.borderColor='#FFA500'; this.style.boxShadow='none'"></textarea>
-                    </div>
-
-                    <div style="margin-top: 18px;">
-                        <label
-                            style="display: block; font-size: 16px; font-weight: 900; margin-bottom: 10px; color: #000; background: #E7F4FF; padding: 8px 12px; border-radius: 5px; border-left: 4px solid #0066CC;">
-                            <i class="fa fa-comment" style="color: #0066CC; margin-right: 8px; font-size: 18px;"></i>
-                            Observações (Opcional)
-                        </label>
-                        <textarea name="observations" rows="4"
-                            placeholder="Ex: Sem cebola, ponto da carne mal passado, etc."
-                            style="width: 100%; padding: 14px; border: 3px solid #0066CC; border-radius: 8px; font-size: 16px; resize: vertical; box-sizing: border-box; line-height: 1.5; transition: border 0.3s; font-weight: 500;"
-                            onfocus="this.style.borderColor='#0052A3'; this.style.boxShadow='0 0 10px rgba(0,102,204,0.3)'"
-                            onblur="this.style.borderColor='#0066CC'; this.style.boxShadow='none'"></textarea>
-                        <small
-                            style="color: #000; font-size: 14px; display: block; margin-top: 8px; line-height: 1.4; font-weight: 600; background: #F0F0F0; padding: 8px; border-radius: 5px;">
-                            <i class="fa fa-info-circle" style="color: #0066CC;"></i> Use este campo para fazer
-                            solicitações especiais, como retirar ingredientes ou adicionar preferências.
-                        </small>
-                    </div>
-                </div>
-
-                <button type="submit" class="btn_buy" style="width: 100%; padding: 15px; font-size: 18px;">
-                    <i class="fa fa-check"></i> FINALIZAR COMPRA
-                </button>
-            </form>
-            <a href="{{ url_for('main.index') }}"
-                style="display: block; text-align: center; margin-top: 15px; color: var(--color-red); text-decoration: none;">
-                <i class="fa fa-arrow-left"></i> Continuar Comprando
-            </a>
+                    <button type="submit" class="btn-primary" style="width: 100%;">
+                        <i class="fa fa-check"></i> FINALIZAR COMPRA
+                    </button>
+                </form>
+                
+                <a href="{{ url_for('main.index') }}" class="continue-shopping-link">
+                    <i class="fa fa-arrow-left"></i> Continuar Comprando
+                </a>
+            </div>
         </div>
     </div>
     {% else %}
-    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 8px;">
-        <i class="fa fa-shopping-cart" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
-        <h3 style="font-size: 24px; margin-bottom: 15px;">Seu carrinho está vazio</h3>
-        <p style="color: #666; margin-bottom: 30px;">Adicione produtos ao carrinho para continuar comprando</p>
-        <a href="{{ url_for('main.index') }}" class="btn_buy" style="display: inline-block; text-decoration: none;">
+    <div class="empty-cart">
+        <i class="fa fa-shopping-cart empty-cart__icon"></i>
+        <h3 class="empty-cart__title">Seu carrinho está vazio</h3>
+        <p class="empty-cart__description">Adicione produtos ao carrinho para continuar comprando</p>
+        <a href="{{ url_for('main.index') }}" class="btn-primary" style="text-decoration: none;">
             <i class="fa fa-shopping-bag"></i> IR ÀS COMPRAS
         </a>
     </div>
@@ -396,28 +258,4 @@
         toggleDeliveryFields();
     });
 </script>
-
-<style>
-    .delivery-option {
-        transition: all 0.3s ease;
-    }
-
-    .delivery-option:hover {
-        border-color: var(--color-red) !important;
-        box-shadow: 0 4px 12px rgba(255, 165, 0, 0.15);
-        transform: translateY(-2px);
-    }
-
-    input[type="radio"] {
-        accent-color: var(--color-red);
-        cursor: pointer;
-    }
-
-    input[type="text"]:focus,
-    input[type="tel"]:focus,
-    textarea:focus {
-        outline: none;
-        box-shadow: 0 0 0 3px rgba(255, 165, 0, 0.1);
-    }
-</style>
 {% endblock %}
