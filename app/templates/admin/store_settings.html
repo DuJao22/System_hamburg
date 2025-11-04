@@ -181,6 +181,77 @@
             </div>
 
             <div class="form_section">
+                <h2><i class="fa fa-map-marker"></i> Área de Cobertura de Entrega</h2>
+                
+                <div class="form_group checkbox_group">
+                    <label class="checkbox_label">
+                        <input type="checkbox" name="delivery_radius_enabled" {% if settings.delivery_radius_enabled %}checked{% endif %}>
+                        <span>Habilitar validação por raio de entrega</span>
+                    </label>
+                    <small class="form_text">Quando habilitado, o sistema validará se o endereço do cliente está dentro do raio de entrega</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_latitude">
+                        <i class="fa fa-globe"></i> Latitude da Loja
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_latitude" 
+                        name="store_latitude" 
+                        class="form_control" 
+                        value="{{ settings.store_latitude }}"
+                        placeholder="-23.550520"
+                    >
+                    <small class="form_text">Coordenada de latitude (Ex: -23.550520)</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_longitude">
+                        <i class="fa fa-globe"></i> Longitude da Loja
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_longitude" 
+                        name="store_longitude" 
+                        class="form_control" 
+                        value="{{ settings.store_longitude }}"
+                        placeholder="-46.633308"
+                    >
+                    <small class="form_text">Coordenada de longitude (Ex: -46.633308)</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="delivery_radius_km">
+                        <i class="fa fa-circle-o"></i> Raio de Entrega (km)
+                    </label>
+                    <input 
+                        type="number" 
+                        id="delivery_radius_km" 
+                        name="delivery_radius_km" 
+                        class="form_control" 
+                        step="0.1" 
+                        min="0"
+                        value="{{ settings.delivery_radius_km }}"
+                        placeholder="10"
+                    >
+                    <small class="form_text">Raio máximo de entrega em quilômetros a partir da localização da loja</small>
+                </div>
+
+                <div class="form_group">
+                    <div style="padding: 15px; background: #f0f8ff; border-left: 4px solid #2196F3; border-radius: 4px;">
+                        <strong><i class="fa fa-info-circle"></i> Como obter as coordenadas?</strong>
+                        <p style="margin: 10px 0 0 0; font-size: 13px; line-height: 1.6;">
+                            1. Acesse <a href="https://www.google.com/maps" target="_blank" style="color: #2196F3;">Google Maps</a><br>
+                            2. Clique com o botão direito no local da sua loja<br>
+                            3. Clique no primeiro item (coordenadas)<br>
+                            4. As coordenadas serão copiadas automaticamente
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form_section">
                 <h2><i class="fa fa-clock"></i> Horários de Funcionamento</h2>
                 
                 <div class="form_group">
