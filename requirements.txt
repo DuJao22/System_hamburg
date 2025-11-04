@@ -14,3 +14,13 @@ mercadopago
 flask-socketio
 python-engineio
 python-socketio
+Flask==3.0.0
+Flask-Login==0.6.3
+flask-socketio
+Flask-SQLAlchemy==3.1.1
+gunicorn==21.2.0
+mercadopago
+python-dotenv==1.0.0
+python-engineio
+python-socketio
+Werkzeug==3.0.1
