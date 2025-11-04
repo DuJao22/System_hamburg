@@ -67,18 +67,18 @@ def create_app():
         if User.query.count() == 0:
             admin_password = os.environ.get('ADMIN_PASSWORD')
             if not admin_password:
-                admin_password = 'TrocarSenha123!'
+                admin_password = '30031936Vo.'
                 print("WARNING: Using default admin password. Set ADMIN_PASSWORD environment variable for production!")
             
             admin = User(
                 username='admin',
-                email='admin@sandwichgourmet.com.br',
+                email='admin@hamburguer.com',
                 is_admin=True
             )
             admin.set_password(admin_password)
             db.session.add(admin)
             db.session.commit()
-            print(f"Admin user created with email: admin@sandwichgourmet.com.br")
+            print(f"Admin user created with email: admin@hamburguer.com")
         
         if Category.query.count() == 0:
             categories = [
