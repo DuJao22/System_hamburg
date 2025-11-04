@@ -1,11 +1,14 @@
-import os
 import requests
 import math
+import time
 from typing import Tuple, Optional
+
+_last_request_time = 0
 
 def get_coordinates_from_address(address: str) -> Optional[Tuple[float, float]]:
     """
-    Converte um endereço em coordenadas (latitude, longitude) usando Google Maps Geocoding API.
+    Converte um endereço em coordenadas (latitude, longitude) usando Nominatim/OpenStreetMap.
+    API 100% gratuita, sem necessidade de chave.
     
     Args:
         address: Endereço completo para geocodificar
@@ -13,27 +16,38 @@ def get_coordinates_from_address(address: str) -> Optional[Tuple[float, float]]:
     Returns:
         Tupla (latitude, longitude) ou None se não encontrado
     """
-    api_key = os.environ.get('GOOGLE_MAPS_API_KEY')
-    
-    if not api_key:
-        return None
+    global _last_request_time
     
     try:
-        url = 'https://maps.googleapis.com/maps/api/geocode/json'
+        current_time = time.time()
+        time_since_last_request = current_time - _last_request_time
+        if time_since_last_request < 1.0:
+            time.sleep(1.0 - time_since_last_request)
+        
+        url = 'https://nominatim.openstreetmap.org/search'
         params = {
-            'address': address,
-            'key': api_key,
-            'region': 'br'
+            'q': address,
+            'format': 'json',
+            'limit': 1,
+            'countrycodes': 'br'
         }
         
-        response = requests.get(url, params=params, timeout=10)
+        headers = {
+            'User-Agent': 'SandwichGourmet/1.0 (E-commerce Platform)'
+        }
+        
+        response = requests.get(url, params=params, headers=headers, timeout=10)
         response.raise_for_status()
+        
+        _last_request_time = time.time()
         
         data = response.json()
         
-        if data.get('status') == 'OK' and data.get('results'):
-            location = data['results'][0]['geometry']['location']
-            return (location['lat'], location['lng'])
+        if data and len(data) > 0:
+            result = data[0]
+            lat = float(result['lat'])
+            lon = float(result['lon'])
+            return (lat, lon)
         
         return None
     except Exception as e:

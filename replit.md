@@ -28,11 +28,11 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
     - **Product Reviews:** Users can rate products (1-5 stars) and add comments, with verification of confirmed purchases.
     - **Add-ons and Observations:** Allows customers to select product extras (like bacon, cheese) and add special observations during checkout (e.g., "no onions"). Extras are stored per item with quantity and price tracking.
     - **Payment Gateway:** Integration with Mercado Pago for processing payments, including webhook handling for order status updates. Supports both pickup and delivery options with configurable shipping costs.
-    - **Delivery Area Control:** Geographic coverage validation system that restricts deliveries to a configurable radius (in km) from the store location. Admin sets store coordinates (latitude/longitude) and maximum delivery radius; system automatically validates customer addresses during checkout using Google Maps Geocoding API and blocks orders outside the coverage area with clear messaging.
+    - **Delivery Area Control:** Geographic coverage validation system that restricts deliveries to a configurable radius (in km) from the store location. Admin sets store coordinates (latitude/longitude) and maximum delivery radius; system automatically validates customer addresses during checkout using Nominatim/OpenStreetMap (free, no API key required) and blocks orders outside the coverage area with clear messaging.
 
 ## External Dependencies
 - **Mercado Pago API:** Integrated for payment processing. Requires `MERCADOPAGO_ACCESS_TOKEN` environment variable.
-- **Google Maps Geocoding API:** Used for address validation and distance calculation in the delivery area control system. Requires `GOOGLE_MAPS_API_KEY` environment variable. Free tier includes $200/month credit (~40,000 requests).
+- **Nominatim/OpenStreetMap API:** Used for address geocoding and distance calculation in the delivery area control system. 100% free with unlimited usage, no API key required. Uses OpenStreetMap community-maintained address data.
 - **Gunicorn:** Used for deploying the Flask application, especially for services like Render.
 - **SQLite3:** Default database for development.
 - **SQLAlchemy ORM:** Used for interacting with the database.
@@ -46,7 +46,6 @@ The following environment variables should be configured in production:
 - `SECRET_KEY`: Flask secret key for session encryption (required for production)
 - `ADMIN_PASSWORD`: Initial admin password (recommended to set)
 - `MERCADOPAGO_ACCESS_TOKEN`: Token for Mercado Pago payment integration
-- `GOOGLE_MAPS_API_KEY`: Google Maps Geocoding API key for delivery area validation (required if delivery radius control is enabled)
 - `CORS_ALLOWED_ORIGINS`: (Optional) Comma-separated list of allowed origins for CORS. Defaults to '*' for development. For production, specify domains like: `https://seudominio.com,https://www.seudominio.com`
 
 See `.env.example` for a template.
@@ -56,4 +55,4 @@ See `.env.example` for a template.
   - Improved CORS security configuration to support environment-based origin restrictions. CORS now uses `CORS_ALLOWED_ORIGINS` environment variable for production security instead of allowing all origins by default.
   - Implemented delivery area control system with geographic radius validation. Admin can now configure store location (latitude/longitude) and maximum delivery radius in km. System validates customer addresses during checkout and blocks orders outside coverage area.
   - Removed redundant customer name and phone fields from checkout form - now uses data from user registration.
-  - Added Google Maps Geocoding API integration for address geocoding and distance calculation using Haversine formula.
+  - Integrated Nominatim/OpenStreetMap API for free address geocoding and distance calculation using Haversine formula. No API key required, 100% free with unlimited usage.
