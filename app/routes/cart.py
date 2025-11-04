@@ -156,14 +156,11 @@ def checkout():
         return redirect(url_for('cart.view_cart'))
     
     delivery_type = request.form.get('delivery_type', 'delivery')
-    customer_name = request.form.get('customer_name', '').strip()
-    customer_phone = request.form.get('customer_phone', '').strip()
     delivery_address = request.form.get('delivery_address', '').strip()
     observations = request.form.get('observations', '').strip()
     
-    if not customer_name or not customer_phone:
-        flash('Por favor, preencha seu nome e telefone.', 'warning')
-        return redirect(url_for('cart.view_cart'))
+    customer_name = current_user.username
+    customer_phone = current_user.phone
     
     if delivery_type == 'delivery' and not delivery_address:
         flash('Por favor, preencha o endereço de entrega.', 'warning')
