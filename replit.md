@@ -28,10 +28,11 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
     - **Product Reviews:** Users can rate products (1-5 stars) and add comments, with verification of confirmed purchases.
     - **Add-ons and Observations:** Allows customers to select product extras (like bacon, cheese) and add special observations during checkout (e.g., "no onions"). Extras are stored per item with quantity and price tracking.
     - **Payment Gateway:** Integration with Mercado Pago for processing payments, including webhook handling for order status updates. Supports both pickup and delivery options with configurable shipping costs.
-    - **Delivery Area Control:** Geographic coverage validation system that restricts deliveries to a configurable radius (in km) from the store location. Admin sets store coordinates (latitude/longitude) and maximum delivery radius; system automatically validates customer addresses during checkout using Nominatim/OpenStreetMap (free, no API key required) and blocks orders outside the coverage area with clear messaging.
+    - **Delivery Area Control:** Geographic coverage validation system that restricts deliveries to a configurable radius (in km) from the store location. Admin enters only the store's ZIP code (CEP), and the system automatically fetches the street name via ViaCEP API (free, no API key required). Admin then adds the building number, and the system calculates coordinates (latitude/longitude) automatically using Nominatim/OpenStreetMap. During checkout, the system validates customer addresses and blocks orders outside the coverage area with clear messaging.
 
 ## External Dependencies
 - **Mercado Pago API:** Integrated for payment processing. Requires `MERCADOPAGO_ACCESS_TOKEN` environment variable.
+- **ViaCEP API:** Used for automatic address lookup from Brazilian ZIP codes (CEP). 100% free with unlimited usage, no API key required. Simplifies store address configuration for delivery radius setup.
 - **Nominatim/OpenStreetMap API:** Used for address geocoding and distance calculation in the delivery area control system. 100% free with unlimited usage, no API key required. Uses OpenStreetMap community-maintained address data.
 - **Gunicorn:** Used for deploying the Flask application, especially for services like Render.
 - **SQLite3:** Default database for development.
@@ -54,5 +55,7 @@ See `.env.example` for a template.
 - **2025-11-04**: 
   - Improved CORS security configuration to support environment-based origin restrictions. CORS now uses `CORS_ALLOWED_ORIGINS` environment variable for production security instead of allowing all origins by default.
   - Implemented delivery area control system with geographic radius validation. Admin can now configure store location (latitude/longitude) and maximum delivery radius in km. System validates customer addresses during checkout and blocks orders outside coverage area.
+  - **Enhanced delivery radius configuration with automatic address lookup:** Admin now simply enters the store's ZIP code (CEP), and the system automatically fetches the complete address (street, neighborhood, city, state) via ViaCEP API. After entering the building number, coordinates are calculated automatically using Nominatim/OpenStreetMap. This eliminates the need for manual coordinate lookup, making setup much easier for administrators.
   - Removed redundant customer name and phone fields from checkout form - now uses data from user registration.
   - Integrated Nominatim/OpenStreetMap API for free address geocoding and distance calculation using Haversine formula. No API key required, 100% free with unlimited usage.
+  - Integrated ViaCEP API for automatic Brazilian ZIP code lookup with real-time address population.
