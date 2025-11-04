@@ -1,5 +1,8 @@
 import requests
+import logging
 from typing import Optional, Dict, List
+
+logger = logging.getLogger(__name__)
 
 def buscar_cep(cep: str) -> Optional[Dict[str, str]]:
     """
@@ -39,7 +42,7 @@ def buscar_cep(cep: str) -> Optional[Dict[str, str]]:
             'ddd': data.get('ddd', '')
         }
     except Exception as e:
-        print(f"Erro ao buscar CEP {cep}: {str(e)}")
+        logger.error(f"Erro ao buscar CEP {cep}: {str(e)}", exc_info=True)
         return None
 
 
@@ -91,5 +94,5 @@ def buscar_endereco(estado: str, cidade: str, logradouro: str) -> Optional[List[
         
         return resultados if resultados else None
     except Exception as e:
-        print(f"Erro ao buscar endereço {estado}/{cidade}/{logradouro}: {str(e)}")
+        logger.error(f"Erro ao buscar endereço {estado}/{cidade}/{logradouro}: {str(e)}", exc_info=True)
         return None

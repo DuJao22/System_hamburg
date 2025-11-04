@@ -57,6 +57,12 @@ See `.env.example` for a template.
   - Implemented delivery area control system with geographic radius validation. Admin can now configure store location (latitude/longitude) and maximum delivery radius in km. System validates customer addresses during checkout and blocks orders outside coverage area.
   - **Enhanced delivery radius configuration with automatic address lookup:** Admin now simply enters the store's ZIP code (CEP), and the system automatically fetches the complete address (street, neighborhood, city, state) via ViaCEP API. After entering the building number, coordinates are calculated automatically using Nominatim/OpenStreetMap. This eliminates the need for manual coordinate lookup, making setup much easier for administrators.
   - **Enhanced customer checkout with automatic address lookup:** Customers now enter their ZIP code (CEP) during delivery checkout, and the system automatically populates street, neighborhood, city, and state fields via ViaCEP API. Customers only need to manually enter their house number and optional complement. Address fields become editable if ViaCEP lookup fails, ensuring customers can always proceed with manual entry.
+  - **NEW: Reverse CEP Search Functionality:** Implemented complete reverse ZIP code search for both customer checkout and admin settings. Users who don't know their CEP can now search for it by entering their state, city, and street name. The system returns all matching addresses from ViaCEP API, and users can select the correct one with a single click. This feature includes:
+    - Backend API routes (`/api/cep/buscar/<cep>` and `/api/cep/buscar-endereco`) for both direct and reverse CEP lookup
+    - Utility module (`app/utils/cep.py`) with robust error handling and validation
+    - Interactive UI with search results display and one-click selection
+    - Automatic form population after CEP selection
+    - Visual feedback with color-coded success indicators
   - Removed redundant customer name and phone fields from checkout form - now uses data from user registration.
   - Integrated Nominatim/OpenStreetMap API for free address geocoding and distance calculation using Haversine formula. No API key required, 100% free with unlimited usage.
   - Integrated ViaCEP API for automatic Brazilian ZIP code lookup with real-time address population in both admin store settings and customer checkout flows.
