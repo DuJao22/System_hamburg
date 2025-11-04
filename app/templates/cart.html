@@ -59,8 +59,12 @@
                     <td style="padding: 20px; text-align: center; font-weight: 600; color: #222;">
                         R$ {{ "%.2f"|format(item.product.price) }}
                         {% if item.extras %}
+                        {% set extras_total = namespace(value=0) %}
+                        {% for extra in item.extras %}
+                            {% set extras_total.value = extras_total.value + (extra.extra.price * extra.quantity) %}
+                        {% endfor %}
                         <div style="font-size: 11px; color: #888; margin-top: 5px;">
-                            + R$ {{ "%.2f"|format(sum(extra.extra.price * extra.quantity for extra in item.extras)) }}
+                            + R$ {{ "%.2f"|format(extras_total.value) }}
                         </div>
                         {% endif %}
                     </td>
@@ -69,7 +73,11 @@
                     </td>
                     <td
                         style="padding: 20px; text-align: center; font-weight: 700; font-size: 18px; color: var(--color-red);">
-                        R$ {{ "%.2f"|format((item.product.price + sum(extra.extra.price * extra.quantity for extra in item.extras)) * item.quantity) }}
+                        {% set item_extras_total = namespace(value=0) %}
+                        {% for extra in item.extras %}
+                            {% set item_extras_total.value = item_extras_total.value + (extra.extra.price * extra.quantity) %}
+                        {% endfor %}
+                        R$ {{ "%.2f"|format((item.product.price + item_extras_total.value) * item.quantity) }}
                     </td>
                     <td style="padding: 20px; text-align: center;">
                         <a href="{{ url_for('cart.remove_from_cart', item_id=item.id) }}"
