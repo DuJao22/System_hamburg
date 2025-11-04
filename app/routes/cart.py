@@ -10,7 +10,7 @@ cart_bp = Blueprint('cart', __name__)
 def view_cart():
     cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
     subtotal = sum(
-        (item.product.price + sum(extra.extra.price for extra in item.extras)) * item.quantity 
+        (item.product.price + sum(extra.extra.price * extra.quantity for extra in item.extras)) * item.quantity 
         for item in cart_items
     )
     
@@ -47,7 +47,6 @@ def view_cart():
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     quantity = int(request.form.get('quantity', 1))
-    extra_ids = request.form.getlist('extras')
     
     if product.stock < quantity:
         flash('Quantidade indisponível em estoque.', 'warning')
@@ -57,12 +56,20 @@ def add_to_cart(product_id):
     db.session.add(cart_item)
     db.session.flush()
     
-    if extra_ids:
-        for extra_id in extra_ids:
-            extra = Extra.query.get(int(extra_id))
-            if extra and extra.active:
-                cart_item_extra = CartItemExtra(cart_item_id=cart_item.id, extra_id=extra.id, quantity=1)
-                db.session.add(cart_item_extra)
+    for field_name in request.form:
+        if field_name.startswith('extra_'):
+            extra_id = int(field_name.replace('extra_', ''))
+            extra_quantity = int(request.form.get(field_name, 0))
+            
+            if extra_quantity > 0:
+                extra = Extra.query.get(extra_id)
+                if extra and extra.active:
+                    cart_item_extra = CartItemExtra(
+                        cart_item_id=cart_item.id, 
+                        extra_id=extra.id, 
+                        quantity=extra_quantity
+                    )
+                    db.session.add(cart_item_extra)
     
     db.session.commit()
     flash(f'{product.name} adicionado ao carrinho!', 'success')
@@ -126,7 +133,10 @@ def apply_coupon():
         return redirect(url_for('cart.view_cart'))
     
     cart_items = CartItem.query.filter_by(user_id=current_user.id).all()
-    subtotal = sum(item.product.price * item.quantity for item in cart_items)
+    subtotal = sum(
+        (item.product.price + sum(extra.extra.price * extra.quantity for extra in item.extras)) * item.quantity 
+        for item in cart_items
+    )
     
     if subtotal < coupon.min_purchase:
         flash(f'Compra mínima de R$ {coupon.min_purchase:.2f} necessária para usar este cupom.', 'warning')
@@ -167,7 +177,7 @@ def checkout():
         return redirect(url_for('cart.view_cart'))
     
     subtotal = sum(
-        (item.product.price + sum(extra.extra.price for extra in item.extras)) * item.quantity 
+        (item.product.price + sum(extra.extra.price * extra.quantity for extra in item.extras)) * item.quantity 
         for item in cart_items
     )
     discount = 0

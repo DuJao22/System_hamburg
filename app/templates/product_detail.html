@@ -71,16 +71,24 @@
                     </h4>
                     <div class="extras-grid">
                         {% for extra in extras %}
-                        <label class="extra-item">
-                            <input type="checkbox" name="extras" value="{{ extra.id }}" class="extra-checkbox">
-                            <div class="extra-content">
+                        <div class="extra-item">
+                            <div class="extra-header">
                                 <span class="extra-name">{{ extra.name }}</span>
-                                <span class="extra-price">+ R$ {{ "%.2f"|format(extra.price) }}</span>
+                                <span class="extra-price">R$ {{ "%.2f"|format(extra.price) }}</span>
                             </div>
                             {% if extra.description %}
                             <small class="extra-description">{{ extra.description }}</small>
                             {% endif %}
-                        </label>
+                            <div class="extra-quantity-selector">
+                                <button type="button" class="quantity-btn" onclick="changeExtraQuantity({{ extra.id }}, -1)">
+                                    <i class="fa fa-minus"></i>
+                                </button>
+                                <input type="number" name="extra_{{ extra.id }}" id="extra_{{ extra.id }}" value="0" min="0" max="10" class="extra-quantity-input" readonly>
+                                <button type="button" class="quantity-btn" onclick="changeExtraQuantity({{ extra.id }}, 1)">
+                                    <i class="fa fa-plus"></i>
+                                </button>
+                            </div>
+                        </div>
                         {% endfor %}
                     </div>
                 </div>
@@ -334,10 +342,9 @@
 .extra-item {
     display: flex;
     flex-direction: column;
-    padding: 12px;
+    padding: 15px;
     border: 2px solid #ddd;
-    border-radius: 6px;
-    cursor: pointer;
+    border-radius: 8px;
     transition: all 0.3s;
     background: #fafafa;
 }
@@ -345,50 +352,81 @@
 .extra-item:hover {
     border-color: var(--color-red);
     background: #fff;
-    transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(220, 20, 60, 0.1);
 }
 
-.extra-checkbox {
-    display: none;
-}
-
-.extra-checkbox:checked + .extra-content {
-    background: var(--color-red);
-    color: #fff;
-}
-
-.extra-content {
+.extra-header {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 8px 12px;
-    background: #fff;
-    border-radius: 4px;
-    transition: all 0.3s;
+    margin-bottom: 10px;
 }
 
 .extra-name {
-    font-weight: 600;
-    font-size: 14px;
+    font-weight: 700;
+    font-size: 15px;
+    color: #222;
 }
 
 .extra-price {
     font-weight: 700;
-    font-size: 14px;
+    font-size: 15px;
     color: var(--color-red);
-}
-
-.extra-checkbox:checked + .extra-content .extra-price {
-    color: #fff;
 }
 
 .extra-description {
     display: block;
-    margin-top: 6px;
+    margin-bottom: 12px;
     font-size: 12px;
     color: #888;
     font-style: italic;
+    line-height: 1.4;
+}
+
+.extra-quantity-selector {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.quantity-btn {
+    width: 36px;
+    height: 36px;
+    border: 2px solid var(--color-red);
+    background: #fff;
+    color: var(--color-red);
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+.quantity-btn:hover {
+    background: var(--color-red);
+    color: #fff;
+    transform: scale(1.1);
+}
+
+.quantity-btn:active {
+    transform: scale(0.95);
+}
+
+.extra-quantity-input {
+    width: 50px;
+    height: 36px;
+    text-align: center;
+    border: 2px solid #ddd;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 700;
+    color: #222;
+    background: #fff;
 }
 
 .quantity-selector {
@@ -630,6 +668,28 @@ if (zoomContainer && mainImage && zoomLens) {
     zoomContainer.addEventListener('touchend', function() {
         mainImage.style.transform = 'scale(1)';
     });
+}
+
+function changeExtraQuantity(extraId, change) {
+    const input = document.getElementById('extra_' + extraId);
+    let currentValue = parseInt(input.value) || 0;
+    let newValue = currentValue + change;
+    
+    if (newValue < 0) newValue = 0;
+    if (newValue > 10) newValue = 10;
+    
+    input.value = newValue;
+    
+    const extraItem = input.closest('.extra-item');
+    if (newValue > 0) {
+        extraItem.style.borderColor = 'var(--color-red)';
+        extraItem.style.background = '#fff5f5';
+        extraItem.style.boxShadow = '0 4px 12px rgba(220, 20, 60, 0.2)';
+    } else {
+        extraItem.style.borderColor = '#ddd';
+        extraItem.style.background = '#fafafa';
+        extraItem.style.boxShadow = 'none';
+    }
 }
 </script>
 {% endblock %}
