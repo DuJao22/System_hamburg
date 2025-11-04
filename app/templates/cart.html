@@ -425,6 +425,11 @@
                                 cityInput.value = data.localidade;
                                 stateInput.value = data.uf;
                                 
+                                streetInput.removeAttribute('readonly');
+                                neighborhoodInput.removeAttribute('readonly');
+                                cityInput.removeAttribute('readonly');
+                                stateInput.removeAttribute('readonly');
+                                
                                 streetInput.style.backgroundColor = '#d4edda';
                                 neighborhoodInput.style.backgroundColor = '#d4edda';
                                 cityInput.style.backgroundColor = '#d4edda';
@@ -440,20 +445,54 @@
                                 numberInput.focus();
                                 updateDeliveryAddress();
                             } else {
-                                alert('CEP não encontrado. Por favor, verifique o CEP digitado.');
+                                streetInput.value = '';
+                                neighborhoodInput.value = '';
+                                cityInput.value = '';
+                                stateInput.value = '';
+                                
+                                streetInput.removeAttribute('readonly');
+                                neighborhoodInput.removeAttribute('readonly');
+                                cityInput.removeAttribute('readonly');
+                                stateInput.removeAttribute('readonly');
+                                
+                                streetInput.style.backgroundColor = '#fff';
+                                neighborhoodInput.style.backgroundColor = '#fff';
+                                cityInput.style.backgroundColor = '#fff';
+                                stateInput.style.backgroundColor = '#fff';
+                                
+                                alert('CEP não encontrado. Por favor, preencha o endereço manualmente.');
+                                streetInput.focus();
                             }
                         })
                         .catch(error => {
                             console.error('Erro ao buscar CEP:', error);
-                            alert('Erro ao buscar o CEP. Tente novamente.');
+                            
+                            streetInput.value = '';
+                            neighborhoodInput.value = '';
+                            cityInput.value = '';
+                            stateInput.value = '';
+                            
+                            streetInput.removeAttribute('readonly');
+                            neighborhoodInput.removeAttribute('readonly');
+                            cityInput.removeAttribute('readonly');
+                            stateInput.removeAttribute('readonly');
+                            
+                            streetInput.style.backgroundColor = '#fff';
+                            neighborhoodInput.style.backgroundColor = '#fff';
+                            cityInput.style.backgroundColor = '#fff';
+                            stateInput.style.backgroundColor = '#fff';
+                            
+                            alert('Erro ao buscar o CEP. Por favor, preencha o endereço manualmente.');
+                            streetInput.focus();
                         });
                 }
             });
         }
 
-        [numberInput, complementInput].forEach(input => {
+        [streetInput, numberInput, complementInput, neighborhoodInput, cityInput, stateInput].forEach(input => {
             if (input) {
                 input.addEventListener('blur', updateDeliveryAddress);
+                input.addEventListener('input', updateDeliveryAddress);
             }
         });
 
@@ -463,6 +502,24 @@
                 const deliveryType = document.querySelector('input[name="delivery_type"]:checked');
                 if (deliveryType && deliveryType.value === 'delivery') {
                     updateDeliveryAddress();
+                    
+                    const deliveryAddressValue = document.getElementById('delivery_address_hidden').value;
+                    if (!deliveryAddressValue || deliveryAddressValue.trim() === '') {
+                        e.preventDefault();
+                        alert('Por favor, preencha todos os campos obrigatórios do endereço de entrega.');
+                        cepInput.focus();
+                        return false;
+                    }
+                    
+                    const requiredFields = [cepInput, streetInput, numberInput, neighborhoodInput, cityInput, stateInput];
+                    for (let field of requiredFields) {
+                        if (!field.value || field.value.trim() === '') {
+                            e.preventDefault();
+                            alert('Por favor, preencha todos os campos obrigatórios do endereço de entrega.');
+                            field.focus();
+                            return false;
+                        }
+                    }
                 }
             });
         }
