@@ -192,33 +192,107 @@
                 </div>
 
                 <div class="form_group">
-                    <label for="store_latitude">
-                        <i class="fa fa-globe"></i> Latitude da Loja
-                    </label>
-                    <input 
-                        type="text" 
-                        id="store_latitude" 
-                        name="store_latitude" 
-                        class="form_control" 
-                        value="{{ settings.store_latitude }}"
-                        placeholder="-23.550520"
-                    >
-                    <small class="form_text">Coordenada de latitude (Ex: -23.550520)</small>
+                    <div style="padding: 15px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px; margin-bottom: 20px;">
+                        <strong><i class="fa fa-info-circle"></i> Como funciona?</strong>
+                        <p style="margin: 10px 0 0 0; font-size: 13px; line-height: 1.6;">
+                            Digite o CEP da hamburgueria e o sistema buscará automaticamente o endereço. Depois, complete com o número. As coordenadas geográficas serão calculadas automaticamente.
+                        </p>
+                    </div>
                 </div>
 
                 <div class="form_group">
-                    <label for="store_longitude">
-                        <i class="fa fa-globe"></i> Longitude da Loja
+                    <label for="store_cep">
+                        <i class="fa fa-map-pin"></i> CEP da Loja
                     </label>
                     <input 
                         type="text" 
-                        id="store_longitude" 
-                        name="store_longitude" 
+                        id="store_cep" 
+                        name="store_cep" 
                         class="form_control" 
-                        value="{{ settings.store_longitude }}"
-                        placeholder="-46.633308"
+                        value="{{ settings.store_cep }}"
+                        placeholder="00000-000"
+                        maxlength="9"
                     >
-                    <small class="form_text">Coordenada de longitude (Ex: -46.633308)</small>
+                    <small class="form_text">Digite o CEP e aguarde o carregamento automático do endereço</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_street">
+                        <i class="fa fa-road"></i> Rua/Avenida
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_street" 
+                        name="store_street" 
+                        class="form_control" 
+                        value="{{ settings.store_street }}"
+                        placeholder="Ex: Rua Judith Naves de Lima"
+                        readonly
+                    >
+                    <small class="form_text">Preenchido automaticamente pelo CEP</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_number">
+                        <i class="fa fa-hashtag"></i> Número
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_number" 
+                        name="store_number" 
+                        class="form_control" 
+                        value="{{ settings.store_number }}"
+                        placeholder="Ex: 469"
+                    >
+                    <small class="form_text">Número do estabelecimento</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_neighborhood">
+                        <i class="fa fa-map"></i> Bairro
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_neighborhood" 
+                        name="store_neighborhood" 
+                        class="form_control" 
+                        value="{{ settings.store_neighborhood }}"
+                        placeholder="Ex: Santa Edwiges"
+                        readonly
+                    >
+                    <small class="form_text">Preenchido automaticamente pelo CEP</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_city">
+                        <i class="fa fa-building"></i> Cidade
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_city" 
+                        name="store_city" 
+                        class="form_control" 
+                        value="{{ settings.store_city }}"
+                        placeholder="Ex: Contagem"
+                        readonly
+                    >
+                    <small class="form_text">Preenchido automaticamente pelo CEP</small>
+                </div>
+
+                <div class="form_group">
+                    <label for="store_state">
+                        <i class="fa fa-flag"></i> Estado
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_state" 
+                        name="store_state" 
+                        class="form_control" 
+                        value="{{ settings.store_state }}"
+                        placeholder="Ex: MG"
+                        readonly
+                    >
+                    <small class="form_text">Preenchido automaticamente pelo CEP</small>
                 </div>
 
                 <div class="form_group">
@@ -238,16 +312,39 @@
                     <small class="form_text">Raio máximo de entrega em quilômetros a partir da localização da loja</small>
                 </div>
 
-                <div class="form_group">
-                    <div style="padding: 15px; background: #f0f8ff; border-left: 4px solid #2196F3; border-radius: 4px;">
-                        <strong><i class="fa fa-info-circle"></i> Como obter as coordenadas?</strong>
-                        <p style="margin: 10px 0 0 0; font-size: 13px; line-height: 1.6;">
-                            1. Acesse <a href="https://www.google.com/maps" target="_blank" style="color: #2196F3;">Google Maps</a><br>
-                            2. Clique com o botão direito no local da sua loja<br>
-                            3. Clique no primeiro item (coordenadas)<br>
-                            4. As coordenadas serão copiadas automaticamente
-                        </p>
-                    </div>
+                <div class="form_group" style="display: none;">
+                    <label for="store_latitude">
+                        <i class="fa fa-globe"></i> Latitude (Auto)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_latitude" 
+                        name="store_latitude" 
+                        class="form_control" 
+                        value="{{ settings.store_latitude }}"
+                        readonly
+                    >
+                </div>
+
+                <div class="form_group" style="display: none;">
+                    <label for="store_longitude">
+                        <i class="fa fa-globe"></i> Longitude (Auto)
+                    </label>
+                    <input 
+                        type="text" 
+                        id="store_longitude" 
+                        name="store_longitude" 
+                        class="form_control" 
+                        value="{{ settings.store_longitude }}"
+                        readonly
+                    >
+                </div>
+
+                <div id="coordinates_status" style="padding: 10px; background: #e9ecef; border-radius: 4px; margin-top: 10px; display: none;">
+                    <small>
+                        <i class="fa fa-map-marker"></i> <strong>Coordenadas:</strong> 
+                        <span id="coords_display">Aguardando endereço...</span>
+                    </small>
                 </div>
             </div>
 
@@ -498,4 +595,109 @@
     background: #5a6268;
 }
 </style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const cepInput = document.getElementById('store_cep');
+    const streetInput = document.getElementById('store_street');
+    const neighborhoodInput = document.getElementById('store_neighborhood');
+    const cityInput = document.getElementById('store_city');
+    const stateInput = document.getElementById('store_state');
+    const numberInput = document.getElementById('store_number');
+    const latInput = document.getElementById('store_latitude');
+    const lonInput = document.getElementById('store_longitude');
+    const coordsStatus = document.getElementById('coordinates_status');
+    const coordsDisplay = document.getElementById('coords_display');
+
+    function formatCEP(value) {
+        value = value.replace(/\D/g, '');
+        if (value.length > 5) {
+            value = value.substring(0, 5) + '-' + value.substring(5, 8);
+        }
+        return value;
+    }
+
+    cepInput.addEventListener('input', function(e) {
+        e.target.value = formatCEP(e.target.value);
+    });
+
+    cepInput.addEventListener('blur', function() {
+        const cep = this.value.replace(/\D/g, '');
+        
+        if (cep.length === 8) {
+            fetch(`https://viacep.com.br/ws/${cep}/json/`)
+                .then(response => response.json())
+                .then(data => {
+                    if (!data.erro) {
+                        streetInput.value = data.logradouro;
+                        neighborhoodInput.value = data.bairro;
+                        cityInput.value = data.localidade;
+                        stateInput.value = data.uf;
+                        
+                        streetInput.style.backgroundColor = '#d4edda';
+                        neighborhoodInput.style.backgroundColor = '#d4edda';
+                        cityInput.style.backgroundColor = '#d4edda';
+                        stateInput.style.backgroundColor = '#d4edda';
+                        
+                        setTimeout(() => {
+                            streetInput.style.backgroundColor = '';
+                            neighborhoodInput.style.backgroundColor = '';
+                            cityInput.style.backgroundColor = '';
+                            stateInput.style.backgroundColor = '';
+                        }, 2000);
+
+                        updateCoordinates();
+                    } else {
+                        alert('CEP não encontrado. Por favor, verifique o CEP digitado.');
+                    }
+                })
+                .catch(error => {
+                    console.error('Erro ao buscar CEP:', error);
+                    alert('Erro ao buscar o CEP. Tente novamente.');
+                });
+        }
+    });
+
+    numberInput.addEventListener('blur', updateCoordinates);
+
+    function updateCoordinates() {
+        const street = streetInput.value;
+        const number = numberInput.value;
+        const neighborhood = neighborhoodInput.value;
+        const city = cityInput.value;
+        const state = stateInput.value;
+
+        if (street && number && city && state) {
+            const fullAddress = `${street}, ${number} - ${neighborhood}, ${city} - ${state}, Brasil`;
+            
+            coordsStatus.style.display = 'block';
+            coordsDisplay.innerHTML = '<i class="fa fa-spinner fa-spin"></i> Buscando coordenadas...';
+
+            fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(fullAddress)}&format=json&limit=1&countrycodes=br`, {
+                headers: {
+                    'User-Agent': 'SandwichGourmet/1.0 (E-commerce Platform)'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data && data.length > 0) {
+                    const lat = parseFloat(data[0].lat);
+                    const lon = parseFloat(data[0].lon);
+                    
+                    latInput.value = lat.toFixed(6);
+                    lonInput.value = lon.toFixed(6);
+                    
+                    coordsDisplay.innerHTML = `<span style="color: #28a745;">✓ Lat: ${lat.toFixed(6)}, Lon: ${lon.toFixed(6)}</span>`;
+                } else {
+                    coordsDisplay.innerHTML = '<span style="color: #dc3545;">✗ Não foi possível obter as coordenadas. Verifique o endereço.</span>';
+                }
+            })
+            .catch(error => {
+                console.error('Erro ao buscar coordenadas:', error);
+                coordsDisplay.innerHTML = '<span style="color: #dc3545;">✗ Erro ao buscar coordenadas.</span>';
+            });
+        }
+    }
+});
+</script>
 {% endblock %}
