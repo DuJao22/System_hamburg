@@ -141,7 +141,27 @@
                 <div style="margin-bottom: 15px;">
                     <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Status do Pedido</div>
                     <div>
-                        <span style="padding: 8px 16px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% elif order.status == 'Entregue' %}#d4edda{% elif order.status == 'Cancelado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% elif order.status == 'Entregue' %}#155724{% elif order.status == 'Cancelado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block;">
+                        {% set status_colors = {
+                            'Pendente': {'bg': '#fff3cd', 'text': '#856404'},
+                            'Confirmado': {'bg': '#d4edda', 'text': '#155724'},
+                            'Em Preparo': {'bg': '#ffe5cc', 'text': '#cc5200'},
+                            'Pronto': {'bg': '#cce5ff', 'text': '#004085'},
+                            'Saiu para Entrega': {'bg': '#e7d9ff', 'text': '#5a0099'},
+                            'Retirado': {'bg': '#c3e6cb', 'text': '#155724'},
+                            'Entregue': {'bg': '#c3e6cb', 'text': '#155724'},
+                            'Cancelado': {'bg': '#f8d7da', 'text': '#721c24'}
+                        } %}
+                        {% set color = status_colors.get(order.status, {'bg': '#e0e0e0', 'text': '#333'}) %}
+                        <span style="padding: 8px 16px; background: {{ color.bg }}; color: {{ color.text }}; border-radius: 20px; font-size: 13px; font-weight: 700; text-transform: uppercase; display: inline-block;">
+                            {% if order.status == 'Em Preparo' %}<i class="fa fa-cutlery"></i>
+                            {% elif order.status == 'Pronto' %}<i class="fa fa-check-circle"></i>
+                            {% elif order.status == 'Saiu para Entrega' %}<i class="fa fa-truck"></i>
+                            {% elif order.status == 'Retirado' %}<i class="fa fa-shopping-bag"></i>
+                            {% elif order.status == 'Entregue' %}<i class="fa fa-check"></i>
+                            {% elif order.status == 'Cancelado' %}<i class="fa fa-times"></i>
+                            {% elif order.status == 'Confirmado' %}<i class="fa fa-check"></i>
+                            {% else %}<i class="fa fa-clock-o"></i>
+                            {% endif %}
                             {{ order.status }}
                         </span>
                     </div>
@@ -158,27 +178,143 @@
             
             <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <h3 style="font-size: 18px; margin-bottom: 15px; color: #111;">
-                    <i class="fa fa-refresh"></i> Atualizar Status
+                    <i class="fa fa-tasks"></i> Ações Rápidas
                 </h3>
-                <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
-                    <select name="status" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px;">
-                        <option value="Pendente" {% if order.status == 'Pendente' %}selected{% endif %}>Pendente</option>
-                        <option value="Confirmado" {% if order.status == 'Confirmado' %}selected{% endif %}>Confirmado</option>
-                        <option value="Enviado" {% if order.status == 'Enviado' %}selected{% endif %}>Enviado</option>
-                        <option value="Entregue" {% if order.status == 'Entregue' %}selected{% endif %}>Entregue</option>
-                        <option value="Cancelado" {% if order.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
-                    </select>
-                    <textarea name="notes" placeholder="Observações sobre a mudança (opcional)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px; min-height: 80px; font-family: inherit;"></textarea>
-                    <button type="submit" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px;">
-                        <i class="fa fa-check"></i> ATUALIZAR STATUS
+                
+                <div style="display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px;">
+                    {% if order.status == 'Pendente' %}
+                    <button onclick="updateStatus('Confirmado', 'Pedido aceito e confirmado')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #28a745;">
+                        <i class="fa fa-check"></i> ACEITAR PEDIDO
                     </button>
-                </form>
+                    <button onclick="updateStatus('Cancelado', 'Pedido cancelado')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #dc3545;">
+                        <i class="fa fa-times"></i> REJEITAR PEDIDO
+                    </button>
+                    {% elif order.status == 'Confirmado' %}
+                    <button onclick="updateStatus('Em Preparo', 'Pedido em preparo')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #ff9800;">
+                        <i class="fa fa-cutlery"></i> INICIAR PREPARO
+                    </button>
+                    {% elif order.status == 'Em Preparo' %}
+                    <button onclick="updateStatus('Pronto', 'Pedido pronto para entrega/retirada')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #2196F3;">
+                        <i class="fa fa-check-circle"></i> MARCAR COMO PRONTO
+                    </button>
+                    {% elif order.status == 'Pronto' %}
+                    {% if order.delivery_type == 'delivery' %}
+                    <button onclick="updateStatus('Saiu para Entrega', 'Pedido saiu para entrega')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #9c27b0;">
+                        <i class="fa fa-truck"></i> SAIU PARA ENTREGA
+                    </button>
+                    {% else %}
+                    <button onclick="updateStatus('Retirado', 'Pedido retirado pelo cliente')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #4caf50;">
+                        <i class="fa fa-shopping-bag"></i> MARCAR COMO RETIRADO
+                    </button>
+                    {% endif %}
+                    {% elif order.status == 'Saiu para Entrega' %}
+                    <button onclick="updateStatus('Entregue', 'Pedido entregue ao cliente')" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px; background: #4caf50;">
+                        <i class="fa fa-check-circle-o"></i> MARCAR COMO ENTREGUE
+                    </button>
+                    {% endif %}
+                </div>
+                
+                <div style="border-top: 2px solid #eee; padding-top: 20px;">
+                    <h4 style="font-size: 14px; margin-bottom: 15px; color: #666;">
+                        <i class="fa fa-edit"></i> Atualização Manual
+                    </h4>
+                    <form method="POST" action="{{ url_for('admin.update_order_status', order_id=order.id) }}">
+                        <select name="status" required style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px;">
+                            <option value="Pendente" {% if order.status == 'Pendente' %}selected{% endif %}>Pendente</option>
+                            <option value="Confirmado" {% if order.status == 'Confirmado' %}selected{% endif %}>Confirmado</option>
+                            <option value="Em Preparo" {% if order.status == 'Em Preparo' %}selected{% endif %}>Em Preparo</option>
+                            <option value="Pronto" {% if order.status == 'Pronto' %}selected{% endif %}>Pronto</option>
+                            <option value="Saiu para Entrega" {% if order.status == 'Saiu para Entrega' %}selected{% endif %}>Saiu para Entrega</option>
+                            <option value="Retirado" {% if order.status == 'Retirado' %}selected{% endif %}>Retirado</option>
+                            <option value="Entregue" {% if order.status == 'Entregue' %}selected{% endif %}>Entregue</option>
+                            <option value="Cancelado" {% if order.status == 'Cancelado' %}selected{% endif %}>Cancelado</option>
+                        </select>
+                        <textarea name="notes" placeholder="Observações sobre a mudança (opcional)" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; margin-bottom: 10px; min-height: 80px; font-family: inherit;"></textarea>
+                        <button type="submit" class="btn_buy" style="width: 100%; padding: 12px; font-size: 14px;">
+                            <i class="fa fa-check"></i> ATUALIZAR STATUS
+                        </button>
+                    </form>
+                </div>
+            </div>
+            
+            <script>
+            function updateStatus(newStatus, defaultNote) {
+                const notes = prompt('Observações sobre a mudança (opcional):', defaultNote);
+                if (notes !== null) {
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = '{{ url_for("admin.update_order_status", order_id=order.id) }}';
+                    
+                    const statusInput = document.createElement('input');
+                    statusInput.type = 'hidden';
+                    statusInput.name = 'status';
+                    statusInput.value = newStatus;
+                    form.appendChild(statusInput);
+                    
+                    const notesInput = document.createElement('input');
+                    notesInput.type = 'hidden';
+                    notesInput.name = 'notes';
+                    notesInput.value = notes;
+                    form.appendChild(notesInput);
+                    
+                    document.body.appendChild(form);
+                    form.submit();
+                }
+            }
+            </script>
+            
+            <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+                <h3 style="font-size: 18px; margin-bottom: 20px; color: #111;">
+                    <i class="fa fa-map-signs"></i> Progresso do Pedido
+                </h3>
+                
+                {% set all_statuses = ['Pendente', 'Confirmado', 'Em Preparo', 'Pronto'] %}
+                {% if order.delivery_type == 'delivery' %}
+                    {% set _ = all_statuses.append('Saiu para Entrega') %}
+                    {% set _ = all_statuses.append('Entregue') %}
+                {% else %}
+                    {% set _ = all_statuses.append('Retirado') %}
+                {% endif %}
+                
+                {% set current_index = all_statuses.index(order.status) if order.status in all_statuses else -1 %}
+                
+                <div style="position: relative; padding: 20px 0;">
+                    {% for status in all_statuses %}
+                    {% set is_completed = loop.index0 <= current_index %}
+                    {% set is_current = status == order.status %}
+                    
+                    <div style="display: flex; align-items: center; margin-bottom: {% if not loop.last %}30px{% else %}0{% endif %}; position: relative;">
+                        <div style="width: 40px; height: 40px; border-radius: 50%; background: {% if is_completed %}linear-gradient(135deg, #28a745, #20c997){% else %}#e0e0e0{% endif %}; display: flex; align-items: center; justify-content: center; color: #fff; font-weight: 700; box-shadow: {% if is_current %}0 0 0 4px rgba(40, 167, 69, 0.2){% else %}none{% endif %}; z-index: 2; position: relative;">
+                            {% if is_completed %}
+                            <i class="fa fa-check" style="font-size: 18px;"></i>
+                            {% else %}
+                            {{ loop.index }}
+                            {% endif %}
+                        </div>
+                        
+                        <div style="margin-left: 15px; flex: 1;">
+                            <div style="font-weight: 600; color: {% if is_completed %}#28a745{% else %}#999{% endif %}; margin-bottom: 4px;">
+                                {{ status }}
+                            </div>
+                            {% if is_current %}
+                            <div style="font-size: 12px; color: #28a745; font-weight: 600;">
+                                <i class="fa fa-circle" style="font-size: 8px; animation: blink 1.5s infinite;"></i> Status Atual
+                            </div>
+                            {% endif %}
+                        </div>
+                        
+                        {% if not loop.last %}
+                        <div style="position: absolute; left: 19px; top: 40px; width: 2px; height: 30px; background: {% if loop.index0 < current_index %}#28a745{% else %}#e0e0e0{% endif %}; z-index: 1;"></div>
+                        {% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
             </div>
             
             {% if order.status_history %}
             <div style="background: #fff; border-radius: 10px; padding: 25px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
                 <h3 style="font-size: 18px; margin-bottom: 15px; color: #111;">
-                    <i class="fa fa-history"></i> Histórico de Status
+                    <i class="fa fa-history"></i> Histórico Detalhado
                 </h3>
                 <div style="max-height: 300px; overflow-y: auto;">
                     {% for history in order.status_history %}
@@ -206,6 +342,13 @@
                 </div>
             </div>
             {% endif %}
+            
+            <style>
+            @keyframes blink {
+                0%, 100% { opacity: 1; }
+                50% { opacity: 0.3; }
+            }
+            </style>
         </div>
     </div>
     

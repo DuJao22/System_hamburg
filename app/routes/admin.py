@@ -369,11 +369,11 @@ def orders():
     orders_list = pagination.items
     
     total_orders = Order.query.count()
-    total_revenue = db.session.query(func.sum(Order.total)).filter(Order.status.in_(['Confirmado', 'Enviado', 'Entregue'])).scalar() or 0
+    total_revenue = db.session.query(func.sum(Order.total)).filter(Order.status.in_(['Confirmado', 'Em Preparo', 'Pronto', 'Saiu para Entrega', 'Retirado', 'Entregue'])).scalar() or 0
     pending_orders = Order.query.filter_by(status='Pendente').count()
     
     status_counts = {}
-    for status in ['Pendente', 'Confirmado', 'Enviado', 'Entregue', 'Cancelado']:
+    for status in ['Pendente', 'Confirmado', 'Em Preparo', 'Pronto', 'Saiu para Entrega', 'Retirado', 'Entregue', 'Cancelado']:
         status_counts[status] = Order.query.filter_by(status=status).count()
     
     return render_template('admin/orders.html', 
@@ -404,6 +404,14 @@ def update_order_status(order_id):
     
     if old_status != new_status:
         order.status = new_status
+        
+        if old_status == 'Pendente' and new_status != 'Cancelado' and not order.accepted_at:
+            order.accepted_at = datetime.utcnow()
+        
+        if new_status == 'Pronto' and not order.ready_at:
+            order.ready_at = datetime.utcnow()
+        elif new_status in ['Entregue', 'Retirado'] and not order.delivered_at:
+            order.delivered_at = datetime.utcnow()
         
         history = OrderStatusHistory(
             order_id=order.id,

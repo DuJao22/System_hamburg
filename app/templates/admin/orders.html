@@ -2,6 +2,23 @@
 
 {% block title %}Gestão de Pedidos - Admin{% endblock %}
 
+{% macro status_badge(status) %}
+    {% set colors = {
+        'Pendente': {'bg': '#fff3cd', 'text': '#856404'},
+        'Confirmado': {'bg': '#d4edda', 'text': '#155724'},
+        'Em Preparo': {'bg': '#ffe5cc', 'text': '#cc5200'},
+        'Pronto': {'bg': '#cce5ff', 'text': '#004085'},
+        'Saiu para Entrega': {'bg': '#e7d9ff', 'text': '#5a0099'},
+        'Retirado': {'bg': '#c3e6cb', 'text': '#155724'},
+        'Entregue': {'bg': '#c3e6cb', 'text': '#155724'},
+        'Cancelado': {'bg': '#f8d7da', 'text': '#721c24'}
+    } %}
+    {% set color = colors.get(status, {'bg': '#e0e0e0', 'text': '#333'}) %}
+    <span style="padding: 6px 14px; background: {{ color.bg }}; color: {{ color.text }}; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
+        {{ status }}
+    </span>
+{% endmacro %}
+
 {% block content %}
 <div class="content_section" style="margin-top: 30px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
@@ -53,7 +70,10 @@
                     <option value="">Todos os Status</option>
                     <option value="Pendente" {% if request.args.get('status') == 'Pendente' %}selected{% endif %}>Pendente</option>
                     <option value="Confirmado" {% if request.args.get('status') == 'Confirmado' %}selected{% endif %}>Confirmado</option>
-                    <option value="Enviado" {% if request.args.get('status') == 'Enviado' %}selected{% endif %}>Enviado</option>
+                    <option value="Em Preparo" {% if request.args.get('status') == 'Em Preparo' %}selected{% endif %}>Em Preparo</option>
+                    <option value="Pronto" {% if request.args.get('status') == 'Pronto' %}selected{% endif %}>Pronto</option>
+                    <option value="Saiu para Entrega" {% if request.args.get('status') == 'Saiu para Entrega' %}selected{% endif %}>Saiu para Entrega</option>
+                    <option value="Retirado" {% if request.args.get('status') == 'Retirado' %}selected{% endif %}>Retirado</option>
                     <option value="Entregue" {% if request.args.get('status') == 'Entregue' %}selected{% endif %}>Entregue</option>
                     <option value="Cancelado" {% if request.args.get('status') == 'Cancelado' %}selected{% endif %}>Cancelado</option>
                 </select>
@@ -235,9 +255,7 @@
                             R$ {{ "%.2f"|format(order.total) }}
                         </td>
                         <td style="padding: 15px; text-align: center;">
-                            <span style="padding: 6px 14px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% elif order.status == 'Entregue' %}#d4edda{% elif order.status == 'Cancelado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% elif order.status == 'Entregue' %}#155724{% elif order.status == 'Cancelado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 11px; font-weight: 700; text-transform: uppercase;">
-                                {{ order.status }}
-                            </span>
+                            {{ status_badge(order.status) }}
                         </td>
                         <td style="padding: 15px; text-align: center;">
                             <span style="padding: 6px 14px; background: {% if order.payment_status == 'Aprovado' %}#d4edda{% elif order.payment_status == 'Recusado' %}#f8d7da{% else %}#fff3cd{% endif %}; color: {% if order.payment_status == 'Aprovado' %}#155724{% elif order.payment_status == 'Recusado' %}#721c24{% else %}#856404{% endif %}; border-radius: 20px; font-size: 11px; font-weight: 700;">
