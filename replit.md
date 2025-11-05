@@ -52,6 +52,15 @@ The following environment variables should be configured in production:
 See `.env.example` for a template.
 
 ## Recent Changes
+- **2025-11-05**:
+  - **Sistema Completo de Gerenciamento de Status de Pedidos:** Implementado sistema robusto e visual para controle de pedidos com múltiplas etapas:
+    - **Novos Status Intermediários:** Adicionados status "Em Preparo", "Pronto", "Saiu para Entrega" e "Retirado" para melhor rastreamento do ciclo de vida do pedido.
+    - **Botões de Ação Rápida:** Interface intuitiva com botões contextuais que mudam dinamicamente baseados no status atual do pedido, facilitando transições com um clique.
+    - **Timeline Visual Moderna:** Adicionada visualização em timeline vertical mostrando o progresso do pedido com indicadores visuais, cores e ícones para cada etapa.
+    - **Registro Automático de Timestamps:** Sistema aprimorado registra automaticamente `accepted_at`, `ready_at` e `delivered_at` nas transições de status, garantindo auditoria completa.
+    - **Badges de Status Coloridos:** Implementado sistema consistente de cores e ícones para todos os status em listagens e detalhes.
+    - **Fluxos Diferenciados:** Sistema inteligente que adapta o fluxo de status baseado no tipo de entrega (delivery vs retirada).
+    - **Histórico Detalhado:** Mantém registro completo de todas as mudanças de status com timestamps, responsável e observações.
 - **2025-11-04**: 
   - Improved CORS security configuration to support environment-based origin restrictions. CORS now uses `CORS_ALLOWED_ORIGINS` environment variable for production security instead of allowing all origins by default.
   - Implemented delivery area control system with geographic radius validation. Admin can now configure store location (latitude/longitude) and maximum delivery radius in km. System validates customer addresses during checkout and blocks orders outside coverage area.
