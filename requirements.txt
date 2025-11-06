@@ -12,3 +12,17 @@ requests
 qrcode[pil]
 openai
 google-genai
+Flask==3.0.0
+Flask-Login==0.6.3
+flask-socketio
+Flask-SQLAlchemy==3.1.1
+google-genai
+gunicorn==21.2.0
+mercadopago
+openai
+python-dotenv==1.0.0
+python-engineio
+python-socketio
+qrcode[pil]
+requests
+Werkzeug==3.0.1

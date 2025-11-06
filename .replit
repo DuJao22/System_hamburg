@@ -1,4 +1,4 @@
-modules = ["web", "nodejs-20", "python-3.11", "postgresql-16"]
+modules = ["web", "python-3.12", "nodejs-20"]
 [agent]
 expertMode = true
 integrations = ["python_openai:1.0.0", "python_gemini:1.0.0"]
@@ -54,6 +54,10 @@ externalPort = 3003
 [[ports]]
 localPort = 41643
 externalPort = 3001
+
+[[ports]]
+localPort = 42789
+externalPort = 6000
 
 [[ports]]
 localPort = 43687
