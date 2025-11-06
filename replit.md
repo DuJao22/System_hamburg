@@ -15,7 +15,7 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
 - **Authentication:** Secure user authentication uses Flask-Login with Werkzeug for password hashing, including role-based access control for users and administrators.
 - **UI/UX:**
     - **Design:** Professional and organized layouts with focus on usability, responsive across devices.
-    - **Color Scheme:** Uses `#FFA500` for visual consistency.
+    - **Color Scheme:** Updated to use `#00E65D` (vibrant green) with enhanced contrast for better visibility. Shadows and borders strengthened for improved visual hierarchy.
     - **Dynamic Content:** Product categories display images on hover, and the homepage carousel loads dynamically from the database.
 - **Core Features:**
     - **User Management:** Registration with CPF and phone validation, login/logout, and session management.
@@ -43,18 +43,22 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
         - **Waiter Dashboard:** PDV interface displays PIN prominently for easy sharing with customers, with one-click PIN regeneration
         - **Status Timeline:** Visual timeline showing order progress from receipt to delivery
         - **Multi-Party Notifications:** Simultaneous updates to kitchen, waiter, and customer when status changes
-    - **QR Code Table Ordering System (NEW - Nov 2025):**
+    - **QR Code Table Ordering System (UPDATED - Nov 2025):**
         - **QR Code Generation:** Admin can create tables and generate unique QR codes for each table
         - **Customer QR Scanning:** Customers scan QR code on table to access digital menu and order system
-        - **Dual Authentication:** After scanning, customers can either login with existing account OR enter table number + customer-created PIN
-        - **PIN-Based Access:** Customers create their own 4-digit PINs when waiters open table comandas, allowing guest access without account creation
+        - **Table PIN Authentication:** Each table has a unique 4-digit PIN that customers must enter along with table number to order
+        - **Auto-Generated PINs:** System automatically generates secure 4-digit PINs when tables are created
+        - **PIN Management:** Admins can view and regenerate PINs from the admin panel at any time
+        - **PIN Display:** PINs are prominently displayed in the admin table management interface for easy reference
+        - **Security Validation:** Orders require both table number AND correct PIN, preventing unauthorized orders
+        - **Auto-Repair:** System automatically generates PINs for legacy tables without one on first access
         - **Digital Catalog:** Full product catalog with images, descriptions, prices, and real-time stock availability
         - **Table Session Management:** Secure session system tracks table orders separately from user accounts
         - **Live Order Status:** Customers view comanda items with real-time status updates (Pending → Preparing → Ready → Delivered)
         - **Order History:** Access to both active comanda items and completed order history for the table
         - **Socket.IO Integration:** Real-time notifications when order items change status
-        - **Admin QR Management:** Dashboard interface to create/delete tables and download printable QR codes
-        - **Seamless PDV Integration:** Works alongside existing PDV system, waiters manage PINs from their existing interface
+        - **Admin QR Management:** Dashboard interface to create/delete tables, download printable QR codes, and manage PINs
+        - **Seamless PDV Integration:** Works alongside existing PDV system with enhanced security
 
 ## External Dependencies
 - **Mercado Pago API:** For payment processing.
