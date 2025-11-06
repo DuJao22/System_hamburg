@@ -2,8 +2,64 @@
 
 {% block title %}Meus Pedidos - {{ store_settings.store_name }}{% endblock %}
 
+{% block extra_css %}
+<style>
+    @media (max-width: 768px) {
+        .order-header {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 15px;
+        }
+        
+        .order-header-right {
+            width: 100%;
+            text-align: left !important;
+        }
+        
+        .order-total-mobile {
+            font-size: 24px !important;
+        }
+        
+        .progress-timeline {
+            display: none !important;
+        }
+        
+        .mobile-status-only {
+            display: block !important;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .order-item-row {
+            flex-direction: column !important;
+            align-items: flex-start !important;
+            gap: 10px;
+        }
+        
+        .order-item-price {
+            text-align: left !important;
+        }
+        
+        .content_section {
+            padding: 0 15px !important;
+        }
+        
+        .order-card {
+            padding: 15px !important;
+            margin-bottom: 15px !important;
+        }
+    }
+    
+    .mobile-status-only {
+        display: none;
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="content_section" style="margin-top: 30px;">
+<div class="content_section" style="margin-top: 30px; padding: 0 20px;">
     <h2 style="font-size: 28px; margin-bottom: 30px; color: #ffffff;">
         <i class="fa fa-list"></i> Meus Pedidos
     </h2>
@@ -11,7 +67,7 @@
     {% if orders %}
     {% for order in orders %}
     <div class="order-card" data-order-id="{{ order.id }}" style="background: #fff; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
+        <div class="order-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
             <div>
                 <h3 style="font-size: 22px; color: #222; margin-bottom: 5px;">
                     <i class="fa fa-receipt" style="color: var(--color-red);"></i> 
@@ -21,8 +77,8 @@
                     <i class="fa fa-calendar"></i> {{ order.created_at.strftime('%d/%m/%Y às %H:%M') }}
                 </p>
             </div>
-            <div style="text-align: right;">
-                <div style="font-size: 28px; font-weight: 700; color: var(--color-red); margin-bottom: 8px;">
+            <div class="order-header-right" style="text-align: right;">
+                <div class="order-total-mobile" style="font-size: 28px; font-weight: 700; color: var(--color-red); margin-bottom: 8px;">
                     R$ {{ "%.2f"|format(order.total) }}
                 </div>
                 <div class="order-status-badge" data-status="{{ order.status }}" style="
@@ -76,8 +132,63 @@
             </div>
         </div>
         
-        <!-- Timeline de Progresso -->
-        <div style="margin: 25px 0; padding: 20px; background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%); border-radius: 8px;">
+        <!-- Status Mobile Simplificado -->
+        <div class="mobile-status-only">
+            <div style="font-size: 16px; font-weight: 700; color: #495057; margin-bottom: 10px;">
+                <i class="fa fa-info-circle"></i> Status Atual
+            </div>
+            <div class="order-status-badge" data-status="{{ order.status }}" style="
+                padding: 10px 20px; 
+                border-radius: 20px; 
+                font-size: 14px; 
+                font-weight: 700; 
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                {% if order.status == 'Pendente' %}
+                    background: linear-gradient(135deg, #FFF3CD 0%, #FFE69C 100%);
+                    color: #856404;
+                {% elif order.status == 'Confirmado' %}
+                    background: linear-gradient(135deg, #CCE5FF 0%, #99CCFF 100%);
+                    color: #004085;
+                {% elif order.status == 'Em Preparo' %}
+                    background: linear-gradient(135deg, #FFF3CD 0%, #FFDF80 100%);
+                    color: #664D03;
+                {% elif order.status == 'Pronto' %}
+                    background: linear-gradient(135deg, #D4EDDA 0%, #A3D9A5 100%);
+                    color: #155724;
+                {% elif order.status == 'Saiu para Entrega' %}
+                    background: linear-gradient(135deg, #D1ECF1 0%, #9FDBEA 100%);
+                    color: #0C5460;
+                {% elif order.status == 'Entregue' or order.status == 'Retirado' %}
+                    background: linear-gradient(135deg, #28A745 0%, #20C997 100%);
+                    color: white;
+                {% elif order.status == 'Cancelado' %}
+                    background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+                    color: #721C24;
+                {% else %}
+                    background: #E2E3E5;
+                    color: #383D41;
+                {% endif %}
+            ">
+                <i class="fa 
+                    {% if order.status == 'Pendente' %}fa-clock
+                    {% elif order.status == 'Confirmado' %}fa-check-circle
+                    {% elif order.status == 'Em Preparo' %}fa-utensils
+                    {% elif order.status == 'Pronto' %}fa-check-double
+                    {% elif order.status == 'Saiu para Entrega' %}fa-truck
+                    {% elif order.status == 'Entregue' %}fa-home
+                    {% elif order.status == 'Retirado' %}fa-hand-holding
+                    {% elif order.status == 'Cancelado' %}fa-times-circle
+                    {% else %}fa-question-circle
+                    {% endif %}
+                "></i>
+                <span>{{ order.status }}</span>
+            </div>
+        </div>
+        
+        <!-- Timeline de Progresso (Desktop) -->
+        <div class="progress-timeline" style="margin: 25px 0; padding: 20px; background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%); border-radius: 8px;">
             <h4 style="margin-bottom: 15px; color: #495057; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
                 <i class="fa fa-route"></i> Acompanhe seu Pedido
             </h4>
@@ -143,14 +254,14 @@
                 <i class="fa fa-shopping-bag"></i> Itens do Pedido
             </h4>
             {% for item in order.items %}
-            <div style="padding: 15px; background: #F8F9FA; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+            <div class="order-item-row" style="padding: 15px; background: #F8F9FA; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
                 <div>
                     <strong style="color: #212529; font-size: 15px;">{{ item.product.name }}</strong>
                     <div style="color: #6C757D; font-size: 13px; margin-top: 3px;">
                         <i class="fa fa-times"></i> {{ item.quantity }} unidade{{ 's' if item.quantity > 1 else '' }}
                     </div>
                 </div>
-                <div style="text-align: right;">
+                <div class="order-item-price" style="text-align: right;">
                     <div style="font-weight: 700; color: var(--color-red); font-size: 16px;">
                         R$ {{ "%.2f"|format(item.price * item.quantity) }}
                     </div>
