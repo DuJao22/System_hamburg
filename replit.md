@@ -53,6 +53,10 @@ See `.env.example` for a template.
 
 ## Recent Changes
 - **2025-11-06**:
+  - **Criação Automática de Comanda ao Abrir Mesa:** Otimizado o fluxo de trabalho do PDV - quando o garçom abre uma mesa, o sistema automaticamente cria uma comanda e redireciona para a página de pedidos, eliminando a etapa manual de criação de comanda e acelerando o atendimento.
+    - **Transação Atômica:** Implementado tratamento de exceções com rollback automático - se houver qualquer erro na criação da comanda, a mesa não fica travada como ocupada
+    - **Fluxo Direto:** Garçom clica em "Abrir Mesa" e já pode começar a lançar pedidos imediatamente
+    - **Mensagem Clara:** Sistema exibe feedback confirmando abertura da mesa e número da comanda criada
   - **Sistema de Gerenciamento de Usuários e Atendentes:** Implementado painel administrativo completo para gerenciar usuários do sistema:
     - **Criação de Atendentes:** Admin pode criar usuários com diferentes papéis (roles): Cliente, Atendente, Cozinha, Gerente e Admin
     - **Gestão de Permissões:** Sistema de controle de acesso baseado em roles - atendentes têm acesso ao PDV para abrir mesas, gerenciar caixa e lançar pedidos
