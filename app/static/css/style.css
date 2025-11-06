@@ -1618,7 +1618,11 @@ body {
 .cart-title {
     font-size: var(--font-xxl);
     font-weight: 700;
-    color: white;
+    color: #111;
+    background: linear-gradient(135deg, #00C851 0%, #007E33 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
     margin-bottom: var(--space-xl);
     display: flex;
     align-items: center;
@@ -1694,10 +1698,11 @@ body {
 
 .cart-item__extras {
     margin-top: var(--space-sm);
-    padding: var(--space-sm);
-    background: #fff8e1;
-    border-left: 3px solid var(--color-red);
+    padding: var(--space-md);
+    background: linear-gradient(135deg, #fff8e1 0%, #ffe9b3 100%);
+    border-left: 4px solid var(--color-red);
     border-radius: var(--border-radius-sm);
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .cart-item__extras-title {
@@ -1713,7 +1718,8 @@ body {
 
 .cart-item__extra-item {
     font-size: var(--font-sm);
-    color: #555;
+    color: #111;
+    font-weight: 600;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -1797,8 +1803,8 @@ body {
 }
 
 .cart-summary__label {
-    color: #555;
-    font-weight: 500;
+    color: #222;
+    font-weight: 600;
 }
 
 .cart-summary__value {
@@ -1849,11 +1855,15 @@ body {
     .cart-item__subtotal::before {
         content: attr(data-label);
         display: block;
-        font-size: var(--font-xs);
+        font-size: var(--font-sm);
         font-weight: 700;
-        color: var(--color-red);
+        color: #111;
+        background: var(--color-red);
+        padding: 4px 8px;
+        border-radius: 4px;
         text-transform: uppercase;
-        margin-bottom: var(--space-xxs);
+        margin-bottom: var(--space-xs);
+        display: inline-block;
     }
     
     .cart-item__actions {
@@ -1916,7 +1926,7 @@ body {
     font-size: var(--font-md);
     display: block;
     margin-bottom: var(--space-xs);
-    color: #222;
+    color: #111;
     font-weight: 700;
 }
 
@@ -1937,7 +1947,7 @@ body {
 .form-section__title {
     font-size: var(--font-lg);
     margin-bottom: var(--space-md);
-    color: #222;
+    color: #111;
     font-weight: 700;
     display: flex;
     align-items: center;
@@ -1953,7 +1963,7 @@ body {
     font-size: var(--font-md);
     font-weight: 700;
     margin-bottom: var(--space-xs);
-    color: #222;
+    color: #111;
 }
 
 .form-label i {
@@ -2003,20 +2013,26 @@ body {
 }
 
 .pix-discount-banner {
-    background: #fff8e1;
+    background: linear-gradient(135deg, #fff8e1 0%, #ffe9b3 100%);
     padding: var(--space-md);
     border-radius: var(--border-radius);
     margin: var(--space-lg) 0;
-    border-left: 3px solid var(--color-red);
+    border-left: 4px solid var(--color-red);
     font-size: var(--font-md);
+    color: #111;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(255, 165, 0, 0.2);
 }
 
 .pix-discount-banner i {
     color: var(--color-red);
+    font-size: 18px;
+    margin-right: 8px;
 }
 
 .pix-discount-banner strong {
-    color: #222;
+    color: var(--color-red);
+    font-size: var(--font-lg);
 }
 
 .empty-cart {
