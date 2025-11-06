@@ -304,7 +304,7 @@ class Comanda(db.Model):
     items = db.relationship('ComandaItem', backref='comanda', lazy=True, cascade='all, delete-orphan')
     
     def calculate_total(self):
-        return sum(item.price * item.quantity for item in self.items)
+        return sum(item.calculate_item_total() for item in self.items)
 
 class ComandaItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
@@ -313,9 +313,26 @@ class ComandaItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False, default=1)
     price = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(20), default='pending')
+    sent_to_kitchen = db.Column(db.Boolean, default=False)
+    notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     product = db.relationship('Product')
+    extras = db.relationship('ComandaItemExtra', backref='comanda_item', lazy=True, cascade='all, delete-orphan')
+    
+    def calculate_item_total(self):
+        product_total = self.price * self.quantity
+        extras_total = sum(extra.price * extra.quantity for extra in self.extras)
+        return product_total + extras_total
+
+class ComandaItemExtra(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comanda_item_id = db.Column(db.Integer, db.ForeignKey('comanda_item.id'), nullable=False)
+    extra_id = db.Column(db.Integer, db.ForeignKey('extra.id'), nullable=False)
+    quantity = db.Column(db.Integer, default=1, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+    
+    extra = db.relationship('Extra')
 
 class CashRegister(db.Model):
     id = db.Column(db.Integer, primary_key=True)

@@ -3,6 +3,151 @@
 {% block title %}Comanda #{{ comanda.comanda_number }} - {{ store_settings.store_name }}{% endblock %}
 
 {% block content %}
+<style>
+.product-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    cursor: pointer;
+    transition: transform 0.2s;
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.product-card img {
+    width: 100%;
+    height: 150px;
+    object-fit: cover;
+}
+
+.product-info {
+    padding: 15px;
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #111;
+    margin-bottom: 8px;
+}
+
+.product-price {
+    color: #28a745;
+    font-weight: 700;
+    font-size: 16px;
+}
+
+.category-tabs {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    margin-bottom: 20px;
+}
+
+.category-tab {
+    padding: 10px 20px;
+    background: #f8f9fa;
+    border: 2px solid #dee2e6;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-weight: 600;
+    color: #666;
+}
+
+.category-tab.active {
+    background: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.category-tab:hover {
+    border-color: #007bff;
+}
+
+.extras-section {
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 2px solid #eee;
+}
+
+.extra-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    margin-bottom: 10px;
+}
+
+.extra-name {
+    font-weight: 600;
+    color: #111;
+}
+
+.extra-price {
+    color: #28a745;
+    font-weight: 600;
+}
+
+.item-extras {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+}
+
+.send-to-kitchen-btn {
+    background: #ff6b35;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-weight: 600;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 16px;
+}
+
+.send-to-kitchen-btn:hover {
+    background: #e55a2a;
+}
+
+.send-to-kitchen-btn:disabled {
+    background: #ccc;
+    cursor: not-allowed;
+}
+
+.item-status-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 12px;
+    font-size: 11px;
+    font-weight: 600;
+    margin-left: 10px;
+}
+
+.status-pending {
+    background: #fff3cd;
+    color: #856404;
+}
+
+.status-sent {
+    background: #d4edda;
+    color: #155724;
+}
+</style>
+
 <div class="pdv-container">
     <div class="pdv-header">
         <h2><i class="fa fa-list"></i> Comanda #{{ comanda.comanda_number }}</h2>
@@ -28,21 +173,58 @@
                 {{ 'Aberta' if comanda.status == 'open' else 'Fechada' }}
             </span>
         </p>
-        
-        {% if comanda.status == 'open' %}
-        <div style="margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap;">
-            <button onclick="document.getElementById('addItemModal').style.display='block'" class="btn btn-primary">
-                <i class="fa fa-plus"></i> Adicionar Item
-            </button>
-            <button onclick="document.getElementById('closeComandaModal').style.display='block'" class="btn btn-success">
-                <i class="fa fa-check"></i> Fechar Comanda
-            </button>
-        </div>
-        {% endif %}
     </div>
     
+    {% if comanda.status == 'open' %}
     <div class="pdv-card">
-        <h3><i class="fa fa-shopping-cart"></i> Itens da Comanda</h3>
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fa fa-plus-circle"></i> Adicionar Produtos</h3>
+            <input type="text" id="searchProduct" placeholder="Buscar produto..." style="padding: 8px; border: 1px solid #ddd; border-radius: 6px; width: 250px;">
+        </div>
+        
+        <div class="category-tabs">
+            <button class="category-tab active" onclick="filterByCategory('all')">Todos</button>
+            {% for category in categories %}
+            <button class="category-tab" onclick="filterByCategory('{{ category.id }}')">{{ category.name }}</button>
+            {% endfor %}
+        </div>
+        
+        <div class="product-grid" id="productGrid">
+            {% for product in products %}
+            <div class="product-card" 
+                 data-category="{{ product.category_id }}" 
+                 data-name="{{ product.name|lower }}"
+                 data-product-id="{{ product.id }}"
+                 data-product-name="{{ product.name }}"
+                 data-product-price="{{ product.price }}"
+                 data-product-image="{{ product.image_url or '/static/images/default-product.jpg' }}"
+                 onclick="openProductModalFromCard(this)">
+                <img src="{{ product.image_url or '/static/images/default-product.jpg' }}" alt="{{ product.name }}">
+                <div class="product-info">
+                    <div class="product-name">{{ product.name }}</div>
+                    <div class="product-price">R$ {{ "%.2f"|format(product.price) }}</div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+    
+    <div class="pdv-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+            <h3><i class="fa fa-shopping-cart"></i> Itens da Comanda</h3>
+            {% if comanda.status == 'open' and comanda.items %}
+            <div>
+                <button onclick="sendToKitchen()" class="send-to-kitchen-btn" id="sendKitchenBtn">
+                    <i class="fa fa-paper-plane"></i> Enviar para Cozinha
+                </button>
+                <button onclick="document.getElementById('closeComandaModal').style.display='block'" class="btn btn-success" style="margin-left: 10px;">
+                    <i class="fa fa-check"></i> Fechar Comanda
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        
         {% if comanda.items %}
             <div style="overflow-x: auto;">
                 <table class="pdv-table">
@@ -52,6 +234,7 @@
                             <th style="text-align: center;">Qtd</th>
                             <th style="text-align: right;">Preço Un.</th>
                             <th style="text-align: right;">Subtotal</th>
+                            <th style="text-align: center;">Status</th>
                             {% if comanda.status == 'open' %}
                             <th style="text-align: center;">Ações</th>
                             {% endif %}
@@ -60,17 +243,41 @@
                     <tbody>
                         {% for item in comanda.items %}
                         <tr>
-                            <td>{{ item.product.name }}</td>
+                            <td>
+                                <strong>{{ item.product.name }}</strong>
+                                {% if item.extras %}
+                                <div class="item-extras">
+                                    <i class="fa fa-plus-circle"></i> Extras: 
+                                    {% for extra in item.extras %}
+                                        {{ extra.extra.name }} ({{ extra.quantity }}x){% if not loop.last %}, {% endif %}
+                                    {% endfor %}
+                                </div>
+                                {% endif %}
+                                {% if item.notes %}
+                                <div class="item-extras">
+                                    <i class="fa fa-sticky-note"></i> Obs: {{ item.notes }}
+                                </div>
+                                {% endif %}
+                            </td>
                             <td style="text-align: center;">{{ item.quantity }}</td>
                             <td style="text-align: right;">R$ {{ "%.2f"|format(item.price) }}</td>
-                            <td style="text-align: right; font-weight: 600;">R$ {{ "%.2f"|format(item.price * item.quantity) }}</td>
+                            <td style="text-align: right; font-weight: 600;">R$ {{ "%.2f"|format(item.calculate_item_total()) }}</td>
+                            <td style="text-align: center;">
+                                <span class="item-status-badge {% if item.sent_to_kitchen %}status-sent{% else %}status-pending{% endif %}">
+                                    {{ 'Enviado' if item.sent_to_kitchen else 'Pendente' }}
+                                </span>
+                            </td>
                             {% if comanda.status == 'open' %}
                             <td style="text-align: center;">
+                                {% if not item.sent_to_kitchen %}
                                 <form method="POST" action="{{ url_for('pdv.remove_comanda_item', comanda_id=comanda.id, item_id=item.id) }}" style="display: inline;">
                                     <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remover este item?')">
                                         <i class="fa fa-trash"></i>
                                     </button>
                                 </form>
+                                {% else %}
+                                <span style="color: #999;">-</span>
+                                {% endif %}
                             </td>
                             {% endif %}
                         </tr>
@@ -78,7 +285,7 @@
                         <tr style="background: #f8f9fa; font-weight: 700;">
                             <td colspan="{% if comanda.status == 'open' %}3{% else %}3{% endif %}" style="text-align: right; color: #111;">TOTAL:</td>
                             <td style="text-align: right; font-size: 18px; color: #111;">R$ {{ "%.2f"|format(comanda.total) }}</td>
-                            {% if comanda.status == 'open' %}<td></td>{% endif %}
+                            <td colspan="2"></td>
                         </tr>
                     </tbody>
                 </table>
@@ -89,26 +296,52 @@
     </div>
 </div>
 
-<div id="addItemModal" class="pdv-modal">
-    <div class="pdv-modal-content">
+<div id="productModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 600px;">
         <div class="pdv-modal-header">
-            <h3>Adicionar Item</h3>
-            <button onclick="document.getElementById('addItemModal').style.display='none'" class="pdv-modal-close">&times;</button>
+            <h3 id="modalProductName">Adicionar Item</h3>
+            <button onclick="closeProductModal()" class="pdv-modal-close">&times;</button>
         </div>
-        <form method="POST" action="{{ url_for('pdv.add_comanda_item', comanda_id=comanda.id) }}">
-            <div class="pdv-form-group">
-                <label class="pdv-form-label">Produto:</label>
-                <select name="product_id" required class="pdv-form-select">
-                    {% for product in products %}
-                        <option value="{{ product.id }}">{{ product.name }} - R$ {{ "%.2f"|format(product.price) }}</option>
-                    {% endfor %}
-                </select>
+        <form method="POST" action="{{ url_for('pdv.add_comanda_item', comanda_id=comanda.id) }}" id="addItemForm">
+            <div style="text-align: center; margin-bottom: 20px;">
+                <img id="modalProductImage" src="" style="max-width: 100%; max-height: 200px; border-radius: 10px;">
             </div>
+            
+            <input type="hidden" name="product_id" id="modalProductId">
+            
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Preço:</label>
+                <div style="font-size: 24px; font-weight: 700; color: #28a745;" id="modalProductPrice"></div>
+            </div>
+            
             <div class="pdv-form-group">
                 <label class="pdv-form-label">Quantidade:</label>
                 <input type="number" name="quantity" value="1" min="1" required class="pdv-form-input">
             </div>
-            <button type="submit" class="btn btn-primary" style="width: 100%;">Adicionar</button>
+            
+            {% if extras %}
+            <div class="extras-section">
+                <h4 style="margin-bottom: 15px;"><i class="fa fa-plus-circle"></i> Adicionais (Opcionais)</h4>
+                {% for extra in extras %}
+                <div class="extra-item">
+                    <div>
+                        <div class="extra-name">{{ extra.name }}</div>
+                        <div class="extra-price">+ R$ {{ "%.2f"|format(extra.price) }}</div>
+                    </div>
+                    <input type="number" name="extra_{{ extra.id }}" min="0" value="0" style="width: 60px; padding: 5px; border: 1px solid #ddd; border-radius: 4px;">
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+            
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Observações (Opcional):</label>
+                <textarea name="notes" class="pdv-form-input" rows="2" placeholder="Ex: Sem cebola, ponto da carne..."></textarea>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; font-size: 18px; padding: 15px;">
+                <i class="fa fa-check"></i> Adicionar à Comanda
+            </button>
         </form>
     </div>
 </div>
@@ -134,4 +367,94 @@
         </form>
     </div>
 </div>
+
+<script>
+function filterByCategory(categoryId) {
+    const tabs = document.querySelectorAll('.category-tab');
+    const products = document.querySelectorAll('.product-card');
+    
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+    
+    products.forEach(product => {
+        if (categoryId === 'all' || product.dataset.category === categoryId) {
+            product.style.display = 'block';
+        } else {
+            product.style.display = 'none';
+        }
+    });
+}
+
+document.getElementById('searchProduct').addEventListener('input', function(e) {
+    const searchTerm = e.target.value.toLowerCase();
+    const products = document.querySelectorAll('.product-card');
+    
+    products.forEach(product => {
+        const productName = product.dataset.name;
+        if (productName.includes(searchTerm)) {
+            product.style.display = 'block';
+        } else {
+            product.style.display = 'none';
+        }
+    });
+});
+
+function openProductModalFromCard(cardElement) {
+    const productId = cardElement.dataset.productId;
+    const productName = cardElement.dataset.productName;
+    const productPrice = parseFloat(cardElement.dataset.productPrice);
+    const productImage = cardElement.dataset.productImage;
+    
+    openProductModal(productId, productName, productPrice, productImage);
+}
+
+function openProductModal(productId, productName, productPrice, productImage) {
+    document.getElementById('modalProductId').value = productId;
+    document.getElementById('modalProductName').textContent = productName;
+    document.getElementById('modalProductPrice').textContent = 'R$ ' + productPrice.toFixed(2);
+    document.getElementById('modalProductImage').src = productImage;
+    document.getElementById('productModal').style.display = 'block';
+    
+    document.querySelector('[name="quantity"]').value = 1;
+    document.querySelectorAll('[name^="extra_"]').forEach(input => input.value = 0);
+    document.querySelector('[name="notes"]').value = '';
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+function sendToKitchen() {
+    if (confirm('Enviar todos os itens pendentes para a cozinha?')) {
+        fetch('{{ url_for("pdv.send_to_kitchen", comanda_id=comanda.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                alert('Pedido enviado para a cozinha com sucesso!');
+                location.reload();
+            } else {
+                alert('Erro ao enviar pedido: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro ao enviar pedido para a cozinha!');
+            console.error(error);
+        });
+    }
+}
+
+window.onclick = function(event) {
+    if (event.target.id === 'productModal') {
+        closeProductModal();
+    }
+    if (event.target.id === 'closeComandaModal') {
+        document.getElementById('closeComandaModal').style.display = 'none';
+    }
+}
+</script>
 {% endblock %}

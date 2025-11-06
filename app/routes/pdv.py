@@ -150,20 +150,29 @@ def create_comanda():
 @login_required
 @admin_or_waiter_required
 def comanda_detail(comanda_id):
+    from app.models import Category, Extra
+    
     comanda = Comanda.query.get_or_404(comanda_id)
+    categories = Category.query.all()
     products = Product.query.filter_by(active=True).all()
+    extras = Extra.query.filter_by(active=True).all()
     
     return render_template('pdv/comanda_detail.html', 
-                         comanda=comanda, 
-                         products=products)
+                         comanda=comanda,
+                         categories=categories, 
+                         products=products,
+                         extras=extras)
 
 @pdv_bp.route('/comanda/<int:comanda_id>/adicionar-item', methods=['POST'])
 @login_required
 @admin_or_waiter_required
 def add_comanda_item(comanda_id):
+    from app.models import ComandaItemExtra, Extra
+    
     comanda = Comanda.query.get_or_404(comanda_id)
     product_id = request.form.get('product_id', type=int)
     quantity = request.form.get('quantity', 1, type=int)
+    notes = request.form.get('notes', '')
     
     product = Product.query.get_or_404(product_id)
     
@@ -171,9 +180,27 @@ def add_comanda_item(comanda_id):
         comanda_id=comanda_id,
         product_id=product_id,
         quantity=quantity,
-        price=product.price
+        price=product.price,
+        notes=notes
     )
     db.session.add(item)
+    db.session.flush()
+    
+    for field_name in request.form:
+        if field_name.startswith('extra_'):
+            extra_id = int(field_name.replace('extra_', ''))
+            extra_quantity = int(request.form.get(field_name, 0))
+            
+            if extra_quantity > 0:
+                extra = Extra.query.get(extra_id)
+                if extra and extra.active:
+                    comanda_item_extra = ComandaItemExtra(
+                        comanda_item_id=item.id,
+                        extra_id=extra.id,
+                        quantity=extra_quantity,
+                        price=extra.price
+                    )
+                    db.session.add(comanda_item_extra)
     
     comanda.total = comanda.calculate_total()
     db.session.commit()
@@ -224,6 +251,65 @@ def close_comanda(comanda_id):
     if comanda.table_id:
         return redirect(url_for('pdv.table_detail', table_id=comanda.table_id))
     return redirect(url_for('pdv.index'))
+
+@pdv_bp.route('/comanda/<int:comanda_id>/enviar-cozinha', methods=['POST'])
+@login_required
+@admin_or_waiter_required
+def send_to_kitchen(comanda_id):
+    from app.models import KitchenOrder, KitchenOrderItem
+    from flask_socketio import emit
+    from app import socketio
+    
+    try:
+        comanda = Comanda.query.get_or_404(comanda_id)
+        
+        pending_items = [item for item in comanda.items if not item.sent_to_kitchen]
+        
+        if not pending_items:
+            return jsonify({'success': False, 'message': 'Nenhum item pendente para enviar'})
+        
+        kitchen_order = KitchenOrder(
+            comanda_id=comanda_id,
+            table_number=comanda.table.table_number if comanda.table else 'Balcão',
+            waiter_id=current_user.id,
+            status='pending'
+        )
+        db.session.add(kitchen_order)
+        db.session.flush()
+        
+        for item in pending_items:
+            item.sent_to_kitchen = True
+            
+            extras_list = ', '.join([f"{e.extra.name} ({e.quantity}x)" for e in item.extras]) if item.extras else None
+            
+            kitchen_item = KitchenOrderItem(
+                kitchen_order_id=kitchen_order.id,
+                product_name=item.product.name,
+                quantity=item.quantity,
+                extras=extras_list,
+                notes=item.notes
+            )
+            db.session.add(kitchen_item)
+        
+        db.session.commit()
+        
+        try:
+            socketio.emit('new_kitchen_order', {
+                'order_id': kitchen_order.id,
+                'table': kitchen_order.table_number,
+                'items_count': len(pending_items)
+            }, namespace='/kitchen')
+        except:
+            pass
+        
+        return jsonify({
+            'success': True, 
+            'message': f'{len(pending_items)} item(ns) enviado(s) para a cozinha'
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'success': False, 'message': str(e)})
 
 @pdv_bp.route('/caixa')
 @login_required

@@ -252,8 +252,8 @@ function getStatusClass(status) {
     return classes[status] || 'badge badge-secondary';
 }
 
-const style = document.createElement('style');
-style.textContent = `
+const orderNotificationStyles = document.createElement('style');
+orderNotificationStyles.textContent = `
     @keyframes slideInRight {
         from {
             transform: translateX(400px);
@@ -309,7 +309,7 @@ style.textContent = `
         50% { transform: scale(1.2); }
     }
 `;
-document.head.appendChild(style);
+document.head.appendChild(orderNotificationStyles);
 
 if (typeof io !== 'undefined') {
     document.addEventListener('DOMContentLoaded', function() {
