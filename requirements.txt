@@ -11,3 +11,4 @@ python-socketio
 requests
 qrcode[pil]
 openai
+google-genai
