@@ -1,0 +1,131 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Usuários - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-users"></i> Gerenciar Usuários
+        </h2>
+        <a href="{{ url_for('admin.add_user') }}" class="btn" style="background: #00C851; color: #fff; padding: 12px 25px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+            <i class="fa fa-plus"></i> Adicionar Usuário
+        </a>
+    </div>
+
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 30px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: 700; color: var(--color-red);">{{ role_counts.customer }}</div>
+                <div style="font-size: 12px; color: #666;">Clientes</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: 700; color: #667eea;">{{ role_counts.waiter }}</div>
+                <div style="font-size: 12px; color: #666;">Atendentes</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: 700; color: #ff9800;">{{ role_counts.kitchen }}</div>
+                <div style="font-size: 12px; color: #666;">Cozinha</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: 700; color: #00C851;">{{ role_counts.manager }}</div>
+                <div style="font-size: 12px; color: #666;">Gerentes</div>
+            </div>
+            <div style="text-align: center; padding: 15px; background: #f8f9fa; border-radius: 6px;">
+                <div style="font-size: 24px; font-weight: 700; color: #111;">{{ role_counts.admin }}</div>
+                <div style="font-size: 12px; color: #666;">Admins</div>
+            </div>
+        </div>
+
+        <form method="GET" style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px;">
+            <div>
+                <select name="role" class="input" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+                    <option value="">Todos os papéis</option>
+                    <option value="customer" {% if current_role_filter == 'customer' %}selected{% endif %}>Clientes</option>
+                    <option value="waiter" {% if current_role_filter == 'waiter' %}selected{% endif %}>Atendentes</option>
+                    <option value="kitchen" {% if current_role_filter == 'kitchen' %}selected{% endif %}>Cozinha</option>
+                    <option value="manager" {% if current_role_filter == 'manager' %}selected{% endif %}>Gerentes</option>
+                </select>
+            </div>
+            <div>
+                <input type="text" name="search" placeholder="Buscar por nome, email ou CPF..." class="input" value="{{ current_search }}" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 6px;">
+            </div>
+            <div>
+                <button type="submit" class="btn" style="background: var(--color-red); color: #fff; padding: 10px 30px; border-radius: 6px; border: none; cursor: pointer;">
+                    <i class="fa fa-search"></i> Filtrar
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); overflow: hidden;">
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead style="background: #f8f9fa;">
+                <tr>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">ID</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Nome</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Email</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Papel</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Telefone</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Cadastrado em</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% if users %}
+                    {% for user in users %}
+                    <tr style="border-bottom: 1px solid #eee;">
+                        <td style="padding: 15px;">{{ user.id }}</td>
+                        <td style="padding: 15px;">
+                            <strong>{{ user.username }}</strong>
+                            {% if user.is_admin %}
+                            <span style="background: #111; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">ADMIN</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">{{ user.email }}</td>
+                        <td style="padding: 15px;">
+                            {% if user.role == 'waiter' %}
+                                <span style="background: #667eea; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Atendente</span>
+                            {% elif user.role == 'kitchen' %}
+                                <span style="background: #ff9800; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Cozinha</span>
+                            {% elif user.role == 'manager' %}
+                                <span style="background: #00C851; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Gerente</span>
+                            {% else %}
+                                <span style="background: #999; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Cliente</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px;">{{ user.phone or '-' }}</td>
+                        <td style="padding: 15px;">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" style="color: #667eea; text-decoration: none; margin-right: 10px;" title="Editar">
+                                <i class="fa fa-edit"></i>
+                            </a>
+                            {% if user.id != current_user.id %}
+                            <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este usuário?');">
+                                <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0;" title="Deletar">
+                                    <i class="fa fa-trash"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                {% else %}
+                    <tr>
+                        <td colspan="7" style="padding: 40px; text-align: center; color: #999;">
+                            <i class="fa fa-users" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i>
+                            <div>Nenhum usuário encontrado</div>
+                        </td>
+                    </tr>
+                {% endif %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 30px; text-align: center;">
+        <a href="{{ url_for('admin.dashboard') }}" style="color: var(--color-red); text-decoration: none;">
+            <i class="fa fa-arrow-left"></i> Voltar ao Dashboard
+        </a>
+    </div>
+</div>
+{% endblock %}

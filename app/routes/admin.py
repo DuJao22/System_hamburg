@@ -1007,3 +1007,162 @@ def toggle_slide(slide_id):
     status = 'ativado' if slide.active else 'desativado'
     flash(f'Slide {status} com sucesso!', 'success')
     return redirect(url_for('admin.slides'))
+
+@admin_bp.route('/usuarios')
+@login_required
+@admin_required
+def users():
+    role_filter = request.args.get('role', '')
+    search = request.args.get('search', '')
+    
+    query = User.query
+    
+    if role_filter:
+        query = query.filter_by(role=role_filter)
+    
+    if search:
+        query = query.filter(
+            or_(
+                User.username.contains(search),
+                User.email.contains(search),
+                User.cpf.contains(search) if search else False
+            )
+        )
+    
+    users = query.order_by(User.created_at.desc()).all()
+    
+    role_counts = {
+        'customer': User.query.filter_by(role='customer').count(),
+        'waiter': User.query.filter_by(role='waiter').count(),
+        'kitchen': User.query.filter_by(role='kitchen').count(),
+        'manager': User.query.filter_by(role='manager').count(),
+        'admin': User.query.filter_by(is_admin=True).count()
+    }
+    
+    return render_template('admin/users.html', 
+                         users=users, 
+                         role_counts=role_counts,
+                         current_role_filter=role_filter,
+                         current_search=search)
+
+@admin_bp.route('/usuarios/adicionar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def add_user():
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        cpf = request.form.get('cpf', '')
+        phone = request.form.get('phone', '')
+        role = request.form.get('role', 'customer')
+        is_admin = request.form.get('is_admin') == 'on'
+        
+        if User.query.filter_by(email=email).first():
+            flash('Este email já está cadastrado.', 'danger')
+            return render_template('admin/add_user.html')
+        
+        if User.query.filter_by(username=username).first():
+            flash('Este nome de usuário já está em uso.', 'danger')
+            return render_template('admin/add_user.html')
+        
+        cpf_normalized = ''.join(filter(str.isdigit, cpf)) if cpf else None
+        
+        if cpf_normalized and len(cpf_normalized) != 11:
+            flash('CPF inválido. Digite 11 dígitos.', 'danger')
+            return render_template('admin/add_user.html')
+        
+        if cpf_normalized and User.query.filter_by(cpf=cpf_normalized).first():
+            flash('Este CPF já está cadastrado.', 'danger')
+            return render_template('admin/add_user.html')
+        
+        user = User(
+            username=username, 
+            email=email, 
+            cpf=cpf_normalized, 
+            phone=phone,
+            role=role,
+            is_admin=is_admin
+        )
+        user.set_password(password)
+        
+        db.session.add(user)
+        db.session.commit()
+        
+        role_name = {
+            'waiter': 'Atendente',
+            'kitchen': 'Cozinha',
+            'manager': 'Gerente',
+            'customer': 'Cliente'
+        }.get(role, role)
+        
+        flash(f'{role_name} "{username}" criado com sucesso!', 'success')
+        return redirect(url_for('admin.users'))
+    
+    return render_template('admin/add_user.html')
+
+@admin_bp.route('/usuarios/editar/<int:user_id>', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def edit_user(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    if request.method == 'POST':
+        username = request.form.get('username')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        cpf = request.form.get('cpf', '')
+        phone = request.form.get('phone', '')
+        role = request.form.get('role', 'customer')
+        is_admin = request.form.get('is_admin') == 'on'
+        
+        if email != user.email and User.query.filter_by(email=email).first():
+            flash('Este email já está cadastrado.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+        
+        if username != user.username and User.query.filter_by(username=username).first():
+            flash('Este nome de usuário já está em uso.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+        
+        cpf_normalized = ''.join(filter(str.isdigit, cpf)) if cpf else None
+        
+        if cpf_normalized and len(cpf_normalized) != 11:
+            flash('CPF inválido. Digite 11 dígitos.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+        
+        if cpf_normalized and cpf_normalized != user.cpf and User.query.filter_by(cpf=cpf_normalized).first():
+            flash('Este CPF já está cadastrado.', 'danger')
+            return render_template('admin/edit_user.html', user=user)
+        
+        user.username = username
+        user.email = email
+        user.cpf = cpf_normalized
+        user.phone = phone
+        user.role = role
+        user.is_admin = is_admin
+        
+        if password:
+            user.set_password(password)
+        
+        db.session.commit()
+        
+        flash(f'Usuário "{username}" atualizado com sucesso!', 'success')
+        return redirect(url_for('admin.users'))
+    
+    return render_template('admin/edit_user.html', user=user)
+
+@admin_bp.route('/usuarios/deletar/<int:user_id>', methods=['POST'])
+@login_required
+@admin_required
+def delete_user(user_id):
+    user = User.query.get_or_404(user_id)
+    
+    if user.id == current_user.id:
+        flash('Você não pode deletar sua própria conta!', 'danger')
+        return redirect(url_for('admin.users'))
+    
+    db.session.delete(user)
+    db.session.commit()
+    
+    flash(f'Usuário "{user.username}" deletado com sucesso!', 'success')
+    return redirect(url_for('admin.users'))
