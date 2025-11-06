@@ -81,6 +81,14 @@
                 </div>
                 {% endif %}
                 
+                <div class="observations-section">
+                    <label for="observations" style="font-size: 15px; font-weight: 700; color: #ffffff; margin-bottom: 10px; display: block;">
+                        <i class="fa fa-comment" style="color: var(--color-red);"></i> Observações
+                    </label>
+                    <textarea name="observations" id="observations" rows="3" placeholder="Ex: Sem cebola, tirar picles, adicionar molho extra..." style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 14px; resize: vertical; font-family: inherit;"></textarea>
+                    <small style="display: block; margin-top: 5px; color: #cccccc; font-size: 12px;">Use este campo para especificar ingredientes que deseja tirar ou acrescentar</small>
+                </div>
+                
                 <div class="quantity-selector">
                     <label for="quantity">Quantidade:</label>
                     <input type="number" name="quantity" id="quantity" value="1" min="1" max="99">
@@ -289,6 +297,15 @@
     background: #fff;
     border: 2px solid #f0f0f0;
     border-radius: 8px;
+}
+
+.observations-section {
+    margin-bottom: 25px;
+}
+
+.observations-section textarea:focus {
+    outline: none;
+    border-color: #DC143C;
 }
 
 .extras-grid {

@@ -42,6 +42,17 @@
                     {% endfor %}
                 </div>
                 {% endif %}
+                
+                {% if item.observations %}
+                <div class="cart-item__observations">
+                    <div class="cart-item__observations-title">
+                        <i class="fa fa-comment"></i> Observações:
+                    </div>
+                    <div class="cart-item__observations-text">
+                        {{ item.observations }}
+                    </div>
+                </div>
+                {% endif %}
             </div>
             
             <div class="cart-item__price" data-label="Preço">
@@ -379,6 +390,30 @@
     </div>
     {% endif %}
 </div>
+
+<style>
+.cart-item__observations {
+    margin-top: 12px;
+    padding: 12px;
+    background: #f8f9fa;
+    border-left: 3px solid #17a2b8;
+    border-radius: 4px;
+}
+
+.cart-item__observations-title {
+    font-size: 13px;
+    font-weight: 700;
+    color: #17a2b8;
+    margin-bottom: 6px;
+}
+
+.cart-item__observations-text {
+    font-size: 13px;
+    color: #495057;
+    line-height: 1.6;
+    font-style: italic;
+}
+</style>
 
 <script>
     function toggleDeliveryFields() {

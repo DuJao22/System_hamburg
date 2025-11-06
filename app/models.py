@@ -119,6 +119,7 @@ class OrderItem(db.Model):
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
+    observations = db.Column(db.Text)
     
     product = db.relationship('Product')
     extras = db.relationship('OrderItemExtra', backref='order_item', lazy=True, cascade='all, delete-orphan')
@@ -137,6 +138,7 @@ class CartItem(db.Model):
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
     quantity = db.Column(db.Integer, nullable=False, default=1)
+    observations = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
     product = db.relationship('Product')

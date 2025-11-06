@@ -52,8 +52,9 @@ def view_cart():
 def add_to_cart(product_id):
     product = Product.query.get_or_404(product_id)
     quantity = int(request.form.get('quantity', 1))
+    observations = request.form.get('observations', '').strip()
     
-    cart_item = CartItem(user_id=current_user.id, product_id=product_id, quantity=quantity)
+    cart_item = CartItem(user_id=current_user.id, product_id=product_id, quantity=quantity, observations=observations if observations else None)
     db.session.add(cart_item)
     db.session.flush()
     
@@ -265,7 +266,8 @@ def checkout():
             order_id=order.id,
             product_id=cart_item.product_id,
             quantity=cart_item.quantity,
-            price=cart_item.product.price
+            price=cart_item.product.price,
+            observations=cart_item.observations
         )
         db.session.add(order_item)
         db.session.flush()
