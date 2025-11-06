@@ -14,14 +14,20 @@ def get_available_api_keys():
     """Retorna lista de chaves API disponíveis"""
     api_keys = []
     
-    for i in range(1, 6):
-        key = os.environ.get(f"GEMINI_API_KEY_{i}")
-        if key:
-            api_keys.append(key)
-    
-    fallback_key = os.environ.get("GEMINI_API_KEY")
-    if fallback_key and fallback_key not in api_keys:
-        api_keys.append(fallback_key)
+    try:
+        from gemini_keys import GEMINI_API_KEYS
+        api_keys = [key for key in GEMINI_API_KEYS if key and key.strip()]
+        print(f"📋 Carregadas {len(api_keys)} chaves do arquivo gemini_keys.py")
+    except ImportError:
+        print("⚠️ Arquivo gemini_keys.py não encontrado, usando variáveis de ambiente...")
+        for i in range(1, 6):
+            key = os.environ.get(f"GEMINI_API_KEY_{i}")
+            if key:
+                api_keys.append(key)
+        
+        fallback_key = os.environ.get("GEMINI_API_KEY")
+        if fallback_key and fallback_key not in api_keys:
+            api_keys.append(fallback_key)
     
     return api_keys
 
