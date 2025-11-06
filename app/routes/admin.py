@@ -6,6 +6,7 @@ from werkzeug.utils import secure_filename
 from app import db
 from app.models import Product, Category, Order, User, Coupon, StoreSettings, Slide, Extra
 from datetime import datetime
+from app.utils.timezone import utcnow_brasilia
 import os
 import secrets
 
@@ -406,12 +407,12 @@ def update_order_status(order_id):
         order.status = new_status
         
         if old_status == 'Pendente' and new_status != 'Cancelado' and not order.accepted_at:
-            order.accepted_at = datetime.utcnow()
+            order.accepted_at = utcnow_brasilia()
         
         if new_status == 'Pronto' and not order.ready_at:
-            order.ready_at = datetime.utcnow()
+            order.ready_at = utcnow_brasilia()
         elif new_status in ['Entregue', 'Retirado'] and not order.delivered_at:
-            order.delivered_at = datetime.utcnow()
+            order.delivered_at = utcnow_brasilia()
         
         history = OrderStatusHistory(
             order_id=order.id,
@@ -448,7 +449,7 @@ def accept_order(order_id):
     if order.status == 'Pendente':
         old_status = order.status
         order.status = 'Confirmado'
-        order.accepted_at = datetime.utcnow()
+        order.accepted_at = utcnow_brasilia()
         
         history = OrderStatusHistory(
             order_id=order.id,
@@ -632,7 +633,7 @@ def order_statistics():
     from sqlalchemy import func, extract
     from datetime import datetime, timedelta
     
-    today = datetime.utcnow().date()
+    today = utcnow_brasilia().date()
     week_ago = today - timedelta(days=7)
     month_ago = today - timedelta(days=30)
     

@@ -2,6 +2,7 @@ from app import db
 from flask_login import UserMixin
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, timedelta
+from app.utils.timezone import utcnow_brasilia
 import secrets
 
 class User(UserMixin, db.Model):
@@ -12,7 +13,7 @@ class User(UserMixin, db.Model):
     cpf = db.Column(db.String(14), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     orders = db.relationship('Order', backref='user', lazy=True)
     wishlists = db.relationship('Wishlist', backref='user', lazy=True, cascade='all, delete-orphan')
@@ -29,7 +30,7 @@ class Category(db.Model):
     name = db.Column(db.String(100), nullable=False, unique=True)
     description = db.Column(db.Text)
     image_url = db.Column(db.String(500))
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     products = db.relationship('Product', backref='category', lazy=True)
 
@@ -48,7 +49,7 @@ class Product(db.Model):
     category_id = db.Column(db.Integer, db.ForeignKey('category.id'))
     featured = db.Column(db.Boolean, default=False)
     active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     def get_all_images(self):
         images = []
@@ -82,8 +83,8 @@ class Order(db.Model):
     accepted_at = db.Column(db.DateTime, nullable=True)
     ready_at = db.Column(db.DateTime, nullable=True)
     delivered_at = db.Column(db.DateTime, nullable=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
-    updated_at = db.Column(db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    updated_at = db.Column(db.DateTime, default=utcnow_brasilia, onupdate=utcnow_brasilia)
     
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
     status_history = db.relationship('OrderStatusHistory', backref='order', lazy=True, cascade='all, delete-orphan')
@@ -101,7 +102,7 @@ class Extra(db.Model):
     description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
     active = db.Column(db.Boolean, default=True)
-    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
 
 class OrderItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
