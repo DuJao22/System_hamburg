@@ -10,40 +10,356 @@
     
     {% if orders %}
     {% for order in orders %}
-    <div style="background: #fff; border-radius: 8px; padding: 20px; margin-bottom: 20px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 15px; border-bottom: 2px solid #e0e0e0;">
+    <div class="order-card" data-order-id="{{ order.id }}" style="background: #fff; border-radius: 12px; padding: 25px; margin-bottom: 25px; box-shadow: 0 4px 20px rgba(0,0,0,0.1); transition: transform 0.3s, box-shadow 0.3s;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-bottom: 20px; border-bottom: 2px solid #e0e0e0;">
             <div>
-                <h3 style="font-size: 20px; color: #222;">Pedido #{{ order.id }}</h3>
-                <p style="color: #777; font-size: 14px;">Data: {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}</p>
+                <h3 style="font-size: 22px; color: #222; margin-bottom: 5px;">
+                    <i class="fa fa-receipt" style="color: var(--color-red);"></i> 
+                    Pedido #{{ order.id }}
+                </h3>
+                <p style="color: #777; font-size: 14px; margin: 0;">
+                    <i class="fa fa-calendar"></i> {{ order.created_at.strftime('%d/%m/%Y às %H:%M') }}
+                </p>
             </div>
             <div style="text-align: right;">
-                <div style="font-size: 24px; font-weight: 700; color: var(--color-red);">R$ {{ "%.2f"|format(order.total) }}</div>
-                <div style="padding: 5px 15px; background: {% if order.status == 'Confirmado' %}#d4edda{% elif order.status == 'Enviado' %}#d1ecf1{% else %}#fff3cd{% endif %}; color: {% if order.status == 'Confirmado' %}#155724{% elif order.status == 'Enviado' %}#0c5460{% else %}#856404{% endif %}; border-radius: 15px; font-size: 12px; font-weight: 600; margin-top: 5px;">
-                    {{ order.status }}
+                <div style="font-size: 28px; font-weight: 700; color: var(--color-red); margin-bottom: 8px;">
+                    R$ {{ "%.2f"|format(order.total) }}
+                </div>
+                <div class="order-status-badge" data-status="{{ order.status }}" style="
+                    padding: 8px 20px; 
+                    border-radius: 20px; 
+                    font-size: 13px; 
+                    font-weight: 700; 
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 8px;
+                    {% if order.status == 'Pendente' %}
+                        background: linear-gradient(135deg, #FFF3CD 0%, #FFE69C 100%);
+                        color: #856404;
+                    {% elif order.status == 'Confirmado' %}
+                        background: linear-gradient(135deg, #CCE5FF 0%, #99CCFF 100%);
+                        color: #004085;
+                    {% elif order.status == 'Em Preparo' %}
+                        background: linear-gradient(135deg, #FFF3CD 0%, #FFDF80 100%);
+                        color: #664D03;
+                    {% elif order.status == 'Pronto' %}
+                        background: linear-gradient(135deg, #D4EDDA 0%, #A3D9A5 100%);
+                        color: #155724;
+                    {% elif order.status == 'Saiu para Entrega' %}
+                        background: linear-gradient(135deg, #D1ECF1 0%, #9FDBEA 100%);
+                        color: #0C5460;
+                    {% elif order.status == 'Entregue' or order.status == 'Retirado' %}
+                        background: linear-gradient(135deg, #28A745 0%, #20C997 100%);
+                        color: white;
+                    {% elif order.status == 'Cancelado' %}
+                        background: linear-gradient(135deg, #F8D7DA 0%, #F5C6CB 100%);
+                        color: #721C24;
+                    {% else %}
+                        background: #E2E3E5;
+                        color: #383D41;
+                    {% endif %}
+                ">
+                    <i class="fa 
+                        {% if order.status == 'Pendente' %}fa-clock
+                        {% elif order.status == 'Confirmado' %}fa-check-circle
+                        {% elif order.status == 'Em Preparo' %}fa-utensils
+                        {% elif order.status == 'Pronto' %}fa-check-double
+                        {% elif order.status == 'Saiu para Entrega' %}fa-truck
+                        {% elif order.status == 'Entregue' %}fa-home
+                        {% elif order.status == 'Retirado' %}fa-hand-holding
+                        {% elif order.status == 'Cancelado' %}fa-times-circle
+                        {% else %}fa-question-circle
+                        {% endif %}
+                    "></i>
+                    <span>{{ order.status }}</span>
                 </div>
             </div>
         </div>
+        
+        <!-- Timeline de Progresso -->
+        <div style="margin: 25px 0; padding: 20px; background: linear-gradient(135deg, #F8F9FA 0%, #E9ECEF 100%); border-radius: 8px;">
+            <h4 style="margin-bottom: 15px; color: #495057; font-size: 14px; text-transform: uppercase; letter-spacing: 1px;">
+                <i class="fa fa-route"></i> Acompanhe seu Pedido
+            </h4>
+            <div style="display: flex; justify-content: space-between; position: relative;">
+                <!-- Linha de progresso -->
+                <div style="position: absolute; top: 15px; left: 0; right: 0; height: 3px; background: #DEE2E6; z-index: 1;"></div>
+                <div style="position: absolute; top: 15px; left: 0; height: 3px; background: linear-gradient(90deg, #28A745, #20C997); z-index: 2; width: 
+                    {% if order.status == 'Pendente' %}0%
+                    {% elif order.status == 'Confirmado' %}20%
+                    {% elif order.status == 'Em Preparo' %}40%
+                    {% elif order.status == 'Pronto' %}60%
+                    {% elif order.status == 'Saiu para Entrega' %}80%
+                    {% elif order.status == 'Entregue' or order.status == 'Retirado' %}100%
+                    {% elif order.status == 'Cancelado' %}0%
+                    {% else %}0%
+                    {% endif %}; transition: width 1s ease-in-out;
+                "></div>
+                
+                <!-- Status Points -->
+                {% set status_list = ['Pendente', 'Confirmado', 'Em Preparo', 'Pronto', 'Saiu para Entrega', 'Entregue'] if order.delivery_type == 'delivery' else ['Pendente', 'Confirmado', 'Em Preparo', 'Pronto', 'Retirado'] %}
+                {% for status_item in status_list %}
+                <div style="flex: 1; text-align: center; position: relative; z-index: 3;">
+                    <div style="
+                        width: 30px; 
+                        height: 30px; 
+                        border-radius: 50%; 
+                        margin: 0 auto 10px; 
+                        display: flex; 
+                        align-items: center; 
+                        justify-content: center;
+                        {% if status_list.index(status_item) <= status_list.index(order.status) if order.status in status_list else False %}
+                            background: linear-gradient(135deg, #28A745, #20C997);
+                            color: white;
+                            box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
+                        {% else %}
+                            background: white;
+                            border: 3px solid #DEE2E6;
+                            color: #ADB5BD;
+                        {% endif %}
+                        transition: all 0.5s;
+                    ">
+                        <i class="fa 
+                            {% if status_item == 'Pendente' %}fa-clock
+                            {% elif status_item == 'Confirmado' %}fa-check-circle
+                            {% elif status_item == 'Em Preparo' %}fa-utensils
+                            {% elif status_item == 'Pronto' %}fa-check-double
+                            {% elif status_item == 'Saiu para Entrega' %}fa-truck
+                            {% elif status_item == 'Entregue' %}fa-home
+                            {% elif status_item == 'Retirado' %}fa-hand-holding
+                            {% endif %}" style="font-size: 14px;"></i>
+                    </div>
+                    <div style="font-size: 11px; font-weight: 600; color: {% if status_list.index(status_item) <= status_list.index(order.status) if order.status in status_list else False %}#28A745{% else %}#ADB5BD{% endif %};">
+                        {{ status_item }}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        
+        <!-- Itens do Pedido -->
         <div>
-            <h4 style="margin-bottom: 10px;">Itens:</h4>
+            <h4 style="margin-bottom: 15px; color: #495057; font-size: 16px;">
+                <i class="fa fa-shopping-bag"></i> Itens do Pedido
+            </h4>
             {% for item in order.items %}
-            <div style="padding: 10px; background: #f9f9f9; border-radius: 5px; margin-bottom: 8px;">
-                <strong>{{ item.product.name }}</strong> - 
-                Quantidade: {{ item.quantity }} - 
-                R$ {{ "%.2f"|format(item.price) }} cada
+            <div style="padding: 15px; background: #F8F9FA; border-radius: 8px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="color: #212529; font-size: 15px;">{{ item.product.name }}</strong>
+                    <div style="color: #6C757D; font-size: 13px; margin-top: 3px;">
+                        <i class="fa fa-times"></i> {{ item.quantity }} unidade{{ 's' if item.quantity > 1 else '' }}
+                    </div>
+                </div>
+                <div style="text-align: right;">
+                    <div style="font-weight: 700; color: var(--color-red); font-size: 16px;">
+                        R$ {{ "%.2f"|format(item.price * item.quantity) }}
+                    </div>
+                    <div style="font-size: 12px; color: #6C757D;">
+                        R$ {{ "%.2f"|format(item.price) }} cada
+                    </div>
+                </div>
             </div>
             {% endfor %}
         </div>
+        
+        <!-- Informações de Entrega -->
+        {% if order.delivery_type == 'delivery' and order.delivery_address %}
+        <div style="margin-top: 20px; padding: 15px; background: #E7F3FF; border-left: 4px solid #0C5460; border-radius: 4px;">
+            <strong style="color: #0C5460;">
+                <i class="fa fa-map-marker-alt"></i> Endereço de Entrega:
+            </strong>
+            <p style="margin: 5px 0 0 0; color: #495057;">{{ order.delivery_address }}</p>
+        </div>
+        {% endif %}
     </div>
     {% endfor %}
     {% else %}
-    <div style="text-align: center; padding: 60px; background: #f9f9f9; border-radius: 8px;">
-        <i class="fa fa-list" style="font-size: 80px; color: #ccc; margin-bottom: 20px;"></i>
-        <h3 style="font-size: 24px; margin-bottom: 15px;">Você ainda não fez nenhum pedido</h3>
-        <p style="color: #777; margin-bottom: 30px;">Comece a comprar agora!</p>
-        <a href="{{ url_for('main.index') }}" class="btn_buy" style="display: inline-block; text-decoration: none;">
-            <i class="fa fa-shopping-bag"></i> IR ÀS COMPRAS
+    <div style="text-align: center; padding: 80px 20px; background: linear-gradient(135deg, #667EEA 0%, #764BA2 100%); border-radius: 16px; color: white;">
+        <i class="fa fa-shopping-bag" style="font-size: 100px; margin-bottom: 30px; opacity: 0.3;"></i>
+        <h3 style="font-size: 28px; margin-bottom: 15px; font-weight: 700;">Nenhum Pedido Ainda</h3>
+        <p style="font-size: 16px; margin-bottom: 35px; opacity: 0.9;">Comece a explorar nossos deliciosos produtos!</p>
+        <a href="{{ url_for('main.index') }}" class="btn_buy" style="display: inline-block; text-decoration: none; padding: 15px 40px; font-size: 16px; background: white; color: #667EEA;">
+            <i class="fa fa-shopping-cart"></i> VER PRODUTOS
         </a>
     </div>
     {% endif %}
 </div>
+
+<!-- Sistema de Notificações -->
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+let userSocket = null;
+let lastKnownStatuses = {};
+
+// Inicializar status conhecidos
+{% for order in orders %}
+lastKnownStatuses[{{ order.id }}] = '{{ order.status }}';
+{% endfor %}
+
+// Conectar ao Socket.IO para receber atualizações
+function initializeUserSocket() {
+    userSocket = io({
+        transports: ['websocket', 'polling']
+    });
+
+    userSocket.on('connect', function() {
+        console.log('✅ Conectado ao sistema de atualizações');
+        // Entrar na sala do usuário
+        userSocket.emit('join_user_room', { user_id: {{ current_user.id }} });
+    });
+
+    userSocket.on('order_status_changed', function(data) {
+        console.log('📦 Status do pedido atualizado:', data);
+        
+        // Verificar se o status realmente mudou
+        if (lastKnownStatuses[data.order_id] !== data.new_status) {
+            showOrderStatusNotification(data);
+            lastKnownStatuses[data.order_id] = data.new_status;
+            
+            // Atualizar a página após 2 segundos
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        }
+    });
+
+    userSocket.on('disconnect', function() {
+        console.log('❌ Desconectado do sistema');
+    });
+}
+
+// Mostrar notificação de mudança de status
+function showOrderStatusNotification(data) {
+    const statusConfig = {
+        'Pendente': { icon: 'fa-clock', color: '#FFC107', bgColor: '#FFF3CD', title: 'Pedido Recebido' },
+        'Confirmado': { icon: 'fa-check-circle', color: '#0080FF', bgColor: '#CCE5FF', title: 'Pedido Confirmado' },
+        'Em Preparo': { icon: 'fa-utensils', color: '#FF9800', bgColor: '#FFE0B2', title: 'Em Preparação' },
+        'Pronto': { icon: 'fa-check-double', color: '#4CAF50', bgColor: '#C8E6C9', title: 'Pedido Pronto' },
+        'Saiu para Entrega': { icon: 'fa-truck', color: '#00BCD4', bgColor: '#B2EBF2', title: 'Saiu para Entrega' },
+        'Entregue': { icon: 'fa-home', color: '#28A745', bgColor: '#D4EDDA', title: 'Pedido Entregue' },
+        'Retirado': { icon: 'fa-hand-holding', color: '#28A745', bgColor: '#D4EDDA', title: 'Pedido Retirado' },
+        'Cancelado': { icon: 'fa-times-circle', color: '#DC3545', bgColor: '#F8D7DA', title: 'Pedido Cancelado' }
+    };
+    
+    const config = statusConfig[data.new_status] || { icon: 'fa-info-circle', color: '#6C757D', bgColor: '#E2E3E5', title: 'Atualização' };
+    
+    const notification = document.createElement('div');
+    notification.className = 'status-notification';
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <div style="
+                width: 50px; 
+                height: 50px; 
+                background: ${config.bgColor}; 
+                border-radius: 50%; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center;
+                flex-shrink: 0;
+            ">
+                <i class="fa ${config.icon}" style="font-size: 24px; color: ${config.color};"></i>
+            </div>
+            <div style="flex: 1;">
+                <h4 style="margin: 0 0 5px 0; font-size: 16px; color: #212529; font-weight: 700;">
+                    ${config.title}
+                </h4>
+                <p style="margin: 0; font-size: 14px; color: #6C757D;">
+                    Pedido #${data.order_id} - ${data.new_status}
+                </p>
+            </div>
+            <button onclick="this.parentElement.parentElement.remove()" style="
+                background: transparent; 
+                border: none; 
+                font-size: 24px; 
+                color: #ADB5BD; 
+                cursor: pointer; 
+                padding: 0;
+                width: 30px;
+                height: 30px;
+                flex-shrink: 0;
+            ">&times;</button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Tocar som de notificação
+    playNotificationSound();
+    
+    // Remover após 6 segundos
+    setTimeout(() => {
+        notification.style.animation = 'slideOutRight 0.5s';
+        setTimeout(() => notification.remove(), 500);
+    }, 6000);
+}
+
+// Tocar som de notificação
+function playNotificationSound() {
+    const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBStux/DajjgJEWSz6OWpVxgLQ5ji8L1tJAUqcsXu2YPFAAAAAAA=');
+    audio.play().catch(e => console.log('Erro ao reproduzir som:', e));
+}
+
+// CSS para notificações
+const style = document.createElement('style');
+style.textContent = `
+    .status-notification {
+        position: fixed;
+        top: 90px;
+        right: 20px;
+        background: white;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        z-index: 10000;
+        min-width: 350px;
+        max-width: 400px;
+        animation: slideInRight 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        border-left: 5px solid var(--color-red);
+    }
+    
+    @keyframes slideInRight {
+        from {
+            transform: translateX(450px);
+            opacity: 0;
+        }
+        to {
+            transform: translateX(0);
+            opacity: 1;
+        }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            transform: translateX(0);
+            opacity: 1;
+        }
+        to {
+            transform: translateX(450px);
+            opacity: 0;
+        }
+    }
+    
+    .order-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+    }
+    
+    @media (max-width: 768px) {
+        .status-notification {
+            right: 10px;
+            left: 10px;
+            min-width: auto;
+            max-width: none;
+        }
+    }
+`;
+document.head.appendChild(style);
+
+// Inicializar socket quando a página carregar
+document.addEventListener('DOMContentLoaded', function() {
+    {% if current_user.is_authenticated %}
+    initializeUserSocket();
+    {% endif %}
+});
+</script>
 {% endblock %}

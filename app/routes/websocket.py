@@ -11,12 +11,16 @@ def handle_connect():
         user_id = session.get('_user_id')
         if user_id:
             user = User.query.get(int(user_id))
-            if user and user.is_admin:
-                join_room('admin_orders')
-                emit('connected', {'message': 'Conectado ao sistema de pedidos'})
-                
-                pending_count = Order.query.filter_by(status='Pendente').count()
-                emit('order_stats', {'pending_count': pending_count})
+            if user:
+                if user.is_admin:
+                    join_room('admin_orders')
+                    emit('connected', {'message': 'Conectado ao sistema de pedidos'})
+                    
+                    pending_count = Order.query.filter_by(status='Pendente').count()
+                    emit('order_stats', {'pending_count': pending_count})
+                else:
+                    join_room(f'user_{user.id}')
+                    emit('connected', {'message': 'Conectado ao sistema de atualizações'})
                 return
         
         emit('error', {'message': 'Não autorizado'})
@@ -26,7 +30,27 @@ def handle_connect():
 
 @socketio.on('disconnect')
 def handle_disconnect():
-    leave_room('admin_orders')
+    try:
+        user_id = session.get('_user_id')
+        if user_id:
+            user = User.query.get(int(user_id))
+            if user:
+                if user.is_admin:
+                    leave_room('admin_orders')
+                else:
+                    leave_room(f'user_{user.id}')
+    except Exception as e:
+        print(f"Erro ao desconectar: {e}")
+
+@socketio.on('join_user_room')
+def handle_join_user_room(data):
+    try:
+        user_id = session.get('_user_id')
+        if user_id and int(user_id) == data.get('user_id'):
+            join_room(f'user_{user_id}')
+            print(f"Usuário {user_id} entrou na sala de notificações")
+    except Exception as e:
+        print(f"Erro ao entrar na sala: {e}")
 
 @socketio.on('request_order_update')
 def handle_order_update_request():
@@ -75,3 +99,10 @@ def notify_order_update(order):
         'estimated_delivery_time': order.estimated_delivery_time
     }
     socketio.emit('order_updated', order_data, room='admin_orders', namespace='/')
+    
+    user_notification = {
+        'order_id': order.id,
+        'new_status': order.status,
+        'payment_status': order.payment_status
+    }
+    socketio.emit('order_status_changed', user_notification, room=f'user_{order.user_id}', namespace='/')
