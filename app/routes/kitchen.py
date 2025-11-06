@@ -42,8 +42,10 @@ def update_order_status(order_id):
     
     valid_statuses = ['Confirmado', 'Em Preparo', 'Pronto', 'Entregue']
     if new_status not in valid_statuses:
-        return jsonify({'success': False, 'message': 'Status inválido'}), 400
+        flash('Status inválido', 'danger')
+        return redirect(url_for('kitchen.kds'))
     
+    old_status = order.status
     order.status = new_status
     db.session.commit()
     
@@ -57,7 +59,8 @@ def update_order_status(order_id):
         'status': new_status
     }, room='admin_orders')
     
-    return jsonify({'success': True, 'message': f'Pedido #{order.id} atualizado para {new_status}'})
+    flash(f'✅ Pedido #{order.id} atualizado de "{old_status}" para "{new_status}"', 'success')
+    return redirect(url_for('kitchen.kds'))
 
 @kitchen_bp.route('/comanda-item/<int:item_id>/status', methods=['POST'])
 @login_required
@@ -68,7 +71,8 @@ def update_comanda_item_status(item_id):
     
     valid_statuses = ['pending', 'preparing', 'ready', 'delivered']
     if new_status not in valid_statuses:
-        return jsonify({'success': False, 'message': 'Status inválido'}), 400
+        flash('Status inválido', 'danger')
+        return redirect(url_for('kitchen.kds'))
     
     item.status = new_status
     db.session.commit()
@@ -78,7 +82,15 @@ def update_comanda_item_status(item_id):
         'status': new_status
     }, room='admin_orders')
     
-    return jsonify({'success': True, 'message': 'Item atualizado'})
+    status_display = {
+        'pending': 'Pendente',
+        'preparing': 'Em Preparo',
+        'ready': 'Pronto',
+        'delivered': 'Entregue'
+    }
+    
+    flash(f'✅ Item da comanda #{item.comanda.comanda_number} atualizado para "{status_display.get(new_status, new_status)}"', 'success')
+    return redirect(url_for('kitchen.kds'))
 
 @kitchen_bp.route('/api/pendentes')
 @login_required
