@@ -28,6 +28,14 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
     - **Add-ons and Observations:** Allows selecting product extras and adding special observations during checkout, with quantity and price tracking.
     - **Payment Gateway:** Integration with Mercado Pago, including webhook handling for order status updates. Supports pickup and delivery.
     - **Delivery Area Control:** Geographic coverage validation restricts deliveries to a configurable radius from the store. Admin enters a ZIP code (CEP), and the system automatically fetches address details via ViaCEP and calculates coordinates using Nominatim/OpenStreetMap for radius validation. Includes reverse CEP search functionality.
+    - **Real-Time Order Tracking (NEW - Nov 2025):**
+        - **PIN Authentication:** Waiters generate a 6-digit PIN for each table/comanda that customers use to access their order status
+        - **Customer Access:** Customers can log in with comanda number + PIN to view their orders in real-time
+        - **Live Status Updates:** Real-time notifications via Socket.IO when order status changes (Pending → Preparing → Ready → Delivered)
+        - **Kitchen Integration:** Kitchen staff can update order status, automatically notifying both waiters and customers
+        - **Waiter Dashboard:** PDV interface displays PIN prominently for easy sharing with customers, with one-click PIN regeneration
+        - **Status Timeline:** Visual timeline showing order progress from receipt to delivery
+        - **Multi-Party Notifications:** Simultaneous updates to kitchen, waiter, and customer when status changes
 
 ## External Dependencies
 - **Mercado Pago API:** For payment processing.
