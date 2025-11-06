@@ -1,0 +1,47 @@
+✅ Funcionalidades principais
+1. Frente de atendimento / PDV / Salão
+Controle de mesas, comandas e pedidos nas mesas: permite abrir mesa, inserir consumos, chamar garçom, dividir conta etc. Consumer+2Consumer | Blog+2
+
+Vendas no balcão (quando o negócio tem balcão ou take-away) integrado ao mesmo sistema. loja.consumer.com.br+1
+
+Comanda móvel (garçom com tablet ou smartphone) para lançar pedidos diretamente da mesa. Consumer | Blog+1
+
+Emissão de abertura e fechamento de caixa, turnos de funcionários, controle de movimentações no caixa. loja.consumer.com.br+1
+
+Integração com impressoras de cozinha ou monitores KDS para produção dos pedidos. Consumer+1
+
+
+2. Delivery & Online
+Sistema próprio de delivery: site/app de pedidos integrados ao sistema, sem comissões adicionadas em alguns planos. Consumer
+
+Cardápio digital (para o cliente acessar via QRCode ou link, fazer pedido direto) – componentes de “mesa” ou “para entrega” digitalizado. Consumer+1
+
+Integração com marketplaces de entrega como iFood e também nova integração com 99Food. Estado de Minas+1
+
+App para entregador: roteirização, localização, status do pedido em tempo real. Consumer
+
+Definição de área de entrega: bairros, CEPs, raio de entrega com taxas diferenciadas. Consumer
+
+
+3. Estoque, ficha técnica, produção
+Controle de estoque: entradas, saídas, níveis, alertas de falta. Consumer
+
+Ficha técnica de produtos: custo dos insumos, definir margens, calcular CMV (Custo de Mercadoria Vendida). Consumer+1
+
+Produção automática de solicitações para a cozinha com base nos pedidos, pedidos agrupados etc. Consumer
+
+
+4. Financeiro e Relatórios
+Relatórios completos: vendas por período, ticket médio, produtos mais vendidos, custo, lucratividade. Consumer | Blog+1
+
+Fluxo de caixa, contas a pagar/receber, fechamento de caixa. Consumer
+
+Acesso remoto: ver os números do restaurante de qualquer lugar (notebook, tablet, celular) com conexão. Consumer | Blog
+
+
+5. Fidelização e marketing
+Programa de fidelidade: pontos, cashback, cupons de desconto para clientes. Consumer+1
+
+Bot ou ChatBot para atendimento via WhatsApp + envio de notificações automáticas do status dos pedidos. Consumer+1
+
+Ferramenta de anúncios: Consumer Ads para criação automatizada de anúncios no Google.
