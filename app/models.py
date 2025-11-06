@@ -413,3 +413,24 @@ class LoyaltyTransaction(db.Model):
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     order = db.relationship('Order')
+
+class ChatConversation(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    session_id = db.Column(db.String(100), unique=True, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    user_name = db.Column(db.String(200), nullable=True)
+    user_phone = db.Column(db.String(50), nullable=True)
+    context_summary = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    updated_at = db.Column(db.DateTime, default=utcnow_brasilia, onupdate=utcnow_brasilia)
+    
+    messages = db.relationship('ChatMessage', backref='conversation', lazy=True, cascade='all, delete-orphan', order_by='ChatMessage.created_at')
+    user = db.relationship('User', backref='chat_conversations')
+
+class ChatMessage(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    conversation_id = db.Column(db.Integer, db.ForeignKey('chat_conversation.id'), nullable=False)
+    role = db.Column(db.String(20), nullable=False)
+    content = db.Column(db.Text, nullable=False)
+    extra_data = db.Column(db.Text, nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
