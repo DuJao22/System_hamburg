@@ -126,13 +126,89 @@
 
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
-            <div style="max-width: 1200px; margin: 20px auto; padding: 0 20px;">
+            <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; max-width: 400px;">
                 {% for category, message in messages %}
-                    <div class="alert alert-{{ category }}" style="padding: 15px; margin-bottom: 10px; border-radius: 5px; background: {% if category == 'success' %}#d4edda{% elif category == 'danger' %}#f8d7da{% elif category == 'warning' %}#fff3cd{% else %}#d1ecf1{% endif %}; color: {% if category == 'success' %}#155724{% elif category == 'danger' %}#721c24{% elif category == 'warning' %}#856404{% else %}#0c5460{% endif %}; border: 1px solid {% if category == 'success' %}#c3e6cb{% elif category == 'danger' %}#f5c6cb{% elif category == 'warning' %}#ffeeba{% else %}#bee5eb{% endif %};">
+                    <div class="flash-message flash-{{ category }}" style="
+                        padding: 18px 24px 18px 60px;
+                        margin-bottom: 15px;
+                        border-radius: 10px;
+                        background: {% if category == 'success' %}linear-gradient(135deg, #00C851 0%, #007E33 100%){% elif category == 'danger' %}linear-gradient(135deg, #dc3545 0%, #c82333 100%){% elif category == 'warning' %}linear-gradient(135deg, #ffc107 0%, #ff9800 100%){% else %}linear-gradient(135deg, #17a2b8 0%, #138496 100%){% endif %};
+                        color: #fff;
+                        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+                        position: relative;
+                        animation: slideIn 0.4s ease-out;
+                        border-left: 5px solid {% if category == 'success' %}#00A040{% elif category == 'danger' %}#a71d2a{% elif category == 'warning' %}#e0a800{% else %}#117a8b{% endif %};
+                        font-size: 15px;
+                        font-weight: 600;
+                        line-height: 1.5;
+                    ">
+                        <div style="position: absolute; left: 20px; top: 50%; transform: translateY(-50%); font-size: 24px;">
+                            {% if category == 'success' %}
+                                <i class="fa fa-check-circle"></i>
+                            {% elif category == 'danger' %}
+                                <i class="fa fa-exclamation-circle"></i>
+                            {% elif category == 'warning' %}
+                                <i class="fa fa-warning"></i>
+                            {% else %}
+                                <i class="fa fa-info-circle"></i>
+                            {% endif %}
+                        </div>
                         {{ message }}
+                        <button onclick="this.parentElement.style.display='none'" style="
+                            position: absolute;
+                            right: 12px;
+                            top: 50%;
+                            transform: translateY(-50%);
+                            background: rgba(255,255,255,0.2);
+                            border: none;
+                            color: #fff;
+                            font-size: 20px;
+                            cursor: pointer;
+                            width: 28px;
+                            height: 28px;
+                            border-radius: 50%;
+                            display: flex;
+                            align-items: center;
+                            justify-content: center;
+                            transition: background 0.2s;
+                        " onmouseover="this.style.background='rgba(255,255,255,0.3)'" onmouseout="this.style.background='rgba(255,255,255,0.2)'">
+                            <i class="fa fa-times"></i>
+                        </button>
                     </div>
                 {% endfor %}
             </div>
+            <style>
+                @keyframes slideIn {
+                    from {
+                        transform: translateX(400px);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(0);
+                        opacity: 1;
+                    }
+                }
+                .flash-message {
+                    animation: slideIn 0.4s ease-out;
+                }
+                @media (max-width: 768px) {
+                    .flash-message {
+                        max-width: calc(100vw - 40px);
+                        font-size: 14px;
+                    }
+                }
+            </style>
+            <script>
+                setTimeout(function() {
+                    var flashMessages = document.querySelectorAll('.flash-message');
+                    flashMessages.forEach(function(msg) {
+                        msg.style.animation = 'slideOut 0.4s ease-out';
+                        setTimeout(function() {
+                            msg.style.display = 'none';
+                        }, 400);
+                    });
+                }, 5000);
+            </script>
         {% endif %}
     {% endwith %}
 
