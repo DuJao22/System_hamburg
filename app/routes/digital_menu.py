@@ -72,30 +72,40 @@ def finalize_order():
         flash('Carrinho vazio!', 'warning')
         return redirect(url_for('digital_menu.index'))
     
-    table_number = session.get('table_number')
-    comanda_number = session.get('comanda_number')
-    customer_name = request.form.get('customer_name', 'Cliente')
+    table_number = request.form.get('table_number', '').strip()
+    table_pin = request.form.get('table_pin', '').strip()
+    customer_name = request.form.get('customer_name', 'Cliente').strip() or 'Cliente'
     
-    comanda = None
+    if not table_number or not table_pin:
+        flash('Por favor, informe o número da mesa e o PIN!', 'danger')
+        return redirect(url_for('digital_menu.temp_cart'))
     
-    if comanda_number:
-        comanda = Comanda.query.filter_by(comanda_number=comanda_number, status='open').first()
+    table = Table.query.filter_by(table_number=table_number).first()
     
-    if not comanda and table_number:
-        table = Table.query.filter_by(table_number=table_number).first()
-        if table:
-            comanda = Comanda(
-                comanda_number=f'AUTO-{datetime.now().strftime("%Y%m%d%H%M%S")}',
-                table_id=table.id,
-                customer_name=customer_name
-            )
-            db.session.add(comanda)
-            db.session.flush()
+    if not table:
+        flash(f'Mesa {table_number} não encontrada!', 'danger')
+        return redirect(url_for('digital_menu.temp_cart'))
+    
+    if not table.access_pin:
+        import secrets
+        table.access_pin = ''.join([str(secrets.randbelow(10)) for _ in range(4)])
+        db.session.commit()
+        flash(f'PIN gerado automaticamente para Mesa {table_number}: {table.access_pin}. Informe ao administrador!', 'warning')
+        flash('PIN incorreto! Verifique o PIN na mesa e tente novamente.', 'danger')
+        return redirect(url_for('digital_menu.temp_cart'))
+    
+    if table.access_pin != table_pin:
+        flash('PIN incorreto! Verifique o PIN na mesa e tente novamente.', 'danger')
+        return redirect(url_for('digital_menu.temp_cart'))
+    
+    comanda = Comanda.query.filter_by(table_id=table.id, status='open').first()
     
     if not comanda:
         comanda = Comanda(
-            comanda_number=f'DIGITAL-{datetime.now().strftime("%Y%m%d%H%M%S")}',
-            customer_name=customer_name
+            comanda_number=f'MESA{table_number}-{datetime.now().strftime("%Y%m%d%H%M%S")}',
+            table_id=table.id,
+            customer_name=customer_name,
+            access_pin=table_pin
         )
         db.session.add(comanda)
         db.session.flush()

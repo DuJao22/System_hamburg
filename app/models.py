@@ -292,6 +292,7 @@ class Table(db.Model):
     opened_at = db.Column(db.DateTime, nullable=True)
     waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
     qr_code_url = db.Column(db.String(500), nullable=True)
+    access_pin = db.Column(db.String(4), nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     waiter = db.relationship('User', foreign_keys=[waiter_id])

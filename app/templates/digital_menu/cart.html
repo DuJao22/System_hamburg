@@ -29,13 +29,31 @@
     </div>
     
     <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <h3 style="margin-bottom: 20px;">Finalizar Pedido</h3>
+        <h3 style="margin-bottom: 20px; color: #111;">Finalizar Pedido</h3>
         <form method="POST" action="{{ url_for('digital_menu.finalize_order') }}">
             <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Seu Nome:</label>
-                <input type="text" name="customer_name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #111; font-size: 16px;">
+                    <i class="fa fa-hashtag" style="color: #00E65D;"></i> Número da Mesa:
+                </label>
+                <input type="text" name="table_number" required placeholder="Ex: 5" 
+                       style="width: 100%; padding: 14px; border: 3px solid #00E65D; border-radius: 6px; font-size: 18px; font-weight: 700; background: #f9f9f9;">
             </div>
-            <button type="submit" class="btn btn-success" style="width: 100%; padding: 15px; font-size: 18px;">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #111; font-size: 16px;">
+                    <i class="fa fa-lock" style="color: #00E65D;"></i> PIN da Mesa:
+                </label>
+                <input type="password" name="table_pin" required placeholder="Digite o PIN de 4 dígitos" maxlength="4" pattern="\d{4}"
+                       style="width: 100%; padding: 14px; border: 3px solid #00E65D; border-radius: 6px; font-size: 18px; font-weight: 700; letter-spacing: 4px; background: #f9f9f9;">
+                <small style="display: block; margin-top: 6px; color: #555; font-weight: 600; font-size: 13px;">Digite o PIN de 4 dígitos que está na mesa</small>
+            </div>
+            <div style="margin-bottom: 25px;">
+                <label style="display: block; margin-bottom: 8px; font-weight: 700; color: #111; font-size: 16px;">
+                    <i class="fa fa-user" style="color: #888;"></i> Seu Nome (opcional):
+                </label>
+                <input type="text" name="customer_name" placeholder="Digite seu nome" 
+                       style="width: 100%; padding: 14px; border: 2px solid #ccc; border-radius: 6px; font-size: 16px; background: #f9f9f9;">
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%; padding: 20px; font-size: 22px; font-weight: 800; background: linear-gradient(135deg, #00E65D 0%, #00B848 100%); border: none; box-shadow: 0 6px 20px rgba(0,230,93,0.5); border-radius: 8px; transition: all 0.3s;">
                 <i class="fa fa-check"></i> Enviar Pedido
             </button>
         </form>

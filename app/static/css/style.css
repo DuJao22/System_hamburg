@@ -5,20 +5,20 @@
 }
 
 :root {
-    /* Cores */
-    --color-primary: #0a0a0a;
-    --color-secondary: #1a1a1a;
-    --color-red: #00C851;
-    --color-red-dark: #00A040;
-    --color-accent: #FFD700;
+    /* Cores - Ajustadas para melhor visibilidade */
+    --color-primary: #0d0d0d;
+    --color-secondary: #1f1f1f;
+    --color-red: #00E65D;
+    --color-red-dark: #00B848;
+    --color-accent: #FFE500;
     --color-white: #FFFFFF;
-    --color-gray-light: #2a2a2a;
-    --color-gray-medium: #7b7b7b;
-    --color-gray-dark: #474747;
-    --color-green: #00C851;
-    --color-bg-dark: #000000;
-    --color-danger: #dc3545;
-    --color-danger-dark: #c82333;
+    --color-gray-light: #333333;
+    --color-gray-medium: #888888;
+    --color-gray-dark: #555555;
+    --color-green: #00E65D;
+    --color-bg-dark: #050505;
+    --color-danger: #FF4757;
+    --color-danger-dark: #EE2F43;
     
     /* Espaçamento */
     --space-xxs: 4px;
@@ -45,10 +45,10 @@
     --border-radius-sm: 4px;
     --border-radius-lg: 12px;
     
-    /* Shadows */
-    --shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.1);
-    --shadow-md: 0 2px 8px rgba(0, 0, 0, 0.15);
-    --shadow-lg: 0 4px 12px rgba(0, 0, 0, 0.2);
+    /* Shadows - Mais fortes para melhor visibilidade */
+    --shadow-sm: 0 2px 6px rgba(0, 0, 0, 0.3);
+    --shadow-md: 0 3px 12px rgba(0, 0, 0, 0.4);
+    --shadow-lg: 0 6px 20px rgba(0, 0, 0, 0.5);
 }
 
 body {

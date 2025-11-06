@@ -18,13 +18,14 @@
         <div style="overflow-x: auto;">
             <table style="width: 100%; border-collapse: collapse;">
                 <thead>
-                    <tr style="border-bottom: 2px solid #00C851;">
-                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Mesa</th>
-                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Capacidade</th>
-                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Status</th>
-                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Garçom</th>
-                        <th style="padding: 15px; text-align: center; color: #00C851; font-weight: 700;">QR Code</th>
-                        <th style="padding: 15px; text-align: center; color: #00C851; font-weight: 700;">Ações</th>
+                    <tr style="border-bottom: 2px solid #00E65D;">
+                        <th style="padding: 15px; text-align: left; color: #00E65D; font-weight: 700;">Mesa</th>
+                        <th style="padding: 15px; text-align: left; color: #00E65D; font-weight: 700;">Capacidade</th>
+                        <th style="padding: 15px; text-align: left; color: #00E65D; font-weight: 700;">PIN</th>
+                        <th style="padding: 15px; text-align: left; color: #00E65D; font-weight: 700;">Status</th>
+                        <th style="padding: 15px; text-align: left; color: #00E65D; font-weight: 700;">Garçom</th>
+                        <th style="padding: 15px; text-align: center; color: #00E65D; font-weight: 700;">QR Code</th>
+                        <th style="padding: 15px; text-align: center; color: #00E65D; font-weight: 700;">Ações</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -35,6 +36,25 @@
                         </td>
                         <td style="padding: 15px; color: #999;">
                             <i class="fa fa-users"></i> {{ table.capacity }} pessoas
+                        </td>
+                        <td style="padding: 15px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <span style="padding: 8px 14px; background: rgba(0,230,93,0.2); color: #00E65D; border-radius: 6px; font-size: 18px; font-weight: 800; letter-spacing: 3px; font-family: monospace;">
+                                    {% if table.access_pin %}
+                                        {{ table.access_pin }}
+                                    {% else %}
+                                        <span style="color: #FF4757;">SEM PIN</span>
+                                    {% endif %}
+                                </span>
+                                <form method="POST" action="{{ url_for('admin.regenerate_table_pin', table_id=table.id) }}" style="display: inline;">
+                                    <button type="submit" 
+                                            class="btn_buy" 
+                                            style="padding: 6px 10px; background: #17a2b8; font-size: 12px;"
+                                            title="Gerar novo PIN">
+                                        <i class="fa fa-refresh"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </td>
                         <td style="padding: 15px;">
                             <span style="padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600;
@@ -101,11 +121,11 @@
         </h3>
         <ol style="color: #999; line-height: 1.8; margin: 0; padding-left: 20px;">
             <li>Crie uma mesa com número identificador (ex: "01", "02", "Mesa VIP")</li>
-            <li>Baixe o QR Code da mesa e imprima-o</li>
-            <li>Cole o QR Code na mesa física do restaurante</li>
-            <li>Quando o garçom abrir uma comanda para a mesa, ele gerará um PIN de 6 dígitos</li>
+            <li>O sistema gera automaticamente um PIN de 4 dígitos para a mesa</li>
+            <li>Baixe o QR Code da mesa e imprima-o junto com o PIN</li>
+            <li>Cole o QR Code e o PIN na mesa física do restaurante</li>
             <li>O cliente escaneia o QR Code com o celular</li>
-            <li>O cliente informa o PIN fornecido pelo garçom</li>
+            <li>O cliente informa o número da mesa e o PIN que está na mesa</li>
             <li>O cliente pode fazer pedidos e acompanhar o status em tempo real!</li>
         </ol>
     </div>
@@ -116,10 +136,11 @@
         </h3>
         <ul style="color: #999; line-height: 1.8; margin: 0; padding-left: 20px;">
             <li>Use números simples e claros para identificar as mesas (01, 02, 03...)</li>
-            <li>Imprima os QR Codes em material resistente e plastificado</li>
+            <li>Imprima os QR Codes junto com o PIN em material resistente e plastificado</li>
             <li>Cole os QR Codes em locais visíveis nas mesas</li>
-            <li>Treine a equipe para informar os PINs aos clientes</li>
-            <li>O PIN é gerado automaticamente pelo sistema quando o garçom abre a comanda no PDV</li>
+            <li>O PIN é gerado automaticamente quando você cria uma mesa</li>
+            <li>Você pode regenerar o PIN a qualquer momento usando o botão de atualizar</li>
+            <li>Guarde os PINs em local seguro para referência da equipe</li>
         </ul>
     </div>
 </div>

@@ -1181,6 +1181,7 @@ def tables():
 def create_table():
     if request.method == 'POST':
         from app.models import Table
+        import secrets
         
         table_number = request.form.get('table_number')
         capacity = request.form.get('capacity', 4, type=int)
@@ -1193,16 +1194,19 @@ def create_table():
             flash('Já existe uma mesa com este número!', 'danger')
             return render_template('admin/add_table.html')
         
+        pin = ''.join([str(secrets.randbelow(10)) for _ in range(4)])
+        
         table = Table(
             table_number=table_number,
             capacity=capacity,
-            status='available'
+            status='available',
+            access_pin=pin
         )
         
         db.session.add(table)
         db.session.commit()
         
-        flash(f'Mesa {table_number} criada com sucesso!', 'success')
+        flash(f'Mesa {table_number} criada com sucesso! PIN: {pin}', 'success')
         return redirect(url_for('admin.tables'))
     
     return render_template('admin/add_table.html')
@@ -1241,6 +1245,23 @@ def generate_table_qrcode(table_id):
     response.headers['Content-Disposition'] = f'attachment; filename=mesa_{table.table_number}_qrcode.png'
     
     return response
+
+@admin_bp.route('/mesas/<int:table_id>/regenerar-pin', methods=['POST'])
+@login_required
+@admin_required
+def regenerate_table_pin(table_id):
+    from app.models import Table
+    import secrets
+    
+    table = Table.query.get_or_404(table_id)
+    
+    new_pin = ''.join([str(secrets.randbelow(10)) for _ in range(4)])
+    table.access_pin = new_pin
+    
+    db.session.commit()
+    
+    flash(f'Novo PIN gerado para Mesa {table.table_number}: {new_pin}', 'success')
+    return redirect(url_for('admin.tables'))
 
 @admin_bp.route('/mesas/<int:table_id>/deletar', methods=['POST'])
 @login_required
