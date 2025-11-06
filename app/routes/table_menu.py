@@ -191,3 +191,176 @@ def table_logout():
     session.pop('table_session', None)
     flash('Você saiu da sessão da mesa.', 'info')
     return redirect(url_for('main.index'))
+
+@table_menu_bp.route('/mesa/api/produtos')
+def table_api_products():
+    """API para obter lista de produtos para o cliente na mesa"""
+    if 'table_session' not in session and not current_user.is_authenticated:
+        return jsonify({'success': False, 'message': 'Não autorizado'}), 401
+    
+    category_id = request.args.get('category_id', type=int)
+    search = request.args.get('search', '')
+    
+    query = Product.query.filter_by(active=True)
+    
+    if category_id:
+        query = query.filter_by(category_id=category_id)
+    
+    if search:
+        query = query.filter(Product.name.contains(search) | Product.description.contains(search))
+    
+    products = query.all()
+    
+    products_data = []
+    for product in products:
+        products_data.append({
+            'id': product.id,
+            'name': product.name,
+            'description': product.description,
+            'price': float(product.price),
+            'stock': product.stock,
+            'image_url': product.image_url,
+            'category_id': product.category_id
+        })
+    
+    return jsonify({'success': True, 'products': products_data})
+
+@table_menu_bp.route('/mesa/api/criar-pedido', methods=['POST'])
+def table_create_order():
+    """
+    API para criar pedido direto para cozinha (sem pagamento)
+    Cliente na mesa pode fazer pedido que vai direto para a cozinha
+    """
+    if 'table_session' not in session and not current_user.is_authenticated:
+        return jsonify({'success': False, 'message': 'Sessão expirada'}), 401
+    
+    data = request.get_json()
+    items = data.get('items', [])
+    observations = data.get('observations', '')
+    
+    if not items:
+        return jsonify({'success': False, 'message': 'Carrinho vazio'}), 400
+    
+    table_session = session.get('table_session')
+    if not table_session:
+        return jsonify({'success': False, 'message': 'Sessão de mesa inválida'}), 401
+    
+    table = Table.query.get(table_session['table_id'])
+    comanda = Comanda.query.get(table_session['comanda_id'])
+    
+    if not table or not comanda:
+        return jsonify({'success': False, 'message': 'Mesa ou comanda não encontrada'}), 404
+    
+    user = current_user if current_user.is_authenticated else comanda.waiter
+    if not user:
+        from app.models import User
+        user = User.query.filter_by(is_admin=True).first()
+    
+    total = 0
+    order_items_data = []
+    
+    for item_data in items:
+        product_id = item_data.get('product_id')
+        quantity = item_data.get('quantity', 1)
+        item_obs = item_data.get('observations', '')
+        extras = item_data.get('extras', [])
+        
+        product = Product.query.get(product_id)
+        if not product or not product.active:
+            continue
+        
+        if product.stock < quantity:
+            return jsonify({'success': False, 'message': f'Estoque insuficiente para {product.name}'}), 400
+        
+        item_total = product.price * quantity
+        
+        extras_data = []
+        for extra_data in extras:
+            extra_id = extra_data.get('id')
+            extra_quantity = extra_data.get('quantity', 1)
+            
+            extra = Extra.query.get(extra_id)
+            if extra and extra.active:
+                item_total += extra.price * extra_quantity
+                extras_data.append({
+                    'extra': extra,
+                    'quantity': extra_quantity
+                })
+        
+        total += item_total
+        order_items_data.append({
+            'product': product,
+            'quantity': quantity,
+            'observations': item_obs,
+            'extras': extras_data
+        })
+    
+    from app.utils.timezone import utcnow_brasilia
+    
+    order = Order(
+        user_id=user.id,
+        total=total,
+        status='Recebido',
+        payment_status='Pago',
+        payment_method='Mesa',
+        delivery_type='mesa',
+        customer_name=comanda.customer_name or f'Mesa {table.table_number}',
+        customer_phone='',
+        observations=observations,
+        table_id=table.id,
+        comanda_id=comanda.id,
+        origin='table',
+        received_at=utcnow_brasilia()
+    )
+    
+    db.session.add(order)
+    db.session.flush()
+    
+    for item_data in order_items_data:
+        product = item_data['product']
+        
+        order_item = OrderItem(
+            order_id=order.id,
+            product_id=product.id,
+            quantity=item_data['quantity'],
+            price=product.price,
+            observations=item_data['observations'],
+            status='Recebido',
+            received_at=utcnow_brasilia()
+        )
+        db.session.add(order_item)
+        db.session.flush()
+        
+        for extra_info in item_data['extras']:
+            order_item_extra = OrderItemExtra(
+                order_item_id=order_item.id,
+                extra_id=extra_info['extra'].id,
+                quantity=extra_info['quantity'],
+                price=extra_info['extra'].price
+            )
+            db.session.add(order_item_extra)
+        
+        product.stock -= item_data['quantity']
+    
+    comanda.total += total
+    
+    db.session.commit()
+    
+    from app.utils.socketio_manager import emit_new_order
+    emit_new_order({
+        'order_id': order.id,
+        'order_number': order.order_number,
+        'table_number': table.table_number,
+        'total': float(total),
+        'items_count': len(order_items_data),
+        'status': order.status,
+        'customer_name': order.customer_name
+    }, table_id=table.id, waiter_id=comanda.waiter_id)
+    
+    return jsonify({
+        'success': True,
+        'message': 'Pedido enviado para a cozinha!',
+        'order_id': order.id,
+        'order_number': order.order_number,
+        'total': float(total)
+    })

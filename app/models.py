@@ -87,6 +87,11 @@ class Order(db.Model):
     delivered_at = db.Column(db.DateTime, nullable=True)
     table_id = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=True)
     comanda_id = db.Column(db.Integer, db.ForeignKey('comanda.id'), nullable=True)
+    table_session_id = db.Column(db.Integer, db.ForeignKey('table_session.id'), nullable=True)
+    origin = db.Column(db.String(20), default='delivery')
+    received_at = db.Column(db.DateTime, nullable=True)
+    preparing_at = db.Column(db.DateTime, nullable=True)
+    kitchen_ready_at = db.Column(db.DateTime, nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     updated_at = db.Column(db.DateTime, default=utcnow_brasilia, onupdate=utcnow_brasilia)
     
@@ -120,6 +125,11 @@ class OrderItem(db.Model):
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
     observations = db.Column(db.Text)
+    status = db.Column(db.String(50), default='Pendente')
+    received_at = db.Column(db.DateTime, nullable=True)
+    preparing_at = db.Column(db.DateTime, nullable=True)
+    ready_at = db.Column(db.DateTime, nullable=True)
+    delivered_at = db.Column(db.DateTime, nullable=True)
     
     product = db.relationship('Product')
     extras = db.relationship('OrderItemExtra', backref='order_item', lazy=True, cascade='all, delete-orphan')
@@ -421,6 +431,36 @@ class LoyaltyTransaction(db.Model):
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     order = db.relationship('Order')
+
+class TableSession(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    table_id = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    comanda_id = db.Column(db.Integer, db.ForeignKey('comanda.id'), nullable=True)
+    session_token = db.Column(db.String(100), unique=True, nullable=False)
+    status = db.Column(db.String(20), default='active')
+    opened_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    closed_at = db.Column(db.DateTime, nullable=True)
+    waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    table = db.relationship('Table', backref='sessions')
+    user = db.relationship('User', foreign_keys=[user_id], backref='table_sessions')
+    waiter = db.relationship('User', foreign_keys=[waiter_id])
+    comanda = db.relationship('Comanda', backref='session')
+    orders = db.relationship('Order', backref='table_session', lazy=True)
+
+class KitchenNotification(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=False)
+    recipient_type = db.Column(db.String(20), nullable=False)
+    recipient_id = db.Column(db.Integer, nullable=True)
+    notification_type = db.Column(db.String(50), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    is_read = db.Column(db.Boolean, default=False)
+    read_at = db.Column(db.DateTime, nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    
+    order = db.relationship('Order', backref='notifications')
 
 class ChatConversation(db.Model):
     id = db.Column(db.Integer, primary_key=True)
