@@ -105,30 +105,53 @@
         </div>
     </div>
 
-    <section class="products_section" id="produtos">
-        <div class="section_header">
-            <h2 class="section_title">Produtos em Destaque</h2>
+    {% for category in categories %}
+    {% if category_products.get(category.id) %}
+    <section class="category_slider_section" id="produtos">
+        <div class="section_header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 class="section_title" style="margin: 0;">
+                <i class="fa fa-cutlery"></i> {{ category.name }}
+            </h2>
+            <a href="{{ url_for('main.category_products', category_id=category.id) }}" style="color: #FFA500; text-decoration: none; font-weight: 600; font-size: 16px;">
+                Ver todos <i class="fa fa-arrow-right"></i>
+            </a>
         </div>
         
-        <div class="products_grid">
-            {% for product in products %}
-            <div class="product_card">
-                <div class="product_image">
-                    {% if product.image_url %}
-                    <img src="{{ product.image_url }}" alt="{{ product.name }}" style="max-width: 100%; max-height: 180px; object-fit: contain;">
-                    {% else %}
-                    <i class="fa fa-cutlery"></i>
-                    {% endif %}
+        <div class="category_slider_wrapper">
+            <button class="slider_nav_btn prev" onclick="scrollSlider('cat{{ category.id }}', -1)">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            
+            <div class="category_slider" id="cat{{ category.id }}">
+                {% for product in category_products[category.id] %}
+                <div class="product_card_slider">
+                    <div class="product_image">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;">
+                        {% else %}
+                        <div style="width: 100%; height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 10px 10px 0 0;">
+                            <i class="fa fa-cutlery" style="font-size: 48px; color: #ddd;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div style="padding: 15px;">
+                        <div class="product_code" style="font-size: 11px; color: #999; margin-bottom: 5px;">Cód: {{ product.code }}</div>
+                        <div class="product_name" style="font-size: 16px; font-weight: 600; color: #111; margin-bottom: 10px; min-height: 40px;">{{ product.name }}</div>
+                        <div class="product_price" style="font-size: 20px; font-weight: 700; color: #28a745; margin-bottom: 5px;">R$ {{ "%.2f"|format(product.price) }}</div>
+                        <div class="product_pix" style="font-size: 13px; color: #666; margin-bottom: 15px;">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
+                        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy" style="display: block; text-align: center; background: #FFA500; color: #fff; padding: 12px; text-decoration: none; border-radius: 5px; font-weight: 600; transition: all 0.3s;">VER DETALHES</a>
+                    </div>
                 </div>
-                <div class="product_code">Cód: {{ product.code }}</div>
-                <div class="product_name">{{ product.name }}</div>
-                <div class="product_price">R$ {{ "%.2f"|format(product.price) }}</div>
-                <div class="product_pix">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
-                <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy">VER DETALHES</a>
+                {% endfor %}
             </div>
-            {% endfor %}
+            
+            <button class="slider_nav_btn next" onclick="scrollSlider('cat{{ category.id}}', 1)">
+                <i class="fa fa-chevron-right"></i>
+            </button>
         </div>
     </section>
+    {% endif %}
+    {% endfor %}
 
     <section class="contact_section" id="contato" style="padding: 60px 20px; background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%); margin-top: 40px;">
         <div style="max-width: 1200px; margin: 0 auto;">
@@ -186,6 +209,102 @@
     </section>
 </div>
 
+<style>
+.category_slider_section {
+    margin: 50px 0;
+    padding: 0 20px;
+}
+
+.category_slider_wrapper {
+    position: relative;
+    padding: 0 50px;
+}
+
+.category_slider {
+    display: flex;
+    overflow-x: auto;
+    scroll-behavior: smooth;
+    gap: 20px;
+    padding: 20px 0;
+    scrollbar-width: none;
+}
+
+.category_slider::-webkit-scrollbar {
+    display: none;
+}
+
+.product_card_slider {
+    min-width: 280px;
+    max-width: 280px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    flex-shrink: 0;
+}
+
+.product_card_slider:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 8px 25px rgba(255,165,0,0.3);
+}
+
+.product_card_slider .btn_buy:hover {
+    background: #ff8c00;
+    transform: scale(1.05);
+}
+
+.slider_nav_btn {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #FFA500;
+    color: #fff;
+    border: none;
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    cursor: pointer;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+    transition: all 0.3s;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.slider_nav_btn:hover {
+    background: #ff8c00;
+    box-shadow: 0 6px 15px rgba(255,165,0,0.4);
+    transform: translateY(-50%) scale(1.1);
+}
+
+.slider_nav_btn.prev {
+    left: 0;
+}
+
+.slider_nav_btn.next {
+    right: 0;
+}
+
+@media (max-width: 768px) {
+    .category_slider_wrapper {
+        padding: 0 35px;
+    }
+    
+    .product_card_slider {
+        min-width: 240px;
+        max-width: 240px;
+    }
+    
+    .slider_nav_btn {
+        width: 35px;
+        height: 35px;
+        font-size: 14px;
+    }
+}
+</style>
+
 <script>
 let currentSlide = 0;
 const slides = document.querySelectorAll('.carousel_slide');
@@ -211,6 +330,15 @@ function prevSlide() {
 
 function goToSlide(n) {
     showSlide(n);
+}
+
+function scrollSlider(sliderId, direction) {
+    const slider = document.getElementById(sliderId);
+    const scrollAmount = 300;
+    slider.scrollBy({
+        left: direction * scrollAmount,
+        behavior: 'smooth'
+    });
 }
 
 function toggleCategories() {
