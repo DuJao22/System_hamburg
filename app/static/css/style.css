@@ -2903,18 +2903,3 @@ button.btn-success:focus {
         padding: 8px 6px;
     }
 }
-/* Forçar contraste adequado em botões success */
-.btn-success,
-.btn.btn-success {
-    background: var(--color-green) !important;
-    color: #000000 !important;
-    font-weight: 700 !important;
-    border-color: var(--color-green) !important;
-}
-
-.btn-success:hover,
-.btn.btn-success:hover {
-    background: var(--color-red-dark) !important;
-    color: #000000 !important;
-    border-color: var(--color-red-dark) !important;
-}
