@@ -108,7 +108,7 @@
                         display: flex; 
                         align-items: center; 
                         justify-content: center;
-                        {% if status_list.index(status_item) <= status_list.index(order.status) if order.status in status_list else False %}
+                        {% if order.status in status_list and status_list.index(status_item) <= status_list.index(order.status) %}
                             background: linear-gradient(135deg, #28A745, #20C997);
                             color: white;
                             box-shadow: 0 4px 15px rgba(40, 167, 69, 0.4);
@@ -129,7 +129,7 @@
                             {% elif status_item == 'Retirado' %}fa-hand-holding
                             {% endif %}" style="font-size: 14px;"></i>
                     </div>
-                    <div style="font-size: 11px; font-weight: 600; color: {% if status_list.index(status_item) <= status_list.index(order.status) if order.status in status_list else False %}#28A745{% else %}#ADB5BD{% endif %};">
+                    <div style="font-size: 11px; font-weight: 600; color: {% if order.status in status_list and status_list.index(status_item) <= status_list.index(order.status) %}#28A745{% else %}#ADB5BD{% endif %};">
                         {{ status_item }}
                     </div>
                 </div>
