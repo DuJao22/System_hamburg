@@ -17,6 +17,10 @@
             <ul class="top_nav_left">
                 <li><a href="{{ url_for('main.index') }}">Início</a></li>
                 <li><a href="{{ url_for('main.index') }}#produtos">Produtos</a></li>
+                <li><a href="{{ url_for('digital_menu.index') }}">Cardápio Digital</a></li>
+                {% if current_user.is_authenticated %}
+                <li><a href="{{ url_for('loyalty.index') }}">Fidelidade</a></li>
+                {% endif %}
                 {% if current_user.is_authenticated and current_user.is_admin %}
                 <li><a href="{{ url_for('admin.dashboard') }}">Admin</a></li>
                 {% endif %}
@@ -42,9 +46,11 @@
             <ul>
                 <li><a href="{{ url_for('main.index') }}"><i class="fa fa-home"></i> Início</a></li>
                 <li><a href="{{ url_for('main.index') }}#produtos"><i class="fa fa-shopping-bag"></i> Produtos</a></li>
+                <li><a href="{{ url_for('digital_menu.index') }}"><i class="fa fa-book"></i> Cardápio Digital</a></li>
                 {% if current_user.is_authenticated %}
                     <li><a href="{{ url_for('cart.view_cart') }}"><i class="fa fa-shopping-cart"></i> Carrinho</a></li>
                     <li><a href="{{ url_for('cart.my_orders') }}"><i class="fa fa-list"></i> Meus Pedidos</a></li>
+                    <li><a href="{{ url_for('loyalty.index') }}"><i class="fa fa-star"></i> Fidelidade</a></li>
                     <li><a href="{{ url_for('auth.change_password') }}"><i class="fa fa-lock"></i> Alterar Senha</a></li>
                     {% if current_user.is_admin %}
                         <li><a href="{{ url_for('admin.dashboard') }}"><i class="fa fa-user-secret"></i> Admin</a></li>

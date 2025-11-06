@@ -13,6 +13,7 @@ class User(UserMixin, db.Model):
     cpf = db.Column(db.String(14), nullable=True)
     phone = db.Column(db.String(20), nullable=True)
     is_admin = db.Column(db.Boolean, default=False)
+    role = db.Column(db.String(20), default='customer')
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     orders = db.relationship('Order', backref='user', lazy=True)
@@ -83,6 +84,8 @@ class Order(db.Model):
     accepted_at = db.Column(db.DateTime, nullable=True)
     ready_at = db.Column(db.DateTime, nullable=True)
     delivered_at = db.Column(db.DateTime, nullable=True)
+    table_id = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=True)
+    comanda_id = db.Column(db.Integer, db.ForeignKey('comanda.id'), nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     updated_at = db.Column(db.DateTime, default=utcnow_brasilia, onupdate=utcnow_brasilia)
     
@@ -261,3 +264,129 @@ class OrderNote(db.Model):
     created_by = db.Column(db.String(200))
     is_internal = db.Column(db.Boolean, default=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+class Table(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    table_number = db.Column(db.String(20), unique=True, nullable=False)
+    capacity = db.Column(db.Integer, default=4)
+    status = db.Column(db.String(20), default='available')
+    current_order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=True)
+    opened_at = db.Column(db.DateTime, nullable=True)
+    waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    
+    waiter = db.relationship('User', foreign_keys=[waiter_id])
+    current_order = db.relationship('Order', foreign_keys=[current_order_id], post_update=True)
+    
+    def get_status_display(self):
+        status_map = {
+            'available': 'Disponível',
+            'occupied': 'Ocupada',
+            'reserved': 'Reservada',
+            'cleaning': 'Limpeza'
+        }
+        return status_map.get(self.status, self.status)
+
+class Comanda(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comanda_number = db.Column(db.String(20), unique=True, nullable=False)
+    table_id = db.Column(db.Integer, db.ForeignKey('table.id'), nullable=True)
+    customer_name = db.Column(db.String(200))
+    status = db.Column(db.String(20), default='open')
+    total = db.Column(db.Float, default=0)
+    opened_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    closed_at = db.Column(db.DateTime, nullable=True)
+    waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    
+    table = db.relationship('Table', backref='comandas')
+    waiter = db.relationship('User', foreign_keys=[waiter_id])
+    items = db.relationship('ComandaItem', backref='comanda', lazy=True, cascade='all, delete-orphan')
+    
+    def calculate_total(self):
+        return sum(item.price * item.quantity for item in self.items)
+
+class ComandaItem(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    comanda_id = db.Column(db.Integer, db.ForeignKey('comanda.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False, default=1)
+    price = db.Column(db.Float, nullable=False)
+    status = db.Column(db.String(20), default='pending')
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    
+    product = db.relationship('Product')
+
+class CashRegister(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    opening_balance = db.Column(db.Float, default=0)
+    closing_balance = db.Column(db.Float, nullable=True)
+    expected_balance = db.Column(db.Float, nullable=True)
+    difference = db.Column(db.Float, nullable=True)
+    opened_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    closed_at = db.Column(db.DateTime, nullable=True)
+    status = db.Column(db.String(20), default='open')
+    notes = db.Column(db.Text)
+    
+    user = db.relationship('User')
+    movements = db.relationship('CashMovement', backref='cash_register', lazy=True, cascade='all, delete-orphan')
+    
+    def calculate_expected_balance(self):
+        total_in = sum(m.amount for m in self.movements if m.movement_type == 'in')
+        total_out = sum(m.amount for m in self.movements if m.movement_type == 'out')
+        return self.opening_balance + total_in - total_out
+
+class CashMovement(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    cash_register_id = db.Column(db.Integer, db.ForeignKey('cash_register.id'), nullable=False)
+    movement_type = db.Column(db.String(10), nullable=False)
+    amount = db.Column(db.Float, nullable=False)
+    description = db.Column(db.Text)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    created_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    
+    order = db.relationship('Order')
+    user = db.relationship('User')
+
+class Ingredient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(200), nullable=False)
+    unit = db.Column(db.String(50), nullable=False)
+    cost_per_unit = db.Column(db.Float, nullable=False)
+    stock = db.Column(db.Float, default=0)
+    min_stock = db.Column(db.Float, default=0)
+    active = db.Column(db.Boolean, default=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+
+class ProductIngredient(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('product.id'), nullable=False)
+    ingredient_id = db.Column(db.Integer, db.ForeignKey('ingredient.id'), nullable=False)
+    quantity = db.Column(db.Float, nullable=False)
+    
+    product = db.relationship('Product', backref='ingredients')
+    ingredient = db.relationship('Ingredient')
+
+class LoyaltyPoints(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    points = db.Column(db.Integer, default=0)
+    total_earned = db.Column(db.Integer, default=0)
+    total_spent = db.Column(db.Integer, default=0)
+    updated_at = db.Column(db.DateTime, default=utcnow_brasilia, onupdate=utcnow_brasilia)
+    
+    user = db.relationship('User', backref='loyalty_points', uselist=False)
+    transactions = db.relationship('LoyaltyTransaction', backref='loyalty_account', lazy=True, cascade='all, delete-orphan')
+
+class LoyaltyTransaction(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    loyalty_points_id = db.Column(db.Integer, db.ForeignKey('loyalty_points.id'), nullable=False)
+    points = db.Column(db.Integer, nullable=False)
+    transaction_type = db.Column(db.String(20), nullable=False)
+    description = db.Column(db.Text)
+    order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=True)
+    created_at = db.Column(db.DateTime, default=utcnow_brasilia)
+    
+    order = db.relationship('Order')

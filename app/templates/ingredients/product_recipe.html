@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+
+{% block title %}Ficha Técnica - {{ product.name }} - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-file-text"></i> Ficha Técnica: {{ product.name }}
+        </h2>
+        <a href="{{ url_for('admin.products') }}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+    
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 20px;">
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 4px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Preço de Venda</div>
+                <div style="font-size: 20px; font-weight: 700; color: #00C851;">R$ {{ "%.2f"|format(product.price) }}</div>
+            </div>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 4px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Custo Total</div>
+                <div style="font-size: 20px; font-weight: 700; color: #dc3545;">R$ {{ "%.2f"|format(total_cost) }}</div>
+            </div>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 4px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">CMV</div>
+                <div style="font-size: 20px; font-weight: 700; color: {% if cmv_percentage > 40 %}#dc3545{% elif cmv_percentage > 30 %}#ffc107{% else %}#00C851{% endif %};">
+                    {{ "%.1f"|format(cmv_percentage) }}%
+                </div>
+            </div>
+            <div style="padding: 15px; background: #f8f9fa; border-radius: 4px;">
+                <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Margem de Lucro</div>
+                <div style="font-size: 20px; font-weight: 700; color: #111;">R$ {{ "%.2f"|format(product.price - total_cost) }}</div>
+            </div>
+        </div>
+    </div>
+    
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px;">Ingredientes</h3>
+        
+        <form method="POST">
+            <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Ingrediente</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Unidade</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Custo/Un.</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Quantidade</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in all_ingredients %}
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px; font-weight: 600;">{{ ingredient.name }}</td>
+                        <td style="padding: 12px;">{{ ingredient.unit }}</td>
+                        <td style="padding: 12px; text-align: right;">R$ {{ "%.2f"|format(ingredient.cost_per_unit) }}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <input 
+                                type="number" 
+                                name="ingredient_{{ ingredient.id }}" 
+                                value="{{ product_ingredients.get(ingredient.id, 0) }}"
+                                min="0"
+                                step="0.01"
+                                style="width: 100px; padding: 8px; border: 1px solid #ddd; border-radius: 4px; text-align: center;">
+                        </td>
+                        <td style="padding: 12px; text-align: right;">
+                            R$ {{ "%.2f"|format(ingredient.cost_per_unit * product_ingredients.get(ingredient.id, 0)) }}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                <i class="fa fa-save"></i> Salvar Ficha Técnica
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

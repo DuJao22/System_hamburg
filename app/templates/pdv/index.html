@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}PDV / Salão - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <h2 style="font-size: 28px; margin-bottom: 30px; color: #111;">
+        <i class="fa fa-cutlery"></i> PDV / Salão
+    </h2>
+    
+    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
+        <a href="{{ url_for('pdv.tables') }}" style="background: var(--color-red); color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(220,20,60,0.3);">
+            <i class="fa fa-th" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 18px; font-weight: 600;">Mesas</div>
+        </a>
+        
+        <a href="{{ url_for('pdv.cash_register') }}" style="background: #00C851; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,200,81,0.3);">
+            <i class="fa fa-money" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 18px; font-weight: 600;">Caixa</div>
+        </a>
+        
+        <a href="{{ url_for('kitchen.kds') }}" style="background: #ff8800; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(255,136,0,0.3);">
+            <i class="fa fa-fire" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 18px; font-weight: 600;">Cozinha (KDS)</div>
+        </a>
+        
+        <a href="{{ url_for('admin.dashboard') }}" style="background: #111; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
+            <i class="fa fa-dashboard" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
+            <div style="font-size: 18px; font-weight: 600;">Admin</div>
+        </a>
+    </div>
+    
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 20px;"><i class="fa fa-info-circle"></i> Status do Caixa</h3>
+        {% if open_cash %}
+            <div style="color: #00C851; font-size: 18px; margin-bottom: 10px;">
+                <i class="fa fa-check-circle"></i> Caixa Aberto
+            </div>
+            <p>Aberto por: {{ open_cash.user.username }}</p>
+            <p>Saldo inicial: R$ {{ "%.2f"|format(open_cash.opening_balance) }}</p>
+            <p>Saldo atual: R$ {{ "%.2f"|format(open_cash.calculate_expected_balance()) }}</p>
+        {% else %}
+            <div style="color: #dc3545; font-size: 18px;">
+                <i class="fa fa-times-circle"></i> Nenhum caixa aberto
+            </div>
+            <a href="{{ url_for('pdv.cash_register') }}" class="btn btn-primary" style="margin-top: 15px;">Abrir Caixa</a>
+        {% endif %}
+    </div>
+    
+    {% if open_comandas %}
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px;"><i class="fa fa-list"></i> Comandas Abertas ({{ open_comandas|length }})</h3>
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Comanda #</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Mesa</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Cliente</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Total</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for comanda in open_comandas %}
+                    <tr style="border-bottom: 1px solid #dee2e6;">
+                        <td style="padding: 12px;">{{ comanda.comanda_number }}</td>
+                        <td style="padding: 12px;">
+                            {% if comanda.table %}Mesa {{ comanda.table.table_number }}{% else %}-{% endif %}
+                        </td>
+                        <td style="padding: 12px;">{{ comanda.customer_name or '-' }}</td>
+                        <td style="padding: 12px; text-align: right; font-weight: 600;">R$ {{ "%.2f"|format(comanda.total) }}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <a href="{{ url_for('pdv.comanda_detail', comanda_id=comanda.id) }}" class="btn btn-sm btn-primary">Ver</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

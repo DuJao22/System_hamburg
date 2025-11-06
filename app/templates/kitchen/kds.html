@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+
+{% block title %}Cozinha (KDS) - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-fire"></i> Cozinha - KDS
+        </h2>
+        <button onclick="location.reload()" class="btn btn-primary">
+            <i class="fa fa-refresh"></i> Atualizar
+        </button>
+    </div>
+    
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
+        <h3 style="margin-bottom: 20px;"><i class="fa fa-shopping-cart"></i> Pedidos Pendentes ({{ pending_orders|length }})</h3>
+        
+        {% if pending_orders %}
+            <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+                {% for order in pending_orders %}
+                <div style="border: 3px solid {% if order.status == 'Pendente' %}#dc3545{% elif order.status == 'Em Preparo' %}#ffc107{% else %}#00C851{% endif %}; border-radius: 8px; padding: 20px; background: #f8f9fa;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 15px;">
+                        <div>
+                            <div style="font-size: 24px; font-weight: 700; color: #111;">#{{ order.id }}</div>
+                            <div style="font-size: 12px; color: #666;">{{ order.created_at.strftime('%H:%M') }}</div>
+                        </div>
+                        <span style="padding: 5px 10px; border-radius: 4px; font-size: 12px; font-weight: 600;
+                            {% if order.status == 'Pendente' %}background: #dc3545; color: #fff;
+                            {% elif order.status == 'Em Preparo' %}background: #ffc107; color: #111;
+                            {% else %}background: #00C851; color: #fff;{% endif %}">
+                            {{ order.status }}
+                        </span>
+                    </div>
+                    
+                    <div style="margin-bottom: 15px;">
+                        <strong>{{ order.delivery_type|upper }}</strong>
+                        {% if order.table %}
+                            <div style="font-size: 14px; color: #666;">Mesa: {{ order.table.table_number }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div style="border-top: 1px solid #dee2e6; padding-top: 15px; margin-bottom: 15px;">
+                        <strong style="display: block; margin-bottom: 10px;">Itens:</strong>
+                        {% for item in order.items %}
+                            <div style="margin-bottom: 8px; padding: 8px; background: #fff; border-radius: 4px;">
+                                <span style="font-weight: 600;">{{ item.quantity }}x</span> {{ item.product.name }}
+                            </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if order.observations %}
+                        <div style="background: #fff3cd; padding: 10px; border-radius: 4px; margin-bottom: 15px; font-size: 12px;">
+                            <strong>OBS:</strong> {{ order.observations }}
+                        </div>
+                    {% endif %}
+                    
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                        {% if order.status == 'Pendente' %}
+                            <form method="POST" action="{{ url_for('kitchen.update_order_status', order_id=order.id) }}" style="grid-column: span 2;">
+                                <input type="hidden" name="status" value="Em Preparo">
+                                <button type="submit" class="btn btn-warning" style="width: 100%;">
+                                    <i class="fa fa-play"></i> Iniciar
+                                </button>
+                            </form>
+                        {% elif order.status == 'Em Preparo' %}
+                            <form method="POST" action="{{ url_for('kitchen.update_order_status', order_id=order.id) }}">
+                                <input type="hidden" name="status" value="Pronto">
+                                <button type="submit" class="btn btn-success" style="width: 100%;">
+                                    <i class="fa fa-check"></i> Pronto
+                                </button>
+                            </form>
+                        {% elif order.status == 'Confirmado' %}
+                            <form method="POST" action="{{ url_for('kitchen.update_order_status', order_id=order.id) }}" style="grid-column: span 2;">
+                                <input type="hidden" name="status" value="Em Preparo">
+                                <button type="submit" class="btn btn-primary" style="width: 100%;">
+                                    <i class="fa fa-play"></i> Preparar
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #666; padding: 40px;">
+                <i class="fa fa-check-circle" style="font-size: 48px; display: block; margin-bottom: 15px; color: #00C851;"></i>
+                Nenhum pedido pendente no momento!
+            </p>
+        {% endif %}
+    </div>
+    
+    {% if pending_comanda_items %}
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px;"><i class="fa fa-list"></i> Itens de Comanda Pendentes ({{ pending_comanda_items|length }})</h3>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 15px;">
+            {% for item in pending_comanda_items %}
+            <div style="border: 2px solid #dc3545; border-radius: 8px; padding: 15px; background: #f8f9fa;">
+                <div style="font-size: 18px; font-weight: 700; margin-bottom: 10px;">
+                    {{ item.quantity }}x {{ item.product.name }}
+                </div>
+                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">
+                    Comanda #{{ item.comanda.comanda_number }}
+                    {% if item.comanda.table %}
+                        | Mesa {{ item.comanda.table.table_number }}
+                    {% endif %}
+                </div>
+                <form method="POST" action="{{ url_for('kitchen.update_comanda_item_status', item_id=item.id) }}">
+                    <input type="hidden" name="status" value="ready">
+                    <button type="submit" class="btn btn-sm btn-success" style="width: 100%;">
+                        <i class="fa fa-check"></i> Marcar como Pronto
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+
+<script>
+setInterval(function() {
+    location.reload();
+}, 30000);
+</script>
+{% endblock %}

@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block title %}Ingredientes - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-leaf"></i> Gerenciar Ingredientes
+        </h2>
+        <a href="{{ url_for('ingredients.add') }}" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Adicionar Ingrediente
+        </a>
+    </div>
+    
+    {% if low_stock %}
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 4px; margin-bottom: 20px;">
+        <h4 style="color: #856404; margin-bottom: 10px;"><i class="fa fa-exclamation-triangle"></i> Estoque Baixo</h4>
+        <p style="color: #856404; margin: 0;">{{ low_stock|length }} ingrediente(s) com estoque abaixo do mínimo.</p>
+    </div>
+    {% endif %}
+    
+    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
+        <h3 style="margin-bottom: 20px;">Lista de Ingredientes</h3>
+        
+        {% if ingredients %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="background: #f8f9fa;">
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Nome</th>
+                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Unidade</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Custo/Un.</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Estoque</th>
+                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Mín.</th>
+                        <th style="padding: 12px; text-align: center; border-bottom: 2px solid #dee2e6;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for ingredient in ingredients %}
+                    <tr style="border-bottom: 1px solid #dee2e6; {% if ingredient.stock <= ingredient.min_stock %}background: #fff3cd;{% endif %}">
+                        <td style="padding: 12px; font-weight: 600;">{{ ingredient.name }}</td>
+                        <td style="padding: 12px;">{{ ingredient.unit }}</td>
+                        <td style="padding: 12px; text-align: right;">R$ {{ "%.2f"|format(ingredient.cost_per_unit) }}</td>
+                        <td style="padding: 12px; text-align: right; {% if ingredient.stock <= ingredient.min_stock %}color: #dc3545; font-weight: 600;{% endif %}">
+                            {{ ingredient.stock }}
+                        </td>
+                        <td style="padding: 12px; text-align: right;">{{ ingredient.min_stock }}</td>
+                        <td style="padding: 12px; text-align: center;">
+                            <a href="{{ url_for('ingredients.edit', ingredient_id=ingredient.id) }}" class="btn btn-sm btn-primary">
+                                <i class="fa fa-edit"></i> Editar
+                            </a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <p style="text-align: center; color: #666; padding: 30px;">Nenhum ingrediente cadastrado.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

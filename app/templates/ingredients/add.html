@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block title %}Adicionar Ingrediente - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h2 style="font-size: 28px; color: #111; margin: 0;">
+            <i class="fa fa-plus"></i> Adicionar Ingrediente
+        </h2>
+        <a href="{{ url_for('ingredients.index') }}" class="btn btn-secondary">
+            <i class="fa fa-arrow-left"></i> Voltar
+        </a>
+    </div>
+    
+    <div style="background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); max-width: 600px;">
+        <form method="POST">
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Nome do Ingrediente:</label>
+                <input type="text" name="name" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Unidade de Medida:</label>
+                <select name="unit" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+                    <option value="kg">Quilograma (kg)</option>
+                    <option value="g">Grama (g)</option>
+                    <option value="l">Litro (l)</option>
+                    <option value="ml">Mililitro (ml)</option>
+                    <option value="un">Unidade (un)</option>
+                </select>
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Custo por Unidade (R$):</label>
+                <input type="number" name="cost_per_unit" step="0.01" min="0" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Estoque Atual:</label>
+                <input type="number" name="stock" step="0.01" min="0" value="0" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Estoque Mínimo:</label>
+                <input type="number" name="min_stock" step="0.01" min="0" value="0" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 12px;">
+                <i class="fa fa-save"></i> Salvar Ingrediente
+            </button>
+        </form>
+    </div>
+</div>
+{% endblock %}

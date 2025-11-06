@@ -40,6 +40,11 @@ def create_app():
     from app.routes.reviews import reviews_bp
     from app.routes.payment import payment_bp
     from app.routes.cep_api import cep_api_bp
+    from app.routes.pdv import pdv_bp
+    from app.routes.ingredients import ingredients_bp
+    from app.routes.kitchen import kitchen_bp
+    from app.routes.loyalty import loyalty_bp
+    from app.routes.digital_menu import digital_menu_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -49,6 +54,11 @@ def create_app():
     app.register_blueprint(reviews_bp)
     app.register_blueprint(payment_bp, url_prefix='/pagamento')
     app.register_blueprint(cep_api_bp)
+    app.register_blueprint(pdv_bp)
+    app.register_blueprint(ingredients_bp)
+    app.register_blueprint(kitchen_bp)
+    app.register_blueprint(loyalty_bp)
+    app.register_blueprint(digital_menu_bp)
     
     @app.context_processor
     def inject_categories():

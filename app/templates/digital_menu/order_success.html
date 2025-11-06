@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Pedido Enviado - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="margin-top: 30px;">
+    <div style="background: #fff; padding: 60px 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+        <i class="fa fa-check-circle" style="font-size: 96px; color: #00C851; margin-bottom: 30px;"></i>
+        <h2 style="font-size: 32px; margin-bottom: 20px; color: #111;">Pedido Enviado com Sucesso!</h2>
+        <p style="font-size: 18px; color: #666; margin-bottom: 30px;">
+            Seu pedido foi enviado para a cozinha e será preparado em breve.
+        </p>
+        <a href="{{ url_for('digital_menu.index') }}" class="btn btn-primary" style="padding: 15px 30px; font-size: 18px;">
+            <i class="fa fa-home"></i> Voltar ao Cardápio
+        </a>
+    </div>
+</div>
+{% endblock %}
