@@ -14,10 +14,81 @@ chatbot_bp = Blueprint('chatbot', __name__)
 # do not change this unless explicitly requested by the user
 client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
 
-def get_store_context():
-    """Obter contexto da loja e produtos"""
+def get_order_info(order_code=None, phone=None):
+    """Buscar informações de pedidos"""
+    orders = []
+    
+    if order_code:
+        order_code = order_code.strip().upper()
+        
+        # 1. Tentar buscar por order_code customizado (alfanumérico)
+        order = Order.query.filter_by(order_code=order_code).first()
+        if order:
+            orders.append(order)
+        else:
+            # 2. Tentar extrair ID do formato PED000123
+            import re
+            match = re.search(r'PED0*(\d+)', order_code)
+            if match:
+                order_id = int(match.group(1))
+                order = Order.query.get(order_id)
+                if order:
+                    orders.append(order)
+            else:
+                # 3. Tentar buscar diretamente por ID se for só número
+                try:
+                    order_id = int(order_code)
+                    order = Order.query.get(order_id)
+                    if order:
+                        orders.append(order)
+                except ValueError:
+                    pass
+    elif phone:
+        # Normalizar telefone (remover TODOS os caracteres não numéricos)
+        import re
+        clean_phone = re.sub(r'[^\d]', '', phone)
+        
+        # Buscar pedidos recentes pelo telefone (últimos 5)
+        # Tentar diferentes formatos de telefone no banco
+        user = User.query.filter_by(phone=clean_phone).first()
+        if not user:
+            user = User.query.filter_by(phone=f'+55{clean_phone}').first()
+        if not user:
+            # Tentar com DDD separado
+            user = User.query.filter_by(phone=f'({clean_phone[:2]}) {clean_phone[2:7]}-{clean_phone[7:]}').first()
+        
+        if user:
+            orders = Order.query.filter_by(user_id=user.id).order_by(Order.created_at.desc()).limit(5).all()
+    
+    orders_info = []
+    for order in orders:
+        # Obter detalhes completos dos itens do pedido
+        items_details = []
+        for item in order.items:
+            items_details.append({
+                'produto': item.product.name if item.product else 'Produto não disponível',
+                'quantidade': item.quantity,
+                'preço_unitário': f'R$ {item.price:.2f}',
+                'subtotal': f'R$ {(item.price * item.quantity):.2f}'
+            })
+        
+        orders_info.append({
+            'código': order.order_number,
+            'status': order.status,
+            'valor_total': f'R$ {order.total:.2f}',
+            'data': order.created_at.strftime('%d/%m/%Y %H:%M'),
+            'endereço_entrega': order.delivery_address or 'Retirada no local',
+            'forma_pagamento': order.payment_method or 'Não especificado',
+            'itens': items_details
+        })
+    
+    return orders_info
+
+def get_store_context(user_message=''):
+    """Obter contexto da loja, produtos e pedidos"""
     store_name = StoreSettings.get_setting('store_name', 'Nossa Hamburgueria')
     store_phone = StoreSettings.get_setting('store_phone', '')
+    store_address = StoreSettings.get_setting('store_address', '')
     
     categories = Category.query.all()
     products = Product.query.filter_by(active=True).all()
@@ -31,28 +102,75 @@ def get_store_context():
             'categoria': product.category.name if product.category else ''
         })
     
+    # Detectar se o usuário está perguntando sobre pedido
+    order_context = ""
+    if any(word in user_message.lower() for word in ['pedido', 'status', 'código', 'rastrear', 'acompanhar']):
+        # Extrair possível código de pedido ou telefone
+        import re
+        
+        # Normalizar mensagem para extrair telefone (remove tudo que não é número)
+        normalized_message = re.sub(r'[^\d]', '', user_message)
+        phone_match = re.search(r'\d{10,11}', normalized_message)
+        
+        # Buscar código de pedido (alfanumérico, PED + números, ou apenas números)
+        # Primeiro tentar capturar código alfanumérico (ex: ABC123, XYZ456)
+        code_match = re.search(r'\b([A-Z]{3}[0-9]{3,6}|PED\d+|\d{1,10})\b', user_message.upper())
+        
+        orders_info = []
+        # Priorizar código de pedido se houver menção a palavras-chave
+        if code_match and any(word in user_message.upper() for word in ['PED', 'CÓDIGO', 'CODIGO', 'NUMERO', 'NÚMERO', 'PEDIDO']):
+            orders_info = get_order_info(order_code=code_match.group())
+        elif phone_match:
+            # Usar telefone apenas se não encontrou código
+            orders_info = get_order_info(phone=phone_match.group())
+        
+        if orders_info:
+            order_context = f"\n\nPEDIDOS ENCONTRADOS:\n{json.dumps(orders_info, ensure_ascii=False, indent=2)}\n"
+    
     context = f"""
-Você é o assistente virtual da {store_name}, uma hamburgueria.
+Você é o assistente virtual da {store_name}, uma hamburgueria especializada em hambúrgueres artesanais.
+
+INFORMAÇÕES DA LOJA:
+- Nome: {store_name}
+- Telefone: {store_phone}
+- Endereço: {store_address}
 
 PRODUTOS DISPONÍVEIS:
 {json.dumps(products_info, ensure_ascii=False, indent=2)}
+{order_context}
 
 SUAS CAPACIDADES:
-1. Ajudar clientes a fazer pedidos
+1. Ajudar clientes a fazer pedidos (colete: nome, telefone, endereço e itens desejados)
 2. Responder perguntas sobre produtos e cardápio
-3. Consultar status de pedidos
+3. Consultar status de pedidos (por código do pedido ou telefone)
 4. Fornecer informações sobre a loja
 5. Ser educado, prestativo e profissional
+
+CONSULTA DE PEDIDOS:
+- Se o cliente quiser consultar um pedido, peça o código do pedido OU telefone cadastrado
+- Códigos de pedido podem ser:
+  * Alfanuméricos customizados (ex: ABC12345, XYZ789)
+  * Formato padrão (PED000001, PED000002)
+  * Apenas o número do ID (1, 2, 3)
+- Com telefone, você pode consultar os últimos 5 pedidos do cliente
+- Aceite telefones em qualquer formato: (31) 98765-4321, 31987654321, +55 31 98765-4321
+
+STATUS DE PEDIDOS:
+- pending: Pedido recebido, aguardando confirmação
+- confirmed: Pedido confirmado, em preparação
+- preparing: Pedido sendo preparado
+- ready: Pedido pronto para retirada/entrega
+- in_delivery: Pedido saiu para entrega
+- delivered: Pedido entregue
+- cancelled: Pedido cancelado
 
 INSTRUÇÕES IMPORTANTES:
 - Seja amigável e use emojis ocasionalmente 🍔
 - Sugira produtos baseado no que o cliente pede
-- Se o cliente quiser fazer pedido, colete: nome, telefone, endereço e itens
-- Confirme sempre os detalhes antes de finalizar
+- Confirme sempre os detalhes antes de finalizar pedido
+- Para novos pedidos, oriente o cliente a usar o site para finalizar
 - Se não souber algo, seja honesto
 - Mantenha respostas concisas e objetivas
-
-Telefone da loja: {store_phone}
 """
     return context
 
@@ -116,8 +234,8 @@ def chat():
         # Obter histórico
         history = get_conversation_history(conversation)
         
-        # Preparar contexto
-        store_context = get_store_context()
+        # Preparar contexto (passa a mensagem do usuário para detectar consultas de pedido)
+        store_context = get_store_context(user_message)
         
         # Preparar mensagens para o Gemini
         messages = [

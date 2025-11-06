@@ -66,6 +66,7 @@ class Product(db.Model):
 class Order(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    order_code = db.Column(db.String(50), unique=True, nullable=True)
     total = db.Column(db.Float, nullable=False)
     status = db.Column(db.String(50), default='Pendente')
     payment_status = db.Column(db.String(50), default='Pendente')
@@ -92,6 +93,11 @@ class Order(db.Model):
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
     status_history = db.relationship('OrderStatusHistory', backref='order', lazy=True, cascade='all, delete-orphan')
     notes = db.relationship('OrderNote', backref='order', lazy=True, cascade='all, delete-orphan')
+    
+    @property
+    def order_number(self):
+        """Retorna código do pedido (custom ou PED + id)"""
+        return self.order_code if self.order_code else f"PED{self.id:06d}"
     
     def get_subtotal(self):
         return sum(item.price * item.quantity for item in self.items)
