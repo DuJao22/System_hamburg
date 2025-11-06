@@ -116,15 +116,16 @@ body {
 }
 
 .mobile-menu-header h2 {
-    color: #fff;
+    color: #000000;
     font-size: 18px;
     margin: 0;
+    font-weight: 800;
 }
 
 .mobile-menu-close {
     background: none;
     border: none;
-    color: #fff;
+    color: #000000;
     font-size: 28px;
     cursor: pointer;
     padding: 0;
@@ -149,7 +150,7 @@ body {
     display: flex;
     align-items: center;
     padding: 16px 20px;
-    color: #fff;
+    color: #ffffff;
     text-decoration: none;
     font-size: 15px;
     font-weight: 600;
@@ -159,11 +160,11 @@ body {
 .mobile-menu-nav > ul > li > a i {
     margin-right: 12px;
     width: 20px;
-    color: var(--color-red);
+    color: #FFE500;
 }
 
 .mobile-menu-nav > ul > li > a:active {
-    background: rgba(220, 20, 60, 0.2);
+    background: rgba(0, 230, 93, 0.2);
 }
 
 /* ========== TOPO VERMELHO ========== */
@@ -191,7 +192,7 @@ body {
 .top_nav_left li a {
     display: block;
     padding: 12px 18px;
-    color: #fff;
+    color: #000000;
     text-decoration: none;
     font-size: 13px;
     font-weight: 700;
@@ -201,10 +202,11 @@ body {
 
 .top_nav_left li a:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 .top_nav_right {
-    color: #fff;
+    color: #000000;
     font-size: 12px;
     display: flex;
     gap: 15px;
@@ -212,8 +214,9 @@ body {
 }
 
 .top_nav_right a {
-    color: #fff;
+    color: #000000;
     text-decoration: none;
+    font-weight: 600;
 }
 
 /* ========== HEADER PRINCIPAL ========== */
@@ -273,7 +276,7 @@ body {
     padding: 10px 20px;
     background: var(--color-red);
     border: none;
-    color: #fff;
+    color: #000000;
     font-weight: 700;
     cursor: pointer;
     transition: background 0.3s;
@@ -281,6 +284,7 @@ body {
 
 .search-btn:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 .header_actions {
@@ -330,9 +334,9 @@ body {
 
 .sidebar_header {
     background: var(--color-red);
-    color: #fff;
+    color: #000000;
     padding: 12px 15px;
-    font-weight: 700;
+    font-weight: 800;
     font-size: 14px;
     text-transform: uppercase;
     display: flex;
@@ -348,7 +352,7 @@ body {
 }
 
 .sidebar_menu > li {
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(0,0,0,0.2);
 }
 
 .sidebar_menu > li > a {
@@ -356,14 +360,16 @@ body {
     align-items: center;
     justify-content: space-between;
     padding: 12px 15px;
-    color: #fff;
+    color: #000000;
     text-decoration: none;
     font-size: 13px;
+    font-weight: 600;
     transition: all 0.2s;
 }
 
 .sidebar_menu > li > a:hover {
     background: var(--color-red-dark);
+    color: #000000;
     padding-left: 20px;
 }
 
@@ -448,17 +454,18 @@ body {
 .view_category_btn {
     display: inline-block;
     background: var(--color-red);
-    color: #fff;
+    color: #000000;
     padding: 10px 20px;
     text-decoration: none;
     border-radius: 4px;
-    font-weight: 600;
+    font-weight: 700;
     font-size: 14px;
     transition: background 0.3s;
 }
 
 .view_category_btn:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 .view_category_btn i {
@@ -742,7 +749,7 @@ body {
 
 .btn_red {
     background: var(--color-red);
-    color: #fff;
+    color: #000000;
     padding: 8px 18px;
     border-radius: 5px;
     text-decoration: none;
@@ -755,6 +762,7 @@ body {
 
 .btn_red:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 .products_grid {
@@ -836,7 +844,7 @@ body {
     width: 100%;
     padding: 10px;
     background: var(--color-red);
-    color: #fff;
+    color: #000000;
     border: none;
     border-radius: 5px;
     font-weight: 700;
@@ -846,6 +854,7 @@ body {
 
 .btn_buy:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 /* ========== BRANDS ========== */
@@ -983,14 +992,16 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #fff;
+    color: #000000;
     font-size: 18px;
+    font-weight: 700;
     transition: background 0.3s, transform 0.3s;
     text-decoration: none;
 }
 
 .footer_social a:hover {
     background: var(--color-red-dark);
+    color: #000000;
     transform: scale(1.1);
 }
 
@@ -1006,11 +1017,11 @@ body {
 .categories_toggle_btn {
     display: none;
     background: var(--color-red);
-    color: #fff;
+    color: #000000;
     border: none;
     padding: 12px 20px;
     font-size: 14px;
-    font-weight: 700;
+    font-weight: 800;
     text-transform: uppercase;
     cursor: pointer;
     border-radius: 5px;
@@ -1022,6 +1033,7 @@ body {
 
 .categories_toggle_btn:hover {
     background: var(--color-red-dark);
+    color: #000000;
 }
 
 .categories_toggle_btn i {
@@ -1148,23 +1160,25 @@ body {
 }
 
 .ai-chat-header h3 {
-    color: #fff;
+    color: #000000;
     margin: 0;
     font-size: 16px;
-    font-weight: 700;
+    font-weight: 800;
 }
 
 .ai-chat-status {
-    color: rgba(255,255,255,0.9);
+    color: #000000;
     font-size: 12px;
     margin: 4px 0 0 0;
+    font-weight: 600;
 }
 
 .ai-chat-close-btn {
     background: none;
     border: none;
-    color: #fff;
+    color: #000000;
     font-size: 28px;
+    font-weight: 700;
     cursor: pointer;
     width: 35px;
     height: 35px;
@@ -1176,15 +1190,16 @@ body {
 }
 
 .ai-chat-close-btn:hover {
-    background: rgba(255,255,255,0.2);
+    background: rgba(0,0,0,0.2);
+    color: #000000;
 }
 
 .ai-chat-back-btn {
-    background: rgba(255,255,255,0.15);
+    background: rgba(0,0,0,0.15);
     border: none;
-    color: #fff;
+    color: #000000;
     font-size: 14px;
-    font-weight: 600;
+    font-weight: 700;
     cursor: pointer;
     padding: 10px 20px;
     display: flex;
@@ -1195,7 +1210,8 @@ body {
 }
 
 .ai-chat-back-btn:hover {
-    background: rgba(255,255,255,0.25);
+    background: rgba(0,0,0,0.25);
+    color: #000000;
     transform: translateX(-2px);
 }
 
@@ -1301,17 +1317,19 @@ body {
     background: var(--color-red);
     border: none;
     border-radius: 50%;
-    color: #fff;
+    color: #000000;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
     font-size: 16px;
+    font-weight: 700;
     transition: all 0.2s;
 }
 
 .ai-chat-send-btn:hover {
     background: var(--color-red-dark);
+    color: #000000;
     transform: scale(1.05);
 }
 
@@ -1859,12 +1877,14 @@ body {
 
 .badge-primary {
     background: var(--color-red);
-    color: white;
+    color: #000000;
+    font-weight: 800;
 }
 
 .badge-success {
     background: var(--color-green);
-    color: white;
+    color: #000000;
+    font-weight: 800;
 }
 
 /* Botões Primários */
@@ -1876,11 +1896,11 @@ body {
     padding: var(--space-sm) var(--space-lg);
     min-height: 44px;
     background: var(--color-red);
-    color: white;
+    color: #000000;
     border: none;
     border-radius: var(--border-radius);
     font-size: var(--font-md);
-    font-weight: 600;
+    font-weight: 700;
     text-decoration: none;
     cursor: pointer;
     transition: all 0.2s ease;
@@ -1889,6 +1909,7 @@ body {
 
 .btn-primary:hover {
     background: var(--color-red-dark);
+    color: #000000;
     box-shadow: var(--shadow-md);
     transform: translateY(-1px);
 }
@@ -2835,7 +2856,27 @@ body {
 
 .pdv-container .btn-lg {
     padding: 12px 24px;
-    font-size: 18px;
+}
+
+/* ========== FORÇAR CONTRASTE ADEQUADO EM BOTÕES SUCCESS ========== */
+.btn-success,
+.btn.btn-success,
+button.btn-success {
+    background: var(--color-green) !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-color: var(--color-green) !important;
+}
+
+.btn-success:hover,
+.btn.btn-success:hover,
+button.btn-success:hover,
+.btn-success:focus,
+.btn.btn-success:focus,
+button.btn-success:focus {
+    background: var(--color-red-dark) !important;
+    color: #000000 !important;
+    border-color: var(--color-red-dark) !important;
 }
 
 @media (max-width: 768px) {
@@ -2861,4 +2902,19 @@ body {
     .pdv-table td {
         padding: 8px 6px;
     }
+}
+/* Forçar contraste adequado em botões success */
+.btn-success,
+.btn.btn-success {
+    background: var(--color-green) !important;
+    color: #000000 !important;
+    font-weight: 700 !important;
+    border-color: var(--color-green) !important;
+}
+
+.btn-success:hover,
+.btn.btn-success:hover {
+    background: var(--color-red-dark) !important;
+    color: #000000 !important;
+    border-color: var(--color-red-dark) !important;
 }
