@@ -13,14 +13,14 @@
     
     <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px;">
         {% for table in tables %}
-        <a href="{{ url_for('pdv.table_detail', table_id=table.id) }}" style="text-decoration: none; color: inherit;">
-            <div style="background: {% if table.status == 'occupied' %}#dc3545{% elif table.status == 'reserved' %}#ffc107{% else %}#00C851{% endif %}; color: #fff; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: transform 0.2s;">
-                <i class="fa fa-square" style="font-size: 48px; margin-bottom: 15px; display: block;"></i>
-                <div style="font-size: 24px; font-weight: 700; margin-bottom: 5px;">Mesa {{ table.table_number }}</div>
-                <div style="font-size: 14px; margin-bottom: 5px;">{{ table.get_status_display() }}</div>
-                <div style="font-size: 12px;">Capacidade: {{ table.capacity }} pessoas</div>
+        <a href="{{ url_for('pdv.table_detail', table_id=table.id) }}" style="text-decoration: none;">
+            <div style="background: #fff; color: #111; padding: 30px; border-radius: 8px; text-align: center; box-shadow: 0 4px 10px rgba(0,0,0,0.2); transition: all 0.2s; border: 3px solid {% if table.status == 'occupied' %}#721c24{% elif table.status == 'reserved' %}#856404{% else %}#155724{% endif %};">
+                <i class="fa fa-square" style="font-size: 48px; margin-bottom: 15px; display: block; color: {% if table.status == 'occupied' %}#721c24{% elif table.status == 'reserved' %}#856404{% else %}#155724{% endif %};"></i>
+                <div style="font-size: 24px; font-weight: 700; margin-bottom: 5px; color: #111;">Mesa {{ table.table_number }}</div>
+                <div style="font-size: 14px; margin-bottom: 5px; color: {% if table.status == 'occupied' %}#721c24{% elif table.status == 'reserved' %}#856404{% else %}#155724{% endif %}; font-weight: 600;">{{ table.get_status_display() }}</div>
+                <div style="font-size: 12px; color: #666;">Capacidade: {{ table.capacity }} pessoas</div>
                 {% if table.status == 'occupied' and table.waiter %}
-                    <div style="font-size: 11px; margin-top: 5px; opacity: 0.9;">Garçom: {{ table.waiter.username }}</div>
+                    <div style="font-size: 11px; margin-top: 5px; color: #666;">Garçom: {{ table.waiter.username }}</div>
                 {% endif %}
             </div>
         </a>

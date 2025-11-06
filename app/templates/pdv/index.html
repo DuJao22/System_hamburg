@@ -4,29 +4,29 @@
 
 {% block content %}
 <div class="pdv-container">
-    <h2 style="font-size: 28px; margin-bottom: 30px; color: #111; padding: 20px; background: #fff; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1);">
-        <i class="fa fa-cutlery"></i> PDV / Salão
-    </h2>
+    <div class="pdv-card">
+        <h2 style="margin: 0;"><i class="fa fa-cutlery"></i> PDV / Salão</h2>
+    </div>
     
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 30px;">
-        <a href="{{ url_for('pdv.tables') }}" style="background: #00C851; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,200,81,0.3);">
-            <i class="fa fa-th" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
-            <div style="font-size: 18px; font-weight: 600;">Mesas</div>
+    <div class="pdv-shortcut-grid">
+        <a href="{{ url_for('pdv.tables') }}" class="pdv-shortcut-card green">
+            <i class="fa fa-th pdv-shortcut-icon"></i>
+            <div class="pdv-shortcut-label">Mesas</div>
         </a>
         
-        <a href="{{ url_for('pdv.cash_register') }}" style="background: #ff8800; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(255,136,0,0.3);">
-            <i class="fa fa-money" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
-            <div style="font-size: 18px; font-weight: 600;">Caixa</div>
+        <a href="{{ url_for('pdv.cash_register') }}" class="pdv-shortcut-card orange">
+            <i class="fa fa-money pdv-shortcut-icon"></i>
+            <div class="pdv-shortcut-label">Caixa</div>
         </a>
         
-        <a href="{{ url_for('kitchen.kds') }}" style="background: #dc3545; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(220,53,69,0.3);">
-            <i class="fa fa-fire" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
-            <div style="font-size: 18px; font-weight: 600;">Cozinha (KDS)</div>
+        <a href="{{ url_for('kitchen.kds') }}" class="pdv-shortcut-card red">
+            <i class="fa fa-fire pdv-shortcut-icon"></i>
+            <div class="pdv-shortcut-label">Cozinha (KDS)</div>
         </a>
         
-        <a href="{{ url_for('admin.dashboard') }}" style="background: #111; color: #fff; padding: 25px; border-radius: 8px; text-align: center; text-decoration: none; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">
-            <i class="fa fa-dashboard" style="font-size: 36px; margin-bottom: 10px; display: block;"></i>
-            <div style="font-size: 18px; font-weight: 600;">Admin</div>
+        <a href="{{ url_for('admin.dashboard') }}" class="pdv-shortcut-card dark">
+            <i class="fa fa-dashboard pdv-shortcut-icon"></i>
+            <div class="pdv-shortcut-label">Admin</div>
         </a>
     </div>
     

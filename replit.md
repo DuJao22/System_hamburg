@@ -53,6 +53,15 @@ See `.env.example` for a template.
 
 ## Recent Changes
 - **2025-11-06**:
+  - **Sistema de Estilos PDV com Alto Contraste:** Implementado sistema completo de CSS dedicado para o PDV, garantindo excelente legibilidade com contraste adequado:
+    - **Container Principal (`.pdv-container`):** Fundo claro (#f5f5f5) que sobrescreve o tema escuro global do site
+    - **Cards e Headers (`.pdv-card`, `.pdv-header`):** Fundos brancos com texto escuro (#111-#333) para máxima legibilidade
+    - **Tabelas (`.pdv-table`):** Cabeçalhos com fundo #f8f9fa, texto escuro e bordas bem definidas
+    - **Atalhos Visuais (`.pdv-shortcut-card`):** Cards brancos com bordas coloridas ao invés de fundos coloridos, texto sempre escuro para garantir contraste WCAG
+    - **Badges e Status (`.pdv-badge`, `.pdv-stat-card`):** Fundos pastéis (#d4edda, #f8d7da, #fff3cd) com texto escuro (#155724, #721c24, #856404) seguindo padrões de acessibilidade
+    - **Modais (`.pdv-modal`):** Fundos brancos com texto escuro e formulários com labels em negrito
+    - **Foco em Acessibilidade:** Todas as combinações de cores atendem aos padrões WCAG de contraste mínimo
+  - **Refatoração de Templates PDV:** Substituição massiva de estilos inline por classes CSS dedicadas nos templates `comanda_detail.html`, `tables.html`, `index.html`, `cash_register.html` e `table_detail.html`, resultando em código mais limpo, manutenível e consistente visualmente
   - **Criação Automática de Comanda ao Abrir Mesa:** Otimizado o fluxo de trabalho do PDV - quando o garçom abre uma mesa, o sistema automaticamente cria uma comanda e redireciona para a página de pedidos, eliminando a etapa manual de criação de comanda e acelerando o atendimento.
     - **Transação Atômica:** Implementado tratamento de exceções com rollback automático - se houver qualquer erro na criação da comanda, a mesa não fica travada como ocupada
     - **Fluxo Direto:** Garçom clica em "Abrir Mesa" e já pode começar a lançar pedidos imediatamente
