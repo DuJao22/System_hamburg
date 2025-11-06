@@ -67,13 +67,29 @@ def open_table(table_id):
         flash('Mesa já está ocupada!', 'warning')
         return redirect(url_for('pdv.tables'))
     
-    table.status = 'occupied'
-    table.opened_at = datetime.utcnow()
-    table.waiter_id = current_user.id
-    db.session.commit()
-    
-    flash(f'Mesa {table.table_number} aberta!', 'success')
-    return redirect(url_for('pdv.table_detail', table_id=table_id))
+    try:
+        table.status = 'occupied'
+        table.opened_at = datetime.utcnow()
+        table.waiter_id = current_user.id
+        
+        last_comanda = Comanda.query.order_by(Comanda.id.desc()).first()
+        comanda_number = str((last_comanda.id if last_comanda else 0) + 1).zfill(6)
+        
+        comanda = Comanda(
+            comanda_number=comanda_number,
+            table_id=table_id,
+            waiter_id=current_user.id
+        )
+        db.session.add(comanda)
+        db.session.flush()
+        db.session.commit()
+        
+        flash(f'Mesa {table.table_number} aberta! Comanda #{comanda_number} criada.', 'success')
+        return redirect(url_for('pdv.comanda_detail', comanda_id=comanda.id))
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Erro ao abrir mesa: {str(e)}', 'danger')
+        return redirect(url_for('pdv.tables'))
 
 @pdv_bp.route('/mesa/<int:table_id>')
 @login_required
