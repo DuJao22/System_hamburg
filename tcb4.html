@@ -1,0 +1,1179 @@
+
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TCB Burger Artesanal - Sistema Completo de Gestão</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-green: #00ff41;
+            --secondary-green: #00cc33;
+            --dark-bg: #0a0a0a;
+            --card-bg: rgba(0, 20, 0, 0.9);
+            --text-white: #ffffff;
+            --text-gray: #b0b0b0;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: var(--dark-bg);
+            color: var(--text-white);
+            overflow-x: hidden;
+            line-height: 1.6;
+        }
+
+        /* Animated Background */
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #0a0a0a 0%, #001a00 100%);
+            z-index: -2;
+        }
+
+        .particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            overflow: hidden;
+            pointer-events: none;
+        }
+
+        .particle {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: var(--primary-green);
+            border-radius: 50%;
+            animation: float 15s infinite;
+            opacity: 0.6;
+            box-shadow: 0 0 8px var(--primary-green);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            50% {
+                transform: translateY(-50vh) translateX(20vw);
+                opacity: 0.8;
+            }
+            90% {
+                opacity: 0.6;
+            }
+        }
+
+        /* Header */
+        .header {
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+            border-bottom: 2px solid var(--primary-green);
+            box-shadow: 0 4px 20px rgba(0, 255, 65, 0.3);
+        }
+
+        .header-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            text-shadow: 0 0 15px var(--primary-green);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            z-index: 1001;
+        }
+
+        .logo i {
+            font-size: 1.8rem;
+        }
+
+        .mobile-menu-btn {
+            display: none;
+            background: none;
+            border: 2px solid var(--primary-green);
+            color: var(--primary-green);
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 1001;
+            padding: 0.5rem;
+            border-radius: 8px;
+            width: 45px;
+            height: 45px;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+            position: relative;
+        }
+
+        .mobile-menu-btn:hover {
+            background: rgba(0, 255, 65, 0.1);
+            transform: scale(1.05);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-links a {
+            color: var(--text-white);
+            text-decoration: none;
+            transition: all 0.3s;
+            font-weight: 500;
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+        }
+
+        .nav-links a:hover {
+            color: var(--primary-green);
+            background: rgba(0, 255, 65, 0.1);
+            text-shadow: 0 0 10px var(--primary-green);
+        }
+
+        /* Hero Section */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 6rem 1rem 3rem;
+            position: relative;
+        }
+
+        .hero-content h1 {
+            font-size: clamp(2rem, 6vw, 4rem);
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, var(--primary-green), #00ffff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            animation: glow 2s infinite alternate;
+            line-height: 1.2;
+        }
+
+        @keyframes glow {
+            from {
+                filter: drop-shadow(0 0 15px var(--primary-green));
+            }
+            to {
+                filter: drop-shadow(0 0 30px var(--primary-green));
+            }
+        }
+
+        .hero-content p {
+            font-size: clamp(1rem, 2.5vw, 1.3rem);
+            color: var(--text-gray);
+            margin-bottom: 1rem;
+            line-height: 1.6;
+        }
+
+        .hero-content .subtitle {
+            font-size: clamp(0.9rem, 2vw, 1.1rem);
+            margin-bottom: 2rem;
+        }
+
+        .cta-button {
+            display: inline-block;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(135deg, var(--primary-green), var(--secondary-green));
+            color: var(--dark-bg);
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 10px 30px rgba(0, 255, 65, 0.4);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-button:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0, 255, 65, 0.6);
+        }
+
+        .cta-button i {
+            margin-right: 0.5rem;
+        }
+
+        /* Container */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 3rem 1rem;
+        }
+
+        /* Section Title */
+        .section-title {
+            text-align: center;
+            font-size: clamp(1.8rem, 4vw, 2.5rem);
+            margin-bottom: 3rem;
+            position: relative;
+            color: var(--primary-green);
+            text-shadow: 0 0 20px var(--primary-green);
+        }
+
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 80px;
+            height: 3px;
+            background: linear-gradient(90deg, transparent, var(--primary-green), transparent);
+        }
+
+        /* Feature Cards */
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature-card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 2rem;
+            transition: all 0.4s;
+            position: relative;
+            overflow: hidden;
+            backdrop-filter: blur(10px);
+        }
+
+        .feature-card::before {
+            content: '';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            right: -2px;
+            bottom: -2px;
+            background: linear-gradient(135deg, var(--primary-green), transparent, var(--primary-green));
+            border-radius: 15px;
+            opacity: 0;
+            transition: opacity 0.4s;
+            z-index: -1;
+        }
+
+        .feature-card:hover::before {
+            opacity: 1;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 15px 40px rgba(0, 255, 65, 0.3);
+        }
+
+        .feature-icon {
+            font-size: 2.5rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+            text-shadow: 0 0 15px var(--primary-green);
+        }
+
+        .feature-card h3 {
+            font-size: 1.4rem;
+            margin-bottom: 1rem;
+            color: var(--primary-green);
+        }
+
+        .feature-card ul {
+            list-style: none;
+            padding-left: 0;
+        }
+
+        .feature-card ul li {
+            padding: 0.5rem 0;
+            color: var(--text-gray);
+            position: relative;
+            padding-left: 1.5rem;
+            font-size: 0.95rem;
+        }
+
+        .feature-card ul li::before {
+            content: '✓';
+            position: absolute;
+            left: 0;
+            color: var(--primary-green);
+            font-weight: bold;
+        }
+
+        /* Profile Cards */
+        .profile-card {
+            background: var(--card-bg);
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            transition: all 0.4s;
+            backdrop-filter: blur(10px);
+        }
+
+        .profile-card:hover {
+            transform: translateX(8px);
+            box-shadow: -8px 8px 30px rgba(0, 255, 65, 0.3);
+        }
+
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-emoji {
+            font-size: 2.5rem;
+        }
+
+        .profile-card h2 {
+            font-size: 1.6rem;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .profile-card h4 {
+            color: var(--primary-green);
+            margin: 1.2rem 0 0.8rem 0;
+            font-size: 1.2rem;
+        }
+
+        /* Stats Section */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--primary-green);
+            border-radius: 12px;
+            padding: 2rem;
+            text-align: center;
+            transition: all 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: scale(1.05);
+            box-shadow: 0 12px 30px rgba(0, 255, 65, 0.3);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--primary-green);
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            font-size: 1rem;
+            color: var(--text-gray);
+        }
+
+        /* Footer */
+        .footer {
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid var(--primary-green);
+            padding: 2.5rem 1rem 1.5rem;
+            text-align: center;
+        }
+
+        .creator-info {
+            max-width: 800px;
+            margin: 0 auto 2rem;
+            padding: 2rem;
+            background: var(--card-bg);
+            border: 2px solid var(--primary-green);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+        }
+
+        .creator-info h3 {
+            font-size: 1.8rem;
+            color: var(--primary-green);
+            margin-bottom: 1rem;
+        }
+
+        .creator-info p {
+            font-size: 1.1rem;
+            color: var(--text-gray);
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .creator-name {
+            color: var(--primary-green);
+            font-weight: bold;
+            font-size: 1.3rem;
+            text-shadow: 0 0 10px var(--primary-green);
+        }
+
+        .footer-bottom {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 1.5rem 0.5rem 0.5rem;
+            border-top: 1px solid rgba(0, 255, 65, 0.3);
+        }
+
+        .footer-bottom p {
+            color: var(--text-gray);
+            font-size: 0.95rem;
+            line-height: 1.8;
+            margin-bottom: 0.5rem;
+        }
+
+        .footer-link {
+            color: var(--primary-green);
+            font-weight: bold;
+            text-decoration: none;
+            transition: all 0.3s;
+        }
+
+        .footer-link:hover {
+            text-shadow: 0 0 10px var(--primary-green);
+            color: #00ffff;
+        }
+
+        /* Scroll Reveal */
+        .reveal {
+            opacity: 0;
+            transform: translateY(30px);
+            transition: all 0.6s ease;
+        }
+
+        .reveal.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Float Animation */
+        .float-animation {
+            animation: floating 3s ease-in-out infinite;
+        }
+
+        @keyframes floating {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-15px);
+            }
+        }
+
+        /* Menu Overlay */
+        .menu-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            z-index: 999;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .menu-overlay.active {
+            display: block;
+            opacity: 1;
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+
+            .nav-links {
+                position: fixed;
+                top: 0;
+                right: -100%;
+                height: 100vh;
+                width: 280px;
+                max-width: 85%;
+                background: rgba(0, 0, 0, 0.98);
+                backdrop-filter: blur(20px);
+                flex-direction: column;
+                padding: 6rem 1.5rem 2rem;
+                gap: 0;
+                transition: right 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+                border-left: 2px solid var(--primary-green);
+                box-shadow: -5px 0 30px rgba(0, 255, 65, 0.3);
+                overflow-y: auto;
+                z-index: 1000;
+            }
+
+            .nav-links.active {
+                right: 0;
+            }
+
+            .nav-links a {
+                width: 100%;
+                font-size: 1.2rem;
+                padding: 1rem;
+                border-bottom: 1px solid rgba(0, 255, 65, 0.2);
+                text-align: left;
+            }
+
+            .logo {
+                font-size: 1.3rem;
+            }
+
+            .logo i {
+                font-size: 1.5rem;
+            }
+
+            .hero {
+                padding: 5rem 1rem 2rem;
+                min-height: 85vh;
+            }
+
+            .container {
+                padding: 2rem 1rem;
+            }
+
+            .features-grid {
+                grid-template-columns: 1fr;
+                gap: 1.2rem;
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+                gap: 1rem;
+            }
+
+            .profile-header {
+                flex-direction: column;
+                text-align: center;
+            }
+
+            .footer {
+                padding: 2rem 1rem 1rem;
+            }
+
+            .creator-info {
+                padding: 1.5rem;
+            }
+
+            .footer-bottom {
+                padding: 1rem 0.5rem 0.5rem;
+            }
+        }
+
+        /* Tablet */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .features-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+
+            .stats-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        /* Extra Small Devices */
+        @media (max-width: 480px) {
+            .nav-links {
+                width: 260px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .feature-card {
+                padding: 1.5rem;
+            }
+
+            .profile-card {
+                padding: 1.5rem;
+            }
+        }
+
+        /* Smooth transitions */
+        * {
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        button {
+            -webkit-appearance: none;
+            -moz-appearance: none;
+            appearance: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg"></div>
+    <div class="particles" id="particles"></div>
+    <div class="menu-overlay" id="menuOverlay"></div>
+
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="logo">
+                <i class="fas fa-burger"></i>
+                <span>TCB Burger</span>
+            </div>
+            <button class="mobile-menu-btn" id="mobileMenuBtn" aria-label="Menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <nav class="nav-links" id="navLinks">
+                <a href="#inicio">Início</a>
+                <a href="#recursos">Recursos</a>
+                <a href="#perfis">Perfis</a>
+                <a href="#contato">Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero" id="inicio">
+        <div class="hero-content">
+            <h1 class="float-animation">TCB BURGER ARTESANAL</h1>
+            <p>Sistema Completo de Gestão para Hamburgueria</p>
+            <p class="subtitle">
+                E-commerce • PDV • Cardápio Digital • Gestão de Cozinha • Pagamentos Online
+            </p>
+            <a href="#recursos" class="cta-button">
+                <i class="fas fa-rocket"></i> Explorar Sistema
+            </a>
+        </div>
+    </section>
+
+    <!-- Stats Section -->
+    <section class="container">
+        <div class="stats-grid reveal">
+            <div class="stat-card">
+                <div class="stat-number">100+</div>
+                <div class="stat-label">Funcionalidades</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">6</div>
+                <div class="stat-label">Perfis de Usuário</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">3</div>
+                <div class="stat-label">Integrações</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number">24/7</div>
+                <div class="stat-label">Tempo Real</div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Features Section -->
+    <section class="container" id="recursos">
+        <h2 class="section-title reveal">🚀 Recursos Principais</h2>
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-shopping-cart"></i></div>
+                <h3>E-commerce Delivery</h3>
+                <ul>
+                    <li>Catálogo completo de produtos</li>
+                    <li>Até 5 imagens por produto</li>
+                    <li>Carrinho de compras inteligente</li>
+                    <li>Sistema de cupons de desconto</li>
+                    <li>Cálculo automático de frete</li>
+                    <li>Validação GPS de raio de entrega</li>
+                    <li>Lista de desejos</li>
+                    <li>Sistema de avaliações</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-cash-register"></i></div>
+                <h3>PDV - Ponto de Venda</h3>
+                <ul>
+                    <li>Gestão completa de mesas</li>
+                    <li>Sistema de comandas com PIN</li>
+                    <li>Abertura e fechamento de caixa</li>
+                    <li>Controle de entradas e saídas</li>
+                    <li>Impressão de comandas</li>
+                    <li>Gerenciamento de garçons</li>
+                    <li>Relatórios de vendas</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-qrcode"></i></div>
+                <h3>Cardápio Digital QR Code</h3>
+                <ul>
+                    <li>QR Code exclusivo por mesa</li>
+                    <li>PIN de segurança de 4 dígitos</li>
+                    <li>Pedidos direto da mesa</li>
+                    <li>Visualização da conta em tempo real</li>
+                    <li>Status dos pedidos ao vivo</li>
+                    <li>Interface mobile responsiva</li>
+                    <li>Zero contato físico</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-kitchen-set"></i></div>
+                <h3>KDS - Kitchen Display</h3>
+                <ul>
+                    <li>Display de pedidos para cozinha</li>
+                    <li>Atualização de status em tempo real</li>
+                    <li>Pedidos de delivery e salão</li>
+                    <li>Controle individual de itens</li>
+                    <li>Notificações automáticas</li>
+                    <li>Organização por prioridade</li>
+                    <li>Detalhes de extras e observações</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-credit-card"></i></div>
+                <h3>Pagamentos Online</h3>
+                <ul>
+                    <li>Integração Mercado Pago</li>
+                    <li>PIX instantâneo</li>
+                    <li>Cartão de crédito/débito</li>
+                    <li>Boleto bancário</li>
+                    <li>Confirmação automática</li>
+                    <li>Webhook de notificações</li>
+                    <li>Segurança PCI compliant</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-robot"></i></div>
+                <h3>Chat com IA</h3>
+                <ul>
+                    <li>Powered by Google Gemini</li>
+                    <li>Atendimento 24/7</li>
+                    <li>Respostas inteligentes</li>
+                    <li>Sugestões personalizadas</li>
+                    <li>Informações sobre produtos</li>
+                    <li>Suporte ao cliente</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-chart-line"></i></div>
+                <h3>Relatórios e Analytics</h3>
+                <ul>
+                    <li>Dashboard completo</li>
+                    <li>Produtos mais vendidos</li>
+                    <li>Receita total</li>
+                    <li>Vendas por período</li>
+                    <li>Gráficos interativos</li>
+                    <li>Exportação CSV</li>
+                    <li>Controle de estoque</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-star"></i></div>
+                <h3>Programa de Fidelidade</h3>
+                <ul>
+                    <li>Ganhe pontos por compra</li>
+                    <li>R$ 1,00 = 1 ponto</li>
+                    <li>Resgate de cupons</li>
+                    <li>100 pts = R$ 10 OFF</li>
+                    <li>250 pts = R$ 30 OFF</li>
+                    <li>500 pts = R$ 70 OFF</li>
+                    <li>Histórico de transações</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Profiles Section -->
+    <section class="container" id="perfis">
+        <h2 class="section-title reveal">👥 Perfis de Usuário</h2>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">👑</span>
+                <div>
+                    <h2>ADMINISTRADOR</h2>
+                    <p style="color: var(--text-gray);">Controle total do sistema</p>
+                </div>
+            </div>
+            <h4>📊 Dashboard Executivo</h4>
+            <ul>
+                <li>Visão geral de vendas e pedidos</li>
+                <li>Estatísticas em tempo real</li>
+                <li>Produtos mais vendidos</li>
+                <li>Alertas de estoque</li>
+            </ul>
+            <h4>🍔 Gestão de Produtos</h4>
+            <ul>
+                <li>CRUD completo de produtos</li>
+                <li>Upload de até 5 imagens</li>
+                <li>Controle de estoque e preços</li>
+                <li>Produtos em destaque</li>
+            </ul>
+            <h4>🏷️ Categorias e Extras</h4>
+            <ul>
+                <li>Criação de categorias com imagem</li>
+                <li>Gestão de adicionais (extras)</li>
+                <li>Precificação individual</li>
+            </ul>
+            <h4>🎫 Sistema de Cupons</h4>
+            <ul>
+                <li>Desconto percentual ou fixo</li>
+                <li>Limite de usos e validade</li>
+                <li>Valor mínimo de compra</li>
+            </ul>
+            <h4>🪑 Gestão de Mesas</h4>
+            <ul>
+                <li>Criar e editar mesas</li>
+                <li>Gerar QR Codes imprimíveis</li>
+                <li>Definir capacidade</li>
+                <li>PIN de segurança</li>
+            </ul>
+            <h4>👤 Gestão de Usuários</h4>
+            <ul>
+                <li>Criar perfis de acesso</li>
+                <li>Gerenciar garçons e cozinha</li>
+                <li>Controle de permissões</li>
+            </ul>
+            <h4>🥬 Ficha Técnica</h4>
+            <ul>
+                <li>Cadastro de ingredientes</li>
+                <li>Cálculo de CMV</li>
+                <li>Controle de estoque</li>
+                <li>Margem de lucro</li>
+            </ul>
+        </div>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">🍽️</span>
+                <div>
+                    <h2>GARÇOM/ATENDENTE</h2>
+                    <p style="color: var(--text-gray);">Frente de atendimento</p>
+                </div>
+            </div>
+            <h4>💰 PDV - Ponto de Venda</h4>
+            <ul>
+                <li>Visualizar todas as mesas</li>
+                <li>Abrir mesa com PIN</li>
+                <li>Criar e gerenciar comandas</li>
+                <li>Adicionar produtos e extras</li>
+                <li>Enviar pedidos para cozinha</li>
+                <li>Fechar contas</li>
+            </ul>
+            <h4>💵 Gestão de Caixa</h4>
+            <ul>
+                <li>Abrir e fechar caixa</li>
+                <li>Registrar movimentações</li>
+                <li>Conferência de valores</li>
+                <li>Relatório de caixa</li>
+            </ul>
+        </div>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">👨‍🍳</span>
+                <div>
+                    <h2>COZINHA</h2>
+                    <p style="color: var(--text-gray);">Produção e preparo</p>
+                </div>
+            </div>
+            <h4>🖥️ KDS - Kitchen Display</h4>
+            <ul>
+                <li>Visualizar pedidos pendentes</li>
+                <li>Atualizar status de produção</li>
+                <li>Marcar itens como prontos</li>
+                <li>Notificações em tempo real</li>
+                <li>Ver extras e observações</li>
+                <li>Priorização automática</li>
+            </ul>
+        </div>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">💼</span>
+                <div>
+                    <h2>GERENTE</h2>
+                    <p style="color: var(--text-gray);">Gestão operacional</p>
+                </div>
+            </div>
+            <ul>
+                <li>Todas as permissões de Garçom</li>
+                <li>Acesso ao KDS da cozinha</li>
+                <li>Relatórios gerenciais</li>
+                <li>Visualização de todas comandas</li>
+                <li>Controle de caixa avançado</li>
+            </ul>
+        </div>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">🛍️</span>
+                <div>
+                    <h2>CLIENTE (Delivery)</h2>
+                    <p style="color: var(--text-gray);">Compras online</p>
+                </div>
+            </div>
+            <h4>🛒 E-commerce</h4>
+            <ul>
+                <li>Navegar catálogo completo</li>
+                <li>Buscar e filtrar produtos</li>
+                <li>Ver até 5 fotos por produto</li>
+                <li>Adicionar extras e observações</li>
+                <li>Carrinho inteligente</li>
+                <li>Aplicar cupons de desconto</li>
+                <li>Escolher delivery ou retirada</li>
+                <li>Validação de raio de entrega</li>
+            </ul>
+            <h4>💳 Pagamento</h4>
+            <ul>
+                <li>PIX, Cartão ou Boleto</li>
+                <li>Mercado Pago integrado</li>
+                <li>Confirmação instantânea</li>
+            </ul>
+            <h4>📱 Minha Conta</h4>
+            <ul>
+                <li>Histórico de pedidos</li>
+                <li>Acompanhamento em tempo real</li>
+                <li>Lista de desejos</li>
+                <li>Avaliar produtos</li>
+                <li>Programa de fidelidade</li>
+                <li>Resgatar pontos</li>
+            </ul>
+        </div>
+
+        <div class="profile-card reveal">
+            <div class="profile-header">
+                <span class="profile-emoji">📱</span>
+                <div>
+                    <h2>CLIENTE NA MESA</h2>
+                    <p style="color: var(--text-gray);">QR Code self-service</p>
+                </div>
+            </div>
+            <h4>📲 Cardápio Digital</h4>
+            <ul>
+                <li>Escanear QR Code da mesa</li>
+                <li>Login com número + PIN</li>
+                <li>Ver catálogo completo</li>
+                <li>Fazer pedidos diretos</li>
+                <li>Adicionar extras</li>
+                <li>Ver conta em tempo real</li>
+                <li>Acompanhar status dos pedidos</li>
+                <li>Notificações quando pronto</li>
+            </ul>
+        </div>
+    </section>
+
+    <!-- Technical Features -->
+    <section class="container">
+        <h2 class="section-title reveal">🔧 Recursos Técnicos</h2>
+        <div class="features-grid">
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-bell"></i></div>
+                <h3>Tempo Real</h3>
+                <ul>
+                    <li>Socket.IO integrado</li>
+                    <li>Notificações instantâneas</li>
+                    <li>Atualização automática</li>
+                    <li>Sincronização multi-dispositivo</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+                <h3>Segurança</h3>
+                <ul>
+                    <li>Flask-Login authentication</li>
+                    <li>Hash de senhas</li>
+                    <li>CSRF Protection</li>
+                    <li>PIN de 4 dígitos</li>
+                    <li>Sessões seguras</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-plug"></i></div>
+                <h3>Integrações</h3>
+                <ul>
+                    <li>Mercado Pago API</li>
+                    <li>Google Gemini AI</li>
+                    <li>ViaCEP API</li>
+                    <li>Geolocalização GPS</li>
+                </ul>
+            </div>
+
+            <div class="feature-card reveal">
+                <div class="feature-icon"><i class="fas fa-mobile-alt"></i></div>
+                <h3>Design Responsivo</h3>
+                <ul>
+                    <li>Mobile-first</li>
+                    <li>Interface dark mode</li>
+                    <li>Animações suaves</li>
+                    <li>FontAwesome icons</li>
+                </ul>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer" id="contato">
+        <div class="creator-info reveal">
+            <h3>💡 Desenvolvido por:</h3>
+            <p>
+                <span class="creator-name">João Layon</span><br>
+                CEO - Soluções Digitais<br>
+                Sistema desenvolvido exclusivamente para<br>
+                <strong style="color: var(--primary-green); font-size: 1.3rem;">TCB Hamburgueria</strong>
+            </p>
+            <p style="margin-top: 1.5rem; font-size: 1rem;">
+                Transformando operações em experiências digitais de alta performance
+            </p>
+        </div>
+        
+        <div class="footer-bottom">
+            <p>© 2024 TCB Burger Artesanal. Todos os direitos reservados.</p>
+            <p style="margin-top: 0.8rem;">
+                <strong>Sistema desenvolvido por:</strong> 
+                <a href="https://dujao22.github.io/Apresentacao_Solucoes_Digitais-/" target="_blank" class="footer-link">
+                    João Layon - Desenvolvedor Fullstack
+                </a>
+            </p>
+        </div>
+    </footer>
+
+    <script>
+        // Criar partículas animadas
+        const particlesContainer = document.getElementById('particles');
+        const particleCount = window.innerWidth < 768 ? 20 : 40;
+
+        for (let i = 0; i < particleCount; i++) {
+            const particle = document.createElement('div');
+            particle.className = 'particle';
+            particle.style.left = Math.random() * 100 + '%';
+            particle.style.top = Math.random() * 100 + '%';
+            particle.style.animationDelay = Math.random() * 15 + 's';
+            particle.style.animationDuration = (Math.random() * 10 + 10) + 's';
+            particlesContainer.appendChild(particle);
+        }
+
+        // Mobile Menu Toggle
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const navLinks = document.getElementById('navLinks');
+        const menuOverlay = document.getElementById('menuOverlay');
+        const navLinksItems = navLinks.querySelectorAll('a');
+
+        function toggleMenu() {
+            navLinks.classList.toggle('active');
+            menuOverlay.classList.toggle('active');
+            const icon = mobileMenuBtn.querySelector('i');
+            icon.classList.toggle('fa-bars');
+            icon.classList.toggle('fa-times');
+            
+            // Prevent body scroll when menu is open
+            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+        }
+
+        mobileMenuBtn.addEventListener('click', toggleMenu);
+        menuOverlay.addEventListener('click', toggleMenu);
+
+        // Close menu when clicking on a link
+        navLinksItems.forEach(link => {
+            link.addEventListener('click', () => {
+                if (navLinks.classList.contains('active')) {
+                    toggleMenu();
+                }
+            });
+        });
+
+        // Scroll reveal animation
+        function reveal() {
+            const reveals = document.querySelectorAll('.reveal');
+            const windowHeight = window.innerHeight;
+            const revealPoint = 100;
+            
+            reveals.forEach(element => {
+                const elementTop = element.getBoundingClientRect().top;
+                
+                if (elementTop < windowHeight - revealPoint) {
+                    element.classList.add('active');
+                }
+            });
+        }
+
+        window.addEventListener('scroll', reveal);
+        reveal(); // Initial check
+
+        // Smooth scroll
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    const headerHeight = document.querySelector('.header').offsetHeight;
+                    const targetPosition = target.offsetTop - headerHeight;
+                    
+                    window.scrollTo({
+                        top: targetPosition,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+
+        // Close menu on escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && navLinks.classList.contains('active')) {
+                toggleMenu();
+            }
+        });
+
+        // Handle resize
+        let resizeTimer;
+        window.addEventListener('resize', () => {
+            clearTimeout(resizeTimer);
+            resizeTimer = setTimeout(() => {
+                if (window.innerWidth > 768 && navLinks.classList.contains('active')) {
+                    toggleMenu();
+                }
+            }, 250);
+        });
+    </script>
+</body>
+</html>
