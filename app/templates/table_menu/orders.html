@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block title %}Meus Pedidos - Mesa {{ table.table_number }} - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="padding: 20px 0;">
+    <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="color: #00C851; margin: 0;">
+                    <i class="fa fa-list"></i> Meus Pedidos - Mesa {{ table.table_number }}
+                </h2>
+                <p style="color: #999; margin: 5px 0 0 0;">Comanda: {{ comanda.comanda_number }}</p>
+            </div>
+            <div style="display: flex; gap: 10px;">
+                <a href="{{ url_for('table_menu.table_catalog') }}" class="btn_buy" style="padding: 12px 20px;">
+                    <i class="fa fa-cutlery"></i> Ver Cardápio
+                </a>
+                <a href="{{ url_for('table_menu.table_logout') }}" class="btn_buy" style="padding: 12px 20px; background: #dc3545;">
+                    <i class="fa fa-sign-out"></i> Sair
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div style="background: #1a1a1a; padding: 25px; border-radius: 10px; margin-bottom: 20px;">
+        <h3 style="color: #fff; margin: 0 0 20px 0;">
+            <i class="fa fa-shopping-cart"></i> Itens da Comanda
+        </h3>
+        
+        {% if comanda.items %}
+        <div style="margin-bottom: 20px;">
+            {% for item in comanda.items %}
+            <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 15px; border-left: 4px solid 
+                {% if item.status == 'delivered' %}#00C851
+                {% elif item.status == 'ready' %}#FFA500
+                {% elif item.status == 'preparing' %}#17a2b8
+                {% else %}#999
+                {% endif %};">
+                <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 15px;">
+                    <div style="flex: 1;">
+                        <h4 style="color: #fff; margin: 0 0 10px 0;">
+                            {{ item.product.name }}
+                            <span style="background: #2a2a2a; padding: 4px 10px; border-radius: 4px; font-size: 14px; margin-left: 10px;">
+                                x{{ item.quantity }}
+                            </span>
+                        </h4>
+                        {% if item.notes %}
+                        <p style="color: #999; font-size: 14px; margin: 5px 0;">
+                            <i class="fa fa-comment-o"></i> {{ item.notes }}
+                        </p>
+                        {% endif %}
+                        {% if item.extras %}
+                        <p style="color: #999; font-size: 14px; margin: 5px 0;">
+                            <i class="fa fa-plus-circle"></i> Adicionais: 
+                            {% for extra in item.extras %}
+                            {{ extra.extra.name }} (x{{ extra.quantity }}){% if not loop.last %}, {% endif %}
+                            {% endfor %}
+                        </p>
+                        {% endif %}
+                        <div style="margin-top: 10px;">
+                            <span style="padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600;
+                                {% if item.status == 'delivered' %}background: rgba(0, 200, 81, 0.2); color: #00C851;
+                                {% elif item.status == 'ready' %}background: rgba(255, 165, 0, 0.2); color: #FFA500;
+                                {% elif item.status == 'preparing' %}background: rgba(23, 162, 184, 0.2); color: #17a2b8;
+                                {% else %}background: rgba(153, 153, 153, 0.2); color: #999;
+                                {% endif %}">
+                                <i class="fa 
+                                    {% if item.status == 'delivered' %}fa-check-circle
+                                    {% elif item.status == 'ready' %}fa-bell
+                                    {% elif item.status == 'preparing' %}fa-spinner
+                                    {% else %}fa-clock-o
+                                    {% endif %}"></i>
+                                {% if item.status == 'delivered' %}Entregue
+                                {% elif item.status == 'ready' %}Pronto
+                                {% elif item.status == 'preparing' %}Preparando
+                                {% else %}Pendente
+                                {% endif %}
+                            </span>
+                        </div>
+                    </div>
+                    <div style="text-align: right;">
+                        <span style="color: #00C851; font-size: 20px; font-weight: 700;">
+                            R$ {{ "%.2f"|format(item.calculate_item_total()) }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <div style="background: #0a0a0a; padding: 25px; border-radius: 8px; border-top: 3px solid #00C851;">
+            <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <span style="color: #fff; font-size: 20px; font-weight: 600;">Total da Comanda:</span>
+                <span style="color: #00C851; font-size: 32px; font-weight: 700;">
+                    R$ {{ "%.2f"|format(comanda.calculate_total()) }}
+                </span>
+            </div>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 40px 20px; background: #0a0a0a; border-radius: 8px;">
+            <i class="fa fa-shopping-basket" style="font-size: 60px; color: #666; margin-bottom: 20px;"></i>
+            <p style="color: #999; font-size: 18px; margin: 0;">Nenhum item adicionado ainda</p>
+            <a href="{{ url_for('table_menu.table_catalog') }}" class="btn_buy" style="margin-top: 20px; display: inline-block; padding: 12px 30px;">
+                <i class="fa fa-cutlery"></i> Ver Cardápio
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    {% if orders %}
+    <div style="background: #1a1a1a; padding: 25px; border-radius: 10px;">
+        <h3 style="color: #fff; margin: 0 0 20px 0;">
+            <i class="fa fa-history"></i> Histórico de Pedidos Finalizados
+        </h3>
+        
+        {% for order in orders %}
+        <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 15px;">
+            <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 15px; margin-bottom: 15px;">
+                <div>
+                    <h4 style="color: #00C851; margin: 0 0 5px 0;">
+                        Pedido #{{ order.id }}
+                    </h4>
+                    <p style="color: #999; font-size: 14px; margin: 0;">
+                        {{ order.created_at.strftime('%d/%m/%Y %H:%M') }}
+                    </p>
+                </div>
+                <div style="text-align: right;">
+                    <span style="padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600;
+                        {% if order.status == 'Entregue' %}background: rgba(0, 200, 81, 0.2); color: #00C851;
+                        {% elif order.status == 'Pronto' %}background: rgba(255, 165, 0, 0.2); color: #FFA500;
+                        {% elif order.status == 'Preparando' %}background: rgba(23, 162, 184, 0.2); color: #17a2b8;
+                        {% else %}background: rgba(153, 153, 153, 0.2); color: #999;
+                        {% endif %}">
+                        {{ order.status }}
+                    </span>
+                    <p style="color: #00C851; font-size: 20px; font-weight: 700; margin: 10px 0 0 0;">
+                        R$ {{ "%.2f"|format(order.total) }}
+                    </p>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px solid #2a2a2a; padding-top: 15px;">
+                {% for item in order.items %}
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span style="color: #999;">{{ item.quantity }}x {{ item.product.name }}</span>
+                    <span style="color: #fff;">R$ {{ "%.2f"|format(item.price * item.quantity) }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+const socket = io();
+
+socket.on('connect', function() {
+    console.log('Connected to WebSocket');
+    socket.emit('join_table', { table_id: {{ table.id }} });
+});
+
+socket.on('comanda_item_status_update', function(data) {
+    if (data.comanda_id === {{ comanda.id }}) {
+        location.reload();
+    }
+});
+
+socket.on('order_status_update', function(data) {
+    if (data.table_id === {{ table.id }}) {
+        location.reload();
+    }
+});
+</script>
+
+{% endblock %}

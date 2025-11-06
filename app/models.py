@@ -273,6 +273,7 @@ class Table(db.Model):
     current_order_id = db.Column(db.Integer, db.ForeignKey('order.id'), nullable=True)
     opened_at = db.Column(db.DateTime, nullable=True)
     waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    qr_code_url = db.Column(db.String(500), nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     waiter = db.relationship('User', foreign_keys=[waiter_id])
@@ -286,6 +287,10 @@ class Table(db.Model):
             'cleaning': 'Limpeza'
         }
         return status_map.get(self.status, self.status)
+    
+    def get_qr_code_data(self):
+        from flask import url_for
+        return url_for('table_menu.table_access', table_number=self.table_number, _external=True)
 
 class Comanda(db.Model):
     id = db.Column(db.Integer, primary_key=True)

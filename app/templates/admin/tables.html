@@ -1,0 +1,126 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Gerenciar Mesas - Admin{% endblock %}
+
+{% block content %}
+<div style="padding: 30px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+        <h1 style="color: #fff; margin: 0;">
+            <i class="fa fa-table"></i> Gerenciar Mesas e QR Codes
+        </h1>
+        <a href="{{ url_for('admin.create_table') }}" class="btn_buy" style="padding: 12px 24px;">
+            <i class="fa fa-plus"></i> Nova Mesa
+        </a>
+    </div>
+
+    <div style="background: #1a1a1a; padding: 25px; border-radius: 10px;">
+        {% if tables %}
+        <div style="overflow-x: auto;">
+            <table style="width: 100%; border-collapse: collapse;">
+                <thead>
+                    <tr style="border-bottom: 2px solid #00C851;">
+                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Mesa</th>
+                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Capacidade</th>
+                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Status</th>
+                        <th style="padding: 15px; text-align: left; color: #00C851; font-weight: 700;">Garçom</th>
+                        <th style="padding: 15px; text-align: center; color: #00C851; font-weight: 700;">QR Code</th>
+                        <th style="padding: 15px; text-align: center; color: #00C851; font-weight: 700;">Ações</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for table in tables %}
+                    <tr style="border-bottom: 1px solid #2a2a2a;">
+                        <td style="padding: 15px; color: #fff; font-weight: 600; font-size: 18px;">
+                            Mesa {{ table.table_number }}
+                        </td>
+                        <td style="padding: 15px; color: #999;">
+                            <i class="fa fa-users"></i> {{ table.capacity }} pessoas
+                        </td>
+                        <td style="padding: 15px;">
+                            <span style="padding: 6px 12px; border-radius: 4px; font-size: 13px; font-weight: 600;
+                                {% if table.status == 'available' %}background: rgba(0, 200, 81, 0.2); color: #00C851;
+                                {% elif table.status == 'occupied' %}background: rgba(220, 53, 69, 0.2); color: #dc3545;
+                                {% elif table.status == 'reserved' %}background: rgba(255, 165, 0, 0.2); color: #FFA500;
+                                {% else %}background: rgba(153, 153, 153, 0.2); color: #999;
+                                {% endif %}">
+                                <i class="fa 
+                                    {% if table.status == 'available' %}fa-check-circle
+                                    {% elif table.status == 'occupied' %}fa-users
+                                    {% elif table.status == 'reserved' %}fa-clock-o
+                                    {% else %}fa-ban
+                                    {% endif %}"></i>
+                                {{ table.get_status_display() }}
+                            </span>
+                        </td>
+                        <td style="padding: 15px; color: #999;">
+                            {% if table.waiter %}
+                            <i class="fa fa-user"></i> {{ table.waiter.username }}
+                            {% else %}
+                            <span style="color: #666;">-</span>
+                            {% endif %}
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <a href="{{ url_for('admin.generate_table_qrcode', table_id=table.id) }}" 
+                               class="btn_buy" 
+                               style="padding: 8px 16px; background: #17a2b8; display: inline-block;"
+                               download>
+                                <i class="fa fa-qrcode"></i> Baixar QR Code
+                            </a>
+                        </td>
+                        <td style="padding: 15px; text-align: center;">
+                            <form method="POST" action="{{ url_for('admin.delete_table', table_id=table.id) }}" 
+                                  style="display: inline;"
+                                  onsubmit="return confirm('Tem certeza que deseja deletar a mesa {{ table.table_number }}?');">
+                                <button type="submit" 
+                                        class="btn_buy" 
+                                        style="padding: 8px 16px; background: #dc3545;"
+                                        {% if table.status == 'occupied' %}disabled title="Mesa ocupada"{% endif %}>
+                                    <i class="fa fa-trash"></i> Deletar
+                                </button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div style="text-align: center; padding: 60px 20px;">
+            <i class="fa fa-table" style="font-size: 80px; color: #666; margin-bottom: 20px;"></i>
+            <p style="color: #999; font-size: 18px; margin-bottom: 20px;">Nenhuma mesa cadastrada ainda</p>
+            <a href="{{ url_for('admin.create_table') }}" class="btn_buy" style="padding: 12px 30px;">
+                <i class="fa fa-plus"></i> Criar Primeira Mesa
+            </a>
+        </div>
+        {% endif %}
+    </div>
+
+    <div style="background: rgba(0, 200, 81, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #00C851; margin-top: 30px;">
+        <h3 style="color: #00C851; margin: 0 0 15px 0;">
+            <i class="fa fa-info-circle"></i> Como funciona o sistema de QR Code?
+        </h3>
+        <ol style="color: #999; line-height: 1.8; margin: 0; padding-left: 20px;">
+            <li>Crie uma mesa com número identificador (ex: "01", "02", "Mesa VIP")</li>
+            <li>Baixe o QR Code da mesa e imprima-o</li>
+            <li>Cole o QR Code na mesa física do restaurante</li>
+            <li>Quando o garçom abrir uma comanda para a mesa, ele gerará um PIN de 6 dígitos</li>
+            <li>O cliente escaneia o QR Code com o celular</li>
+            <li>O cliente informa o PIN fornecido pelo garçom</li>
+            <li>O cliente pode fazer pedidos e acompanhar o status em tempo real!</li>
+        </ol>
+    </div>
+
+    <div style="background: #1a1a1a; padding: 25px; border-radius: 10px; margin-top: 20px;">
+        <h3 style="color: #fff; margin: 0 0 15px 0;">
+            <i class="fa fa-lightbulb-o"></i> Dicas de Uso
+        </h3>
+        <ul style="color: #999; line-height: 1.8; margin: 0; padding-left: 20px;">
+            <li>Use números simples e claros para identificar as mesas (01, 02, 03...)</li>
+            <li>Imprima os QR Codes em material resistente e plastificado</li>
+            <li>Cole os QR Codes em locais visíveis nas mesas</li>
+            <li>Treine a equipe para informar os PINs aos clientes</li>
+            <li>O PIN é gerado automaticamente pelo sistema quando o garçom abre a comanda no PDV</li>
+        </ul>
+    </div>
+</div>
+{% endblock %}

@@ -36,6 +36,18 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
         - **Waiter Dashboard:** PDV interface displays PIN prominently for easy sharing with customers, with one-click PIN regeneration
         - **Status Timeline:** Visual timeline showing order progress from receipt to delivery
         - **Multi-Party Notifications:** Simultaneous updates to kitchen, waiter, and customer when status changes
+    - **QR Code Table Ordering System (NEW - Nov 2025):**
+        - **QR Code Generation:** Admin can create tables and generate unique QR codes for each table
+        - **Customer QR Scanning:** Customers scan QR code on table to access digital menu and order system
+        - **Dual Authentication:** After scanning, customers can either login with existing account OR enter table number + waiter-provided PIN
+        - **PIN-Based Access:** Waiters generate 6-digit PINs when opening table comandas, allowing guest access without account creation
+        - **Digital Catalog:** Full product catalog with images, descriptions, prices, and real-time stock availability
+        - **Table Session Management:** Secure session system tracks table orders separately from user accounts
+        - **Live Order Status:** Customers view comanda items with real-time status updates (Pending → Preparing → Ready → Delivered)
+        - **Order History:** Access to both active comanda items and completed order history for the table
+        - **Socket.IO Integration:** Real-time notifications when order items change status
+        - **Admin QR Management:** Dashboard interface to create/delete tables and download printable QR codes
+        - **Seamless PDV Integration:** Works alongside existing PDV system, waiters manage PINs from their existing interface
 
 ## External Dependencies
 - **Mercado Pago API:** For payment processing.

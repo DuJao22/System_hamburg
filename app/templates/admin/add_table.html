@@ -1,0 +1,71 @@
+{% extends "admin/base.html" %}
+
+{% block title %}Nova Mesa - Admin{% endblock %}
+
+{% block content %}
+<div style="padding: 30px;">
+    <div style="margin-bottom: 30px;">
+        <a href="{{ url_for('admin.tables') }}" style="color: #00C851; text-decoration: none;">
+            <i class="fa fa-arrow-left"></i> Voltar para Mesas
+        </a>
+    </div>
+
+    <h1 style="color: #fff; margin-bottom: 30px;">
+        <i class="fa fa-plus-circle"></i> Criar Nova Mesa
+    </h1>
+
+    <div style="background: #1a1a1a; padding: 30px; border-radius: 10px; max-width: 600px;">
+        <form method="POST">
+            <div style="margin-bottom: 25px;">
+                <label for="table_number" style="display: block; color: #00C851; font-weight: 600; margin-bottom: 10px;">
+                    Número/Identificador da Mesa *
+                </label>
+                <input 
+                    type="text" 
+                    id="table_number" 
+                    name="table_number" 
+                    required
+                    placeholder="Ex: 01, 02, Mesa VIP, A1..."
+                    style="width: 100%; padding: 15px; border: 2px solid #00C851; border-radius: 6px; background: #0a0a0a; color: #fff; font-size: 16px;">
+                <p style="color: #999; font-size: 13px; margin-top: 8px;">
+                    <i class="fa fa-info-circle"></i> Use um identificador único e fácil de lembrar
+                </p>
+            </div>
+
+            <div style="margin-bottom: 25px;">
+                <label for="capacity" style="display: block; color: #00C851; font-weight: 600; margin-bottom: 10px;">
+                    Capacidade (número de pessoas)
+                </label>
+                <input 
+                    type="number" 
+                    id="capacity" 
+                    name="capacity" 
+                    value="4"
+                    min="1"
+                    max="20"
+                    style="width: 100%; padding: 15px; border: 2px solid #00C851; border-radius: 6px; background: #0a0a0a; color: #fff; font-size: 16px;">
+                <p style="color: #999; font-size: 13px; margin-top: 8px;">
+                    <i class="fa fa-info-circle"></i> Número máximo de pessoas que a mesa comporta
+                </p>
+            </div>
+
+            <div style="background: rgba(0, 200, 81, 0.1); padding: 20px; border-radius: 8px; border-left: 4px solid #00C851; margin-bottom: 25px;">
+                <p style="color: #999; margin: 0; font-size: 14px; line-height: 1.6;">
+                    <i class="fa fa-lightbulb-o" style="color: #00C851;"></i> 
+                    <strong style="color: #fff;">Após criar a mesa:</strong><br>
+                    Você poderá baixar o QR Code na lista de mesas. Imprima e cole na mesa física para que os clientes possam escanear e fazer pedidos!
+                </p>
+            </div>
+
+            <div style="display: flex; gap: 10px;">
+                <button type="submit" class="btn_buy" style="flex: 1; padding: 15px; font-size: 16px;">
+                    <i class="fa fa-check"></i> CRIAR MESA
+                </button>
+                <a href="{{ url_for('admin.tables') }}" class="btn_buy" style="flex: 1; padding: 15px; font-size: 16px; text-align: center; background: #666;">
+                    <i class="fa fa-times"></i> CANCELAR
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

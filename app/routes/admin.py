@@ -1166,3 +1166,96 @@ def delete_user(user_id):
     
     flash(f'Usuário "{user.username}" deletado com sucesso!', 'success')
     return redirect(url_for('admin.users'))
+
+@admin_bp.route('/mesas')
+@login_required
+@admin_required
+def tables():
+    from app.models import Table
+    tables = Table.query.all()
+    return render_template('admin/tables.html', tables=tables)
+
+@admin_bp.route('/mesas/criar', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def create_table():
+    if request.method == 'POST':
+        from app.models import Table
+        
+        table_number = request.form.get('table_number')
+        capacity = request.form.get('capacity', 4, type=int)
+        
+        if not table_number:
+            flash('Número da mesa é obrigatório!', 'danger')
+            return render_template('admin/add_table.html')
+        
+        if Table.query.filter_by(table_number=table_number).first():
+            flash('Já existe uma mesa com este número!', 'danger')
+            return render_template('admin/add_table.html')
+        
+        table = Table(
+            table_number=table_number,
+            capacity=capacity,
+            status='available'
+        )
+        
+        db.session.add(table)
+        db.session.commit()
+        
+        flash(f'Mesa {table_number} criada com sucesso!', 'success')
+        return redirect(url_for('admin.tables'))
+    
+    return render_template('admin/add_table.html')
+
+@admin_bp.route('/mesas/<int:table_id>/qrcode')
+@login_required
+@admin_required
+def generate_table_qrcode(table_id):
+    from app.models import Table
+    import qrcode
+    from io import BytesIO
+    import base64
+    from flask import make_response
+    
+    table = Table.query.get_or_404(table_id)
+    
+    qr_data = table.get_qr_code_data()
+    
+    qr = qrcode.QRCode(
+        version=1,
+        error_correction=qrcode.constants.ERROR_CORRECT_L,
+        box_size=10,
+        border=4,
+    )
+    qr.add_data(qr_data)
+    qr.make(fit=True)
+    
+    img = qr.make_image(fill_color="black", back_color="white")
+    
+    buf = BytesIO()
+    img.save(buf, format='PNG')
+    buf.seek(0)
+    
+    response = make_response(buf.getvalue())
+    response.headers['Content-Type'] = 'image/png'
+    response.headers['Content-Disposition'] = f'attachment; filename=mesa_{table.table_number}_qrcode.png'
+    
+    return response
+
+@admin_bp.route('/mesas/<int:table_id>/deletar', methods=['POST'])
+@login_required
+@admin_required
+def delete_table(table_id):
+    from app.models import Table
+    
+    table = Table.query.get_or_404(table_id)
+    
+    if table.status == 'occupied':
+        flash('Não é possível deletar uma mesa ocupada!', 'danger')
+        return redirect(url_for('admin.tables'))
+    
+    db.session.delete(table)
+    db.session.commit()
+    
+    flash(f'Mesa {table.table_number} deletada com sucesso!', 'success')
+    return redirect(url_for('admin.tables'))

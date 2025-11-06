@@ -1,0 +1,230 @@
+{% extends "base.html" %}
+
+{% block title %}Cardápio - Mesa {{ table.table_number }} - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="content_section" style="padding: 20px 0;">
+    <div style="background: #1a1a1a; padding: 20px; border-radius: 10px; margin-bottom: 20px;">
+        <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+            <div>
+                <h2 style="color: #00C851; margin: 0;">
+                    <i class="fa fa-cutlery"></i> Mesa {{ table.table_number }}
+                </h2>
+                <p style="color: #999; margin: 5px 0 0 0;">Comanda: {{ comanda.comanda_number }}</p>
+            </div>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <div style="background: #0a0a0a; padding: 12px 20px; border-radius: 6px;">
+                    <span style="color: #999; font-size: 13px;">Total da Comanda:</span>
+                    <strong style="color: #00C851; font-size: 20px; margin-left: 10px;" id="comandaTotal">
+                        R$ {{ "%.2f"|format(comanda.total) }}
+                    </strong>
+                </div>
+                <a href="{{ url_for('table_menu.table_orders') }}" class="btn_buy" style="padding: 12px 20px;">
+                    <i class="fa fa-list"></i> Meus Pedidos
+                </a>
+                <a href="{{ url_for('table_menu.table_logout') }}" class="btn_buy" style="padding: 12px 20px; background: #dc3545;">
+                    <i class="fa fa-sign-out"></i> Sair
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div style="margin-bottom: 20px;">
+        <form method="GET" style="display: flex; gap: 10px; flex-wrap: wrap;">
+            <input 
+                type="text" 
+                name="search" 
+                placeholder="Buscar produtos..." 
+                value="{{ search_query }}"
+                style="flex: 1; min-width: 250px; padding: 12px; border: 2px solid #00C851; border-radius: 6px; background: #0a0a0a; color: #fff;">
+            <button type="submit" class="btn_buy" style="padding: 12px 30px;">
+                <i class="fa fa-search"></i> Buscar
+            </button>
+        </form>
+    </div>
+
+    <div style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 20px;">
+        <a href="{{ url_for('table_menu.table_catalog') }}" 
+           class="btn_buy" 
+           style="padding: 10px 20px; {% if not selected_category %}background: #00C851;{% else %}background: #2a2a2a; color: #999;{% endif %}">
+            Todos
+        </a>
+        {% for category in categories %}
+        <a href="{{ url_for('table_menu.table_catalog', category_id=category.id) }}" 
+           class="btn_buy" 
+           style="padding: 10px 20px; {% if selected_category == category.id %}background: #00C851;{% else %}background: #2a2a2a; color: #999;{% endif %}">
+            {{ category.name }}
+        </a>
+        {% endfor %}
+    </div>
+
+    <div class="products_grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">
+        {% for product in products %}
+        <div class="product_card" style="background: #1a1a1a; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.3);">
+            <div style="height: 200px; overflow: hidden; background: #0a0a0a;">
+                {% if product.image_url %}
+                <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                {% else %}
+                <div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: #666;">
+                    <i class="fa fa-image" style="font-size: 60px;"></i>
+                </div>
+                {% endif %}
+            </div>
+            <div style="padding: 20px;">
+                <h3 style="color: #fff; margin: 0 0 10px 0; font-size: 18px;">{{ product.name }}</h3>
+                <p style="color: #999; font-size: 14px; margin: 0 0 15px 0; line-height: 1.5;">
+                    {{ product.description[:100] }}{% if product.description|length > 100 %}...{% endif %}
+                </p>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span style="color: #00C851; font-size: 24px; font-weight: 700;">
+                        R$ {{ "%.2f"|format(product.price) }}
+                    </span>
+                    <button onclick="openProductModal({{ product.id }}, '{{ product.name }}', {{ product.price }}, '{{ product.description }}')" 
+                            class="btn_buy" style="padding: 10px 20px;">
+                        <i class="fa fa-cart-plus"></i> Adicionar
+                    </button>
+                </div>
+                {% if product.stock < 10 and product.stock > 0 %}
+                <p style="color: #FFA500; font-size: 12px; margin-top: 10px;">
+                    <i class="fa fa-exclamation-triangle"></i> Apenas {{ product.stock }} unidades restantes
+                </p>
+                {% elif product.stock == 0 %}
+                <p style="color: #dc3545; font-size: 12px; margin-top: 10px;">
+                    <i class="fa fa-times-circle"></i> Indisponível
+                </p>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if not products %}
+    <div style="text-align: center; padding: 60px 20px; background: #1a1a1a; border-radius: 10px;">
+        <i class="fa fa-search" style="font-size: 60px; color: #666; margin-bottom: 20px;"></i>
+        <p style="color: #999; font-size: 18px;">Nenhum produto encontrado</p>
+    </div>
+    {% endif %}
+</div>
+
+<div id="productModal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; align-items: center; justify-content: center;">
+    <div style="background: #1a1a1a; padding: 30px; border-radius: 12px; max-width: 500px; width: 90%; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3 style="color: #00C851; margin: 0;" id="modalProductName"></h3>
+            <button onclick="closeProductModal()" style="background: transparent; border: none; color: #fff; font-size: 24px; cursor: pointer;">
+                <i class="fa fa-times"></i>
+            </button>
+        </div>
+        
+        <p style="color: #999; margin-bottom: 20px;" id="modalProductDescription"></p>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: #fff; display: block; margin-bottom: 10px; font-weight: 600;">Quantidade:</label>
+            <div style="display: flex; gap: 10px; align-items: center;">
+                <button onclick="changeQuantity(-1)" class="btn_buy" style="padding: 10px 20px; background: #2a2a2a;">
+                    <i class="fa fa-minus"></i>
+                </button>
+                <input type="number" id="productQuantity" value="1" min="1" 
+                       style="width: 80px; text-align: center; padding: 10px; border: 2px solid #00C851; border-radius: 6px; background: #0a0a0a; color: #fff; font-size: 18px;" readonly>
+                <button onclick="changeQuantity(1)" class="btn_buy" style="padding: 10px 20px;">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </div>
+        
+        <div style="margin-bottom: 20px;">
+            <label style="color: #fff; display: block; margin-bottom: 10px; font-weight: 600;">Observações:</label>
+            <textarea id="productNotes" rows="3" 
+                      placeholder="Ex: Sem cebola, bem passado..." 
+                      style="width: 100%; padding: 12px; border: 2px solid #00C851; border-radius: 6px; background: #0a0a0a; color: #fff; resize: vertical;"></textarea>
+        </div>
+        
+        <div style="background: #0a0a0a; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                <span style="color: #999;">Preço unitário:</span>
+                <span style="color: #fff;" id="modalUnitPrice"></span>
+            </div>
+            <div style="display: flex; justify-content: space-between; padding-top: 10px; border-top: 1px solid #2a2a2a;">
+                <span style="color: #fff; font-weight: 600;">Total:</span>
+                <span style="color: #00C851; font-size: 24px; font-weight: 700;" id="modalTotalPrice"></span>
+            </div>
+        </div>
+        
+        <button onclick="addProductToComanda()" class="btn_buy" style="width: 100%; padding: 15px; font-size: 18px;">
+            <i class="fa fa-check"></i> CONFIRMAR PEDIDO
+        </button>
+    </div>
+</div>
+
+<script>
+let currentProduct = null;
+
+function openProductModal(id, name, price, description) {
+    currentProduct = { id, name, price, description };
+    document.getElementById('modalProductName').textContent = name;
+    document.getElementById('modalProductDescription').textContent = description;
+    document.getElementById('modalUnitPrice').textContent = 'R$ ' + price.toFixed(2);
+    document.getElementById('productQuantity').value = 1;
+    document.getElementById('productNotes').value = '';
+    updateModalTotal();
+    document.getElementById('productModal').style.display = 'flex';
+}
+
+function closeProductModal() {
+    document.getElementById('productModal').style.display = 'none';
+}
+
+function changeQuantity(change) {
+    const input = document.getElementById('productQuantity');
+    const newValue = parseInt(input.value) + change;
+    if (newValue >= 1) {
+        input.value = newValue;
+        updateModalTotal();
+    }
+}
+
+function updateModalTotal() {
+    const quantity = parseInt(document.getElementById('productQuantity').value);
+    const total = currentProduct.price * quantity;
+    document.getElementById('modalTotalPrice').textContent = 'R$ ' + total.toFixed(2);
+}
+
+function addProductToComanda() {
+    const quantity = parseInt(document.getElementById('productQuantity').value);
+    const notes = document.getElementById('productNotes').value;
+    
+    fetch('{{ url_for("table_menu.table_add_item") }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            product_id: currentProduct.id,
+            quantity: quantity,
+            notes: notes,
+            extras: []
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('comandaTotal').textContent = 'R$ ' + data.total.toFixed(2);
+            closeProductModal();
+            alert('Item adicionado com sucesso!');
+        } else {
+            alert('Erro: ' + data.message);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('Erro ao adicionar item');
+    });
+}
+
+document.getElementById('productModal').addEventListener('click', function(e) {
+    if (e.target === this) {
+        closeProductModal();
+    }
+});
+</script>
+
+{% endblock %}

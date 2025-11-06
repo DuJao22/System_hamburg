@@ -45,6 +45,7 @@ def create_app():
     from app.routes.kitchen import kitchen_bp
     from app.routes.loyalty import loyalty_bp
     from app.routes.digital_menu import digital_menu_bp
+    from app.routes.table_menu import table_menu_bp
     
     app.register_blueprint(main_bp)
     app.register_blueprint(auth_bp)
@@ -59,6 +60,7 @@ def create_app():
     app.register_blueprint(kitchen_bp)
     app.register_blueprint(loyalty_bp)
     app.register_blueprint(digital_menu_bp)
+    app.register_blueprint(table_menu_bp)
     
     @app.context_processor
     def inject_categories():
