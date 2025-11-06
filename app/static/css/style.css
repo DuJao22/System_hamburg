@@ -597,11 +597,31 @@ body {
 }
 
 .carousel_slide.slide2 {
-    background-image: url('/static/images/food_banner_fast_foo_3736efc2.jpg');
+    background-image: url('/static/images/burger_banner.png');
 }
 
 .carousel_slide.slide3 {
-    background-image: url('/static/images/food_banner_fast_foo_52f5db02.jpg');
+    background-image: url('/static/images/fries_banner.png');
+}
+
+.carousel_slide.slide4 {
+    background-image: url('/static/images/drinks_banner.png');
+}
+
+.carousel_slide.slide5 {
+    background-image: url('/static/images/delicious_gourmet_bu_3904a411.jpg');
+}
+
+.carousel_slide.slide6 {
+    background-image: url('/static/images/delicious_hamburger__106f355e.jpg');
+}
+
+.carousel_slide.slide7 {
+    background-image: url('/static/images/fresh_sandwich_food__033e68ac.jpg');
+}
+
+.carousel_slide.slide8 {
+    background-image: url('/static/images/gourmet_burger_resta_41d51929.jpg');
 }
 
 .carousel_btn {
