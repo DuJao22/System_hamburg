@@ -3,19 +3,17 @@
 {% block title %}Caixa - {{ store_settings.store_name }}{% endblock %}
 
 {% block content %}
-<div class="content_section" style="margin-top: 30px;">
-    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
-        <h2 style="font-size: 28px; color: #111; margin: 0;">
-            <i class="fa fa-money"></i> Controle de Caixa
-        </h2>
+<div class="pdv-container">
+    <div class="pdv-header">
+        <h2><i class="fa fa-money"></i> Controle de Caixa</h2>
         <a href="{{ url_for('pdv.index') }}" class="btn btn-secondary">
             <i class="fa fa-arrow-left"></i> Voltar
         </a>
     </div>
     
     {% if open_cash %}
-    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-bottom: 20px;">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+    <div class="pdv-card">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 10px;">
             <h3 style="margin: 0;"><i class="fa fa-unlock" style="color: #00C851;"></i> Caixa Aberto</h3>
             <button onclick="document.getElementById('closeCashModal').style.display='block'" class="btn btn-danger">
                 <i class="fa fa-lock"></i> Fechar Caixa
@@ -52,28 +50,28 @@
         
         {% if open_cash.movements %}
         <div style="margin-top: 30px;">
-            <h4 style="margin-bottom: 15px;">Movimentações</h4>
+            <h4 style="margin-bottom: 15px; color: #111;">Movimentações</h4>
             <div style="overflow-x: auto;">
-                <table style="width: 100%; border-collapse: collapse;">
+                <table class="pdv-table">
                     <thead>
-                        <tr style="background: #f8f9fa;">
-                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Hora</th>
-                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Tipo</th>
-                            <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Descrição</th>
-                            <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Valor</th>
+                        <tr>
+                            <th>Hora</th>
+                            <th>Tipo</th>
+                            <th>Descrição</th>
+                            <th style="text-align: right;">Valor</th>
                         </tr>
                     </thead>
                     <tbody>
                         {% for movement in open_cash.movements|sort(attribute='created_at', reverse=True) %}
-                        <tr style="border-bottom: 1px solid #dee2e6;">
-                            <td style="padding: 12px;">{{ movement.created_at.strftime('%H:%M') }}</td>
-                            <td style="padding: 12px;">
+                        <tr>
+                            <td>{{ movement.created_at.strftime('%H:%M') }}</td>
+                            <td>
                                 <span style="padding: 4px 8px; border-radius: 4px; font-size: 12px; {% if movement.movement_type == 'in' %}background: #d4edda; color: #155724;{% else %}background: #f8d7da; color: #721c24;{% endif %}">
                                     {{ 'Entrada' if movement.movement_type == 'in' else 'Saída' }}
                                 </span>
                             </td>
-                            <td style="padding: 12px;">{{ movement.description }}</td>
-                            <td style="padding: 12px; text-align: right; font-weight: 600; color: {% if movement.movement_type == 'in' %}#00C851{% else %}#dc3545{% endif %};">
+                            <td>{{ movement.description }}</td>
+                            <td style="text-align: right; font-weight: 600; color: {% if movement.movement_type == 'in' %}#00C851{% else %}#dc3545{% endif %};">
                                 {{ '+' if movement.movement_type == 'in' else '-' }} R$ {{ "%.2f"|format(movement.amount) }}
                             </td>
                         </tr>
@@ -85,9 +83,9 @@
         {% endif %}
     </div>
     {% else %}
-    <div style="background: #fff; padding: 40px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); text-align: center;">
+    <div class="pdv-card" style="text-align: center; padding: 40px;">
         <i class="fa fa-lock" style="font-size: 64px; color: #dc3545; margin-bottom: 20px;"></i>
-        <h3 style="margin-bottom: 20px;">Nenhum caixa aberto</h3>
+        <h3 style="margin-bottom: 20px; color: #111;">Nenhum caixa aberto</h3>
         <button onclick="document.getElementById('openCashModal').style.display='block'" class="btn btn-success btn-lg">
             <i class="fa fa-unlock"></i> Abrir Caixa
         </button>
@@ -95,27 +93,27 @@
     {% endif %}
     
     {% if cash_history %}
-    <div style="background: #fff; padding: 25px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); margin-top: 20px;">
-        <h3 style="margin-bottom: 20px;"><i class="fa fa-history"></i> Histórico de Caixas</h3>
+    <div class="pdv-card">
+        <h3><i class="fa fa-history"></i> Histórico de Caixas</h3>
         <div style="overflow-x: auto;">
-            <table style="width: 100%; border-collapse: collapse;">
+            <table class="pdv-table">
                 <thead>
-                    <tr style="background: #f8f9fa;">
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Data Abertura</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Data Fechamento</th>
-                        <th style="padding: 12px; text-align: left; border-bottom: 2px solid #dee2e6;">Operador</th>
-                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Saldo Final</th>
-                        <th style="padding: 12px; text-align: right; border-bottom: 2px solid #dee2e6;">Diferença</th>
+                    <tr>
+                        <th>Data Abertura</th>
+                        <th>Data Fechamento</th>
+                        <th>Operador</th>
+                        <th style="text-align: right;">Saldo Final</th>
+                        <th style="text-align: right;">Diferença</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for cash in cash_history %}
-                    <tr style="border-bottom: 1px solid #dee2e6;">
-                        <td style="padding: 12px;">{{ cash.opened_at.strftime('%d/%m/%Y %H:%M') }}</td>
-                        <td style="padding: 12px;">{{ cash.closed_at.strftime('%d/%m/%Y %H:%M') if cash.closed_at else '-' }}</td>
-                        <td style="padding: 12px;">{{ cash.user.username }}</td>
-                        <td style="padding: 12px; text-align: right;">R$ {{ "%.2f"|format(cash.closing_balance or 0) }}</td>
-                        <td style="padding: 12px; text-align: right; font-weight: 600; color: {% if cash.difference == 0 %}#00C851{% elif cash.difference > 0 %}#ffc107{% else %}#dc3545{% endif %};">
+                    <tr>
+                        <td>{{ cash.opened_at.strftime('%d/%m/%Y %H:%M') }}</td>
+                        <td>{{ cash.closed_at.strftime('%d/%m/%Y %H:%M') if cash.closed_at else '-' }}</td>
+                        <td>{{ cash.user.username }}</td>
+                        <td style="text-align: right;">R$ {{ "%.2f"|format(cash.closing_balance or 0) }}</td>
+                        <td style="text-align: right; font-weight: 600; color: {% if cash.difference == 0 %}#00C851{% elif cash.difference > 0 %}#ffc107{% else %}#dc3545{% endif %};">
                             {% if cash.difference %}R$ {{ "%.2f"|format(cash.difference) }}{% else %}-{% endif %}
                         </td>
                     </tr>
@@ -127,70 +125,70 @@
     {% endif %}
 </div>
 
-<div id="openCashModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 10% auto; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;">Abrir Caixa</h3>
-            <button onclick="document.getElementById('openCashModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+<div id="openCashModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 500px;">
+        <div class="pdv-modal-header">
+            <h3>Abrir Caixa</h3>
+            <button onclick="document.getElementById('openCashModal').style.display='none'" class="pdv-modal-close">&times;</button>
         </div>
         <form method="POST" action="{{ url_for('pdv.open_cash_register') }}">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Saldo Inicial (R$):</label>
-                <input type="number" name="opening_balance" value="0" min="0" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Saldo Inicial (R$):</label>
+                <input type="number" name="opening_balance" value="0" min="0" step="0.01" required class="pdv-form-input">
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Observações:</label>
-                <textarea name="notes" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Observações:</label>
+                <textarea name="notes" rows="3" class="pdv-form-input"></textarea>
             </div>
             <button type="submit" class="btn btn-success" style="width: 100%;">Abrir Caixa</button>
         </form>
     </div>
 </div>
 
-<div id="closeCashModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 10% auto; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;">Fechar Caixa</h3>
-            <button onclick="document.getElementById('closeCashModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+<div id="closeCashModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 500px;">
+        <div class="pdv-modal-header">
+            <h3>Fechar Caixa</h3>
+            <button onclick="document.getElementById('closeCashModal').style.display='none'" class="pdv-modal-close">&times;</button>
         </div>
         <form method="POST" action="{{ url_for('pdv.close_cash_register') }}">
             {% if open_cash %}
-            <p style="margin-bottom: 15px;"><strong>Saldo Esperado:</strong> R$ {{ "%.2f"|format(open_cash.calculate_expected_balance()) }}</p>
+            <p style="margin-bottom: 15px; color: #111;"><strong>Saldo Esperado:</strong> R$ {{ "%.2f"|format(open_cash.calculate_expected_balance()) }}</p>
             {% endif %}
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Saldo Real (R$):</label>
-                <input type="number" name="closing_balance" min="0" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Saldo Real (R$):</label>
+                <input type="number" name="closing_balance" min="0" step="0.01" required class="pdv-form-input">
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Observações de Fechamento:</label>
-                <textarea name="notes" rows="3" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;"></textarea>
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Observações de Fechamento:</label>
+                <textarea name="notes" rows="3" class="pdv-form-input"></textarea>
             </div>
             <button type="submit" class="btn btn-danger" style="width: 100%;">Fechar Caixa</button>
         </form>
     </div>
 </div>
 
-<div id="addMovementModal" style="display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; overflow: auto; background-color: rgba(0,0,0,0.4);">
-    <div style="background-color: #fefefe; margin: 10% auto; padding: 30px; border-radius: 8px; width: 90%; max-width: 500px; box-shadow: 0 4px 20px rgba(0,0,0,0.3);">
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
-            <h3 style="margin: 0;">Adicionar Movimento</h3>
-            <button onclick="document.getElementById('addMovementModal').style.display='none'" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+<div id="addMovementModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 500px;">
+        <div class="pdv-modal-header">
+            <h3>Adicionar Movimento</h3>
+            <button onclick="document.getElementById('addMovementModal').style.display='none'" class="pdv-modal-close">&times;</button>
         </div>
         <form method="POST" action="{{ url_for('pdv.add_cash_movement') }}">
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Tipo:</label>
-                <select name="movement_type" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Tipo:</label>
+                <select name="movement_type" required class="pdv-form-select">
                     <option value="in">Entrada</option>
                     <option value="out">Saída</option>
                 </select>
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Valor (R$):</label>
-                <input type="number" name="amount" min="0.01" step="0.01" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Valor (R$):</label>
+                <input type="number" name="amount" min="0.01" step="0.01" required class="pdv-form-input">
             </div>
-            <div style="margin-bottom: 20px;">
-                <label style="display: block; margin-bottom: 5px; font-weight: 600;">Descrição:</label>
-                <input type="text" name="description" required style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Descrição:</label>
+                <input type="text" name="description" required class="pdv-form-input">
             </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Adicionar</button>
         </form>
