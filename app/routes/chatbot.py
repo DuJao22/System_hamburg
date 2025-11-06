@@ -112,14 +112,32 @@ def get_store_context(user_message=''):
         normalized_message = re.sub(r'[^\d]', '', user_message)
         phone_match = re.search(r'\d{10,11}', normalized_message)
         
-        # Buscar código de pedido (alfanumérico, PED + números, ou apenas números)
-        # Primeiro tentar capturar código alfanumérico (ex: ABC123, XYZ456)
-        code_match = re.search(r'\b([A-Z]{3}[0-9]{3,6}|PED\d+|\d{1,10})\b', user_message.upper())
+        # Buscar código de pedido com priorização inteligente
+        # 1º: Códigos alfanuméricos (ABC123, XYZ456)
+        # 2º: Códigos PED (PED000001)
+        # 3º: Números isolados (1, 2, 3)
+        all_matches = re.findall(r'\b([A-Z]{3}[0-9]{3,6}|PED\d+|\d{1,10})\b', user_message.upper())
+        
+        code_match = None
+        if all_matches:
+            # Priorizar por tipo de código
+            for match in all_matches:
+                if re.match(r'[A-Z]{3}[0-9]{3,6}', match):  # Alfanumérico
+                    code_match = match
+                    break
+            if not code_match:
+                for match in all_matches:
+                    if match.startswith('PED'):  # Código PED
+                        code_match = match
+                        break
+            if not code_match:
+                # Usar número apenas se houver palavra-chave específica
+                if any(word in user_message.upper() for word in ['PED', 'CÓDIGO', 'CODIGO', 'NUMERO', 'NÚMERO', 'PEDIDO']):
+                    code_match = all_matches[0]
         
         orders_info = []
-        # Priorizar código de pedido se houver menção a palavras-chave
-        if code_match and any(word in user_message.upper() for word in ['PED', 'CÓDIGO', 'CODIGO', 'NUMERO', 'NÚMERO', 'PEDIDO']):
-            orders_info = get_order_info(order_code=code_match.group())
+        if code_match:
+            orders_info = get_order_info(order_code=code_match)
         elif phone_match:
             # Usar telefone apenas se não encontrou código
             orders_info = get_order_info(phone=phone_match.group())
