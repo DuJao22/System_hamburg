@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+
+{% block title %}Acompanhar Pedido - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-3">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div>
+                            <h4 class="mb-1">Comanda #{{ comanda.comanda_number }}</h4>
+                            <p class="text-muted mb-0">
+                                <i class="fas fa-map-marker-alt"></i> 
+                                {% if comanda.table %}
+                                    Mesa {{ comanda.table.table_number }}
+                                {% else %}
+                                    Balcão
+                                {% endif %}
+                            </p>
+                        </div>
+                        <div>
+                            <a href="{{ url_for('digital_menu.customer_logout') }}" class="btn btn-outline-danger">
+                                <i class="fas fa-sign-out-alt"></i> Sair
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h5 class="mb-0"><i class="fas fa-receipt"></i> Seus Pedidos</h5>
+                </div>
+                <div class="card-body" id="order-items">
+                    {% if comanda.items %}
+                        {% for item in comanda.items %}
+                            <div class="order-item mb-3 p-3 border rounded" data-item-id="{{ item.id }}">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="flex-grow-1">
+                                        <h6 class="mb-1">
+                                            <span class="badge bg-secondary">{{ item.quantity }}x</span>
+                                            {{ item.product.name }}
+                                        </h6>
+                                        {% if item.notes %}
+                                            <small class="text-muted d-block">
+                                                <i class="fas fa-sticky-note"></i> {{ item.notes }}
+                                            </small>
+                                        {% endif %}
+                                        <small class="text-muted">Pedido às {{ item.created_at.strftime('%H:%M') }}</small>
+                                    </div>
+                                    <div class="text-end">
+                                        <div class="mb-2">
+                                            <span class="badge status-badge" data-status="{{ item.status }}">
+                                                {{ item.status|upper }}
+                                            </span>
+                                        </div>
+                                        <strong>R$ {{ "%.2f"|format(item.calculate_item_total()) }}</strong>
+                                    </div>
+                                </div>
+                                
+                                <div class="status-timeline mt-2">
+                                    <div class="timeline-step" data-step="pending">
+                                        <div class="timeline-icon">
+                                            <i class="fas fa-clock"></i>
+                                        </div>
+                                        <small>Recebido</small>
+                                    </div>
+                                    <div class="timeline-step" data-step="preparing">
+                                        <div class="timeline-icon">
+                                            <i class="fas fa-fire"></i>
+                                        </div>
+                                        <small>Preparando</small>
+                                    </div>
+                                    <div class="timeline-step" data-step="ready">
+                                        <div class="timeline-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <small>Pronto</small>
+                                    </div>
+                                    <div class="timeline-step" data-step="delivered">
+                                        <div class="timeline-icon">
+                                            <i class="fas fa-utensils"></i>
+                                        </div>
+                                        <small>Entregue</small>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="text-center py-5 text-muted">
+                            <i class="fas fa-inbox fa-3x mb-3"></i>
+                            <p>Nenhum pedido ainda.</p>
+                            <p>Peça ao garçom para adicionar itens!</p>
+                        </div>
+                    {% endif %}
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">Total</h5>
+                        <h4 class="mb-0 text-primary" id="total-amount">
+                            R$ {{ "%.2f"|format(comanda.calculate_total()) }}
+                        </h4>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .order-item {
+        background-color: #f8f9fa;
+        transition: all 0.3s ease;
+    }
+    
+    .order-item:hover {
+        background-color: #e9ecef;
+    }
+    
+    .status-badge {
+        font-size: 0.75rem;
+        padding: 5px 10px;
+    }
+    
+    .status-badge[data-status="pending"] {
+        background-color: #6c757d;
+    }
+    
+    .status-badge[data-status="preparing"] {
+        background-color: #fd7e14;
+    }
+    
+    .status-badge[data-status="ready"] {
+        background-color: #28a745;
+    }
+    
+    .status-badge[data-status="delivered"] {
+        background-color: #007bff;
+    }
+    
+    .status-timeline {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 15px;
+        position: relative;
+    }
+    
+    .status-timeline::before {
+        content: '';
+        position: absolute;
+        top: 15px;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #dee2e6;
+        z-index: 0;
+    }
+    
+    .timeline-step {
+        flex: 1;
+        text-align: center;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .timeline-icon {
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background: #dee2e6;
+        color: #6c757d;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        margin-bottom: 5px;
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-step small {
+        display: block;
+        font-size: 0.7rem;
+        color: #6c757d;
+    }
+    
+    .order-item[data-status="pending"] .timeline-step[data-step="pending"] .timeline-icon {
+        background: #6c757d;
+        color: white;
+    }
+    
+    .order-item[data-status="preparing"] .timeline-step[data-step="pending"] .timeline-icon,
+    .order-item[data-status="preparing"] .timeline-step[data-step="preparing"] .timeline-icon {
+        background: #fd7e14;
+        color: white;
+    }
+    
+    .order-item[data-status="ready"] .timeline-step[data-step="pending"] .timeline-icon,
+    .order-item[data-status="ready"] .timeline-step[data-step="preparing"] .timeline-icon,
+    .order-item[data-status="ready"] .timeline-step[data-step="ready"] .timeline-icon {
+        background: #28a745;
+        color: white;
+    }
+    
+    .order-item[data-status="delivered"] .timeline-step .timeline-icon {
+        background: #007bff;
+        color: white;
+    }
+</style>
+
+<script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
+<script>
+    const comandaId = {{ comanda.id }};
+    const socket = io();
+    
+    function updateOrderStatus() {
+        fetch(`{{ url_for('digital_menu.get_order_status', comanda_id=comanda.id) }}`)
+            .then(response => response.json())
+            .then(data => {
+                data.items.forEach(item => {
+                    const itemElement = document.querySelector(`[data-item-id="${item.id}"]`);
+                    if (itemElement) {
+                        const statusBadge = itemElement.querySelector('.status-badge');
+                        statusBadge.textContent = item.status.toUpperCase();
+                        statusBadge.setAttribute('data-status', item.status);
+                        itemElement.setAttribute('data-status', item.status);
+                    }
+                });
+                
+                document.getElementById('total-amount').textContent = 
+                    'R$ ' + data.total.toFixed(2).replace('.', ',');
+            })
+            .catch(error => console.error('Erro ao atualizar status:', error));
+    }
+    
+    socket.on('connect', function() {
+        console.log('Conectado ao servidor');
+        socket.emit('join_comanda_room', { comanda_id: comandaId });
+    });
+    
+    socket.on('comanda_item_updated', function(data) {
+        console.log('Status atualizado:', data);
+        updateOrderStatus();
+    });
+    
+    socket.on('new_item_added', function(data) {
+        console.log('Novo item adicionado:', data);
+        location.reload();
+    });
+    
+    setInterval(updateOrderStatus, 10000);
+</script>
+{% endblock %}

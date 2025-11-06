@@ -80,11 +80,12 @@ def open_table(table_id):
             table_id=table_id,
             waiter_id=current_user.id
         )
+        comanda.generate_pin()
         db.session.add(comanda)
         db.session.flush()
         db.session.commit()
         
-        flash(f'Mesa {table.table_number} aberta! Comanda #{comanda_number} criada.', 'success')
+        flash(f'Mesa {table.table_number} aberta! Comanda #{comanda_number} criada. PIN: {comanda.access_pin}', 'success')
         return redirect(url_for('pdv.comanda_detail', comanda_id=comanda.id))
     except Exception as e:
         db.session.rollback()
@@ -140,10 +141,11 @@ def create_comanda():
         customer_name=customer_name,
         waiter_id=current_user.id
     )
+    comanda.generate_pin()
     db.session.add(comanda)
     db.session.commit()
     
-    flash(f'Comanda #{comanda_number} criada!', 'success')
+    flash(f'Comanda #{comanda_number} criada! PIN de acesso: {comanda.access_pin}', 'success')
     return redirect(url_for('pdv.comanda_detail', comanda_id=comanda.id))
 
 @pdv_bp.route('/comanda/<int:comanda_id>')
@@ -168,6 +170,7 @@ def comanda_detail(comanda_id):
 @admin_or_waiter_required
 def add_comanda_item(comanda_id):
     from app.models import ComandaItemExtra, Extra
+    from app.routes.websocket import notify_new_comanda_item
     
     comanda = Comanda.query.get_or_404(comanda_id)
     product_id = request.form.get('product_id', type=int)
@@ -204,6 +207,8 @@ def add_comanda_item(comanda_id):
     
     comanda.total = comanda.calculate_total()
     db.session.commit()
+    
+    notify_new_comanda_item(item)
     
     flash(f'{product.name} adicionado à comanda!', 'success')
     return redirect(url_for('pdv.comanda_detail', comanda_id=comanda_id))
@@ -310,6 +315,42 @@ def send_to_kitchen(comanda_id):
     except Exception as e:
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)})
+
+@pdv_bp.route('/comanda/<int:comanda_id>/gerar-pin', methods=['POST'])
+@login_required
+@admin_or_waiter_required
+def generate_pin(comanda_id):
+    comanda = Comanda.query.get_or_404(comanda_id)
+    
+    if comanda.status != 'open':
+        return jsonify({'success': False, 'message': 'Comanda já está fechada'})
+    
+    pin = comanda.generate_pin()
+    db.session.commit()
+    
+    return jsonify({
+        'success': True, 
+        'pin': pin,
+        'message': f'PIN gerado com sucesso: {pin}'
+    })
+
+@pdv_bp.route('/comanda/<int:comanda_id>/resetar-pin', methods=['POST'])
+@login_required
+@admin_or_waiter_required
+def reset_pin(comanda_id):
+    comanda = Comanda.query.get_or_404(comanda_id)
+    
+    if comanda.status != 'open':
+        return jsonify({'success': False, 'message': 'Comanda já está fechada'})
+    
+    new_pin = comanda.generate_pin()
+    db.session.commit()
+    
+    return jsonify({
+        'success': True, 
+        'pin': new_pin,
+        'message': f'PIN resetado com sucesso: {new_pin}'
+    })
 
 @pdv_bp.route('/caixa')
 @login_required

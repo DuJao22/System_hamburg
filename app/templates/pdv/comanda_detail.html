@@ -173,6 +173,37 @@
                 {{ 'Aberta' if comanda.status == 'open' else 'Fechada' }}
             </span>
         </p>
+        
+        {% if comanda.status == 'open' %}
+        <div style="margin-top: 20px; padding: 20px; background: #e7f3ff; border-radius: 10px; border: 2px solid #007bff;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div>
+                    <strong style="display: block; margin-bottom: 10px; color: #111;">
+                        <i class="fa fa-lock"></i> PIN de Acesso do Cliente:
+                    </strong>
+                    <div style="font-size: 36px; font-weight: 800; letter-spacing: 8px; color: #007bff; font-family: 'Courier New', monospace;" id="pin-display">
+                        {{ comanda.access_pin or 'Gerar PIN' }}
+                    </div>
+                    <small style="color: #666; display: block; margin-top: 10px;">
+                        Compartilhe este PIN com o cliente para acompanhar os pedidos
+                    </small>
+                </div>
+                <div>
+                    <button onclick="regeneratePin()" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px;">
+                        <i class="fa fa-sync"></i> {% if comanda.access_pin %}Resetar{% else %}Gerar{% endif %} PIN
+                    </button>
+                    {% if comanda.access_pin %}
+                    <div style="margin-top: 10px;">
+                        <small style="color: #666;">Link de acesso:</small><br>
+                        <a href="{{ url_for('digital_menu.customer_login', _external=True) }}" target="_blank" style="font-size: 12px; word-break: break-all;">
+                            {{ url_for('digital_menu.customer_login', _external=True) }}
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        {% endif %}
     </div>
     
     {% if comanda.status == 'open' %}
@@ -443,6 +474,31 @@ function sendToKitchen() {
         })
         .catch(error => {
             alert('Erro ao enviar pedido para a cozinha!');
+            console.error(error);
+        });
+    }
+}
+
+function regeneratePin() {
+    if (confirm('Deseja gerar/resetar o PIN de acesso do cliente?')) {
+        fetch('{{ url_for("pdv.reset_pin", comanda_id=comanda.id) }}', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('pin-display').textContent = data.pin;
+                alert('PIN gerado/resetado com sucesso!\n\nPIN: ' + data.pin + '\n\nCompartilhe este PIN com o cliente.');
+                location.reload();
+            } else {
+                alert('Erro ao gerar PIN: ' + data.message);
+            }
+        })
+        .catch(error => {
+            alert('Erro ao gerar PIN!');
             console.error(error);
         });
     }

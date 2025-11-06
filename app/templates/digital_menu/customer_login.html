@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+
+{% block title %}Acessar Mesa - {{ store_settings.store_name }}{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card shadow">
+                <div class="card-body p-5">
+                    <div class="text-center mb-4">
+                        <h2 class="mb-3">🍔 Acessar Minha Mesa</h2>
+                        <p class="text-muted">Digite o número da comanda e o PIN fornecido pelo garçom</p>
+                    </div>
+
+                    <form method="POST" action="{{ url_for('digital_menu.validate_pin') }}">
+                        <div class="mb-4">
+                            <label for="comanda_number" class="form-label">Número da Comanda</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg text-center" 
+                                   id="comanda_number" 
+                                   name="comanda_number" 
+                                   placeholder="Ex: 000123" 
+                                   required
+                                   autofocus>
+                            <small class="form-text text-muted">
+                                O número está impresso no topo da comanda
+                            </small>
+                        </div>
+
+                        <div class="mb-4">
+                            <label for="pin" class="form-label">PIN de Acesso</label>
+                            <input type="text" 
+                                   class="form-control form-control-lg text-center" 
+                                   id="pin" 
+                                   name="pin" 
+                                   placeholder="000000" 
+                                   maxlength="6"
+                                   pattern="[0-9]{6}"
+                                   required>
+                            <small class="form-text text-muted">
+                                O PIN de 6 dígitos foi fornecido pelo garçom
+                            </small>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100">
+                            <i class="fas fa-sign-in-alt"></i> Acessar Mesa
+                        </button>
+                    </form>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted mb-0">
+                            <small>Não tem o PIN? Peça ao garçom!</small>
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('main.index') }}" class="btn btn-link">
+                    <i class="fas fa-arrow-left"></i> Voltar ao Início
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    .card {
+        border-radius: 15px;
+        border: none;
+    }
+    
+    input.form-control-lg {
+        font-size: 1.5rem;
+        letter-spacing: 0.2rem;
+        font-weight: bold;
+    }
+    
+    .btn-lg {
+        padding: 15px;
+        font-size: 1.1rem;
+    }
+</style>
+{% endblock %}

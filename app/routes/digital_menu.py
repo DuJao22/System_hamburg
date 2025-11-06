@@ -123,6 +123,91 @@ def finalize_order():
 def order_success():
     return render_template('digital_menu/order_success.html')
 
+@digital_menu_bp.route('/acessar-mesa')
+def customer_login():
+    return render_template('digital_menu/customer_login.html')
+
+@digital_menu_bp.route('/validar-pin', methods=['POST'])
+def validate_pin():
+    comanda_number = request.form.get('comanda_number')
+    pin = request.form.get('pin')
+    
+    if not comanda_number or not pin:
+        flash('Por favor, preencha todos os campos.', 'danger')
+        return redirect(url_for('digital_menu.customer_login'))
+    
+    comanda = Comanda.query.filter_by(
+        comanda_number=comanda_number,
+        access_pin=pin,
+        status='open'
+    ).first()
+    
+    if not comanda:
+        flash('Número da comanda ou PIN incorreto.', 'danger')
+        return redirect(url_for('digital_menu.customer_login'))
+    
+    session['customer_comanda_id'] = comanda.id
+    session['customer_authenticated'] = True
+    
+    flash(f'Bem-vindo! Você está acessando a comanda #{comanda.comanda_number}', 'success')
+    return redirect(url_for('digital_menu.track_order'))
+
+@digital_menu_bp.route('/acompanhar-pedido')
+def track_order():
+    if not session.get('customer_authenticated'):
+        flash('Você precisa fazer login primeiro.', 'warning')
+        return redirect(url_for('digital_menu.customer_login'))
+    
+    comanda_id = session.get('customer_comanda_id')
+    if not comanda_id:
+        flash('Sessão expirada. Faça login novamente.', 'warning')
+        return redirect(url_for('digital_menu.customer_login'))
+    
+    comanda = Comanda.query.get_or_404(comanda_id)
+    
+    if comanda.status != 'open':
+        flash('Esta comanda já foi fechada.', 'info')
+        session.pop('customer_comanda_id', None)
+        session.pop('customer_authenticated', None)
+        return redirect(url_for('digital_menu.customer_login'))
+    
+    return render_template('digital_menu/track_order.html', comanda=comanda)
+
+@digital_menu_bp.route('/sair-mesa')
+def customer_logout():
+    session.pop('customer_comanda_id', None)
+    session.pop('customer_authenticated', None)
+    flash('Você saiu da mesa com sucesso.', 'info')
+    return redirect(url_for('digital_menu.customer_login'))
+
+@digital_menu_bp.route('/api/status-pedido/<int:comanda_id>')
+def get_order_status(comanda_id):
+    if not session.get('customer_authenticated') or session.get('customer_comanda_id') != comanda_id:
+        return jsonify({'error': 'Não autorizado'}), 403
+    
+    comanda = Comanda.query.get_or_404(comanda_id)
+    
+    items_data = []
+    for item in comanda.items:
+        items_data.append({
+            'id': item.id,
+            'product_name': item.product.name,
+            'quantity': item.quantity,
+            'price': float(item.price),
+            'status': item.status,
+            'sent_to_kitchen': item.sent_to_kitchen,
+            'notes': item.notes,
+            'created_at': item.created_at.strftime('%H:%M')
+        })
+    
+    return jsonify({
+        'comanda_number': comanda.comanda_number,
+        'table_number': comanda.table.table_number if comanda.table else 'Balcão',
+        'total': float(comanda.calculate_total()),
+        'items': items_data,
+        'status': comanda.status
+    })
+
 @digital_menu_bp.route('/admin/gerar-qrcode/<int:table_id>')
 @login_required
 def generate_qrcode(table_id):

@@ -52,6 +52,29 @@ def handle_join_user_room(data):
     except Exception as e:
         print(f"Erro ao entrar na sala: {e}")
 
+@socketio.on('join_comanda_room')
+def handle_join_comanda_room(data):
+    try:
+        comanda_id = data.get('comanda_id')
+        customer_comanda_id = session.get('customer_comanda_id')
+        
+        if customer_comanda_id and int(customer_comanda_id) == int(comanda_id):
+            join_room(f'comanda_{comanda_id}')
+            emit('connected', {'message': f'Conectado à comanda {comanda_id}'})
+            print(f"Cliente entrou na sala da comanda {comanda_id}")
+    except Exception as e:
+        print(f"Erro ao entrar na sala da comanda: {e}")
+        emit('error', {'message': 'Erro ao conectar à comanda'})
+
+@socketio.on('leave_comanda_room')
+def handle_leave_comanda_room(data):
+    try:
+        comanda_id = data.get('comanda_id')
+        leave_room(f'comanda_{comanda_id}')
+        print(f"Cliente saiu da sala da comanda {comanda_id}")
+    except Exception as e:
+        print(f"Erro ao sair da sala da comanda: {e}")
+
 @socketio.on('request_order_update')
 def handle_order_update_request():
     if current_user.is_authenticated and current_user.is_admin:
@@ -106,3 +129,27 @@ def notify_order_update(order):
         'payment_status': order.payment_status
     }
     socketio.emit('order_status_changed', user_notification, room=f'user_{order.user_id}', namespace='/')
+
+def notify_comanda_item_update(comanda_item):
+    from app import socketio
+    item_data = {
+        'item_id': comanda_item.id,
+        'comanda_id': comanda_item.comanda_id,
+        'product_name': comanda_item.product.name,
+        'status': comanda_item.status,
+        'sent_to_kitchen': comanda_item.sent_to_kitchen
+    }
+    socketio.emit('comanda_item_updated', item_data, room=f'comanda_{comanda_item.comanda_id}', namespace='/')
+    print(f"Notificação enviada para comanda_{comanda_item.comanda_id}: item {comanda_item.id} status {comanda_item.status}")
+
+def notify_new_comanda_item(comanda_item):
+    from app import socketio
+    item_data = {
+        'item_id': comanda_item.id,
+        'comanda_id': comanda_item.comanda_id,
+        'product_name': comanda_item.product.name,
+        'quantity': comanda_item.quantity,
+        'status': comanda_item.status
+    }
+    socketio.emit('new_item_added', item_data, room=f'comanda_{comanda_item.comanda_id}', namespace='/')
+    print(f"Novo item adicionado à comanda_{comanda_item.comanda_id}")

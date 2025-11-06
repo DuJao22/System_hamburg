@@ -66,6 +66,8 @@ def update_order_status(order_id):
 @login_required
 @admin_or_kitchen_required
 def update_comanda_item_status(item_id):
+    from app.routes.websocket import notify_comanda_item_update
+    
     item = ComandaItem.query.get_or_404(item_id)
     new_status = request.form.get('status')
     
@@ -76,6 +78,8 @@ def update_comanda_item_status(item_id):
     
     item.status = new_status
     db.session.commit()
+    
+    notify_comanda_item_update(item)
     
     socketio.emit('comanda_item_updated', {
         'item_id': item.id,

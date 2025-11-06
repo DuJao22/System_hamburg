@@ -297,6 +297,7 @@ class Comanda(db.Model):
     opened_at = db.Column(db.DateTime, default=utcnow_brasilia)
     closed_at = db.Column(db.DateTime, nullable=True)
     waiter_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    access_pin = db.Column(db.String(6), nullable=True)
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
     table = db.relationship('Table', backref='comandas')
@@ -305,6 +306,11 @@ class Comanda(db.Model):
     
     def calculate_total(self):
         return sum(item.calculate_item_total() for item in self.items)
+    
+    def generate_pin(self):
+        import random
+        self.access_pin = ''.join([str(random.randint(0, 9)) for _ in range(6)])
+        return self.access_pin
 
 class ComandaItem(db.Model):
     id = db.Column(db.Integer, primary_key=True)
