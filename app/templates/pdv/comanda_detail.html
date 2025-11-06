@@ -189,8 +189,8 @@
                     </small>
                 </div>
                 <div>
-                    <button onclick="regeneratePin()" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px;">
-                        <i class="fa fa-sync"></i> {% if comanda.access_pin %}Resetar{% else %}Gerar{% endif %} PIN
+                    <button onclick="document.getElementById('changePinModal').style.display='block'" class="btn btn-primary" style="padding: 12px 24px; font-size: 16px;">
+                        <i class="fa fa-sync"></i> {% if comanda.access_pin %}Alterar{% else %}Definir{% endif %} PIN
                     </button>
                     {% if comanda.access_pin %}
                     <div style="margin-top: 10px;">
@@ -399,6 +399,25 @@
     </div>
 </div>
 
+<div id="changePinModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 500px;">
+        <div class="pdv-modal-header">
+            <h3>Alterar PIN de Acesso</h3>
+            <button onclick="document.getElementById('changePinModal').style.display='none'" class="pdv-modal-close">&times;</button>
+        </div>
+        <div style="padding: 20px;">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Peça ao cliente para criar um novo PIN de 4 dígitos: *</label>
+                <input type="text" id="newPinInput" pattern="[0-9]{4}" maxlength="4" class="pdv-form-input" placeholder="Ex: 1234" style="font-size: 32px; letter-spacing: 10px; text-align: center; font-weight: bold;" autocomplete="off">
+                <small style="color: #666; display: block; margin-top: 10px;">O cliente usará este PIN para acompanhar os pedidos</small>
+            </div>
+            <button onclick="changePin()" class="btn btn-primary" style="width: 100%; margin-top: 15px;">
+                <i class="fa fa-check"></i> Confirmar Alteração
+            </button>
+        </div>
+    </div>
+</div>
+
 <script>
 function filterByCategory(categoryId) {
     const tabs = document.querySelectorAll('.category-tab');
@@ -479,29 +498,36 @@ function sendToKitchen() {
     }
 }
 
-function regeneratePin() {
-    if (confirm('Deseja gerar/resetar o PIN de acesso do cliente?')) {
-        fetch('{{ url_for("pdv.reset_pin", comanda_id=comanda.id) }}', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            }
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                document.getElementById('pin-display').textContent = data.pin;
-                alert('PIN gerado/resetado com sucesso!\n\nPIN: ' + data.pin + '\n\nCompartilhe este PIN com o cliente.');
-                location.reload();
-            } else {
-                alert('Erro ao gerar PIN: ' + data.message);
-            }
-        })
-        .catch(error => {
-            alert('Erro ao gerar PIN!');
-            console.error(error);
-        });
+function changePin() {
+    const newPin = document.getElementById('newPinInput').value;
+    
+    if (!newPin || newPin.length !== 4 || !/^\d{4}$/.test(newPin)) {
+        alert('Por favor, digite um PIN de exatamente 4 dígitos numéricos!');
+        return;
     }
+    
+    const formData = new FormData();
+    formData.append('new_pin', newPin);
+    
+    fetch('{{ url_for("pdv.change_pin", comanda_id=comanda.id) }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            document.getElementById('pin-display').textContent = data.pin;
+            alert('PIN alterado com sucesso!\n\nNovo PIN: ' + data.pin + '\n\nCompartilhe este PIN com o cliente.');
+            document.getElementById('changePinModal').style.display = 'none';
+            location.reload();
+        } else {
+            alert('Erro ao alterar PIN: ' + data.message);
+        }
+    })
+    .catch(error => {
+        alert('Erro ao alterar PIN!');
+        console.error(error);
+    });
 }
 
 window.onclick = function(event) {
@@ -510,6 +536,9 @@ window.onclick = function(event) {
     }
     if (event.target.id === 'closeComandaModal') {
         document.getElementById('closeComandaModal').style.display = 'none';
+    }
+    if (event.target.id === 'changePinModal') {
+        document.getElementById('changePinModal').style.display = 'none';
     }
 }
 </script>

@@ -62,9 +62,14 @@ def add_table():
 @admin_or_waiter_required
 def open_table(table_id):
     table = Table.query.get_or_404(table_id)
+    customer_pin = request.form.get('customer_pin', '').strip()
     
     if table.status == 'occupied':
         flash('Mesa já está ocupada!', 'warning')
+        return redirect(url_for('pdv.tables'))
+    
+    if not customer_pin or len(customer_pin) != 4 or not customer_pin.isdigit():
+        flash('Por favor, peça ao cliente para criar um PIN de 4 dígitos!', 'danger')
         return redirect(url_for('pdv.tables'))
     
     try:
@@ -78,14 +83,14 @@ def open_table(table_id):
         comanda = Comanda(
             comanda_number=comanda_number,
             table_id=table_id,
-            waiter_id=current_user.id
+            waiter_id=current_user.id,
+            access_pin=customer_pin
         )
-        comanda.generate_pin()
         db.session.add(comanda)
         db.session.flush()
         db.session.commit()
         
-        flash(f'Mesa {table.table_number} aberta! Comanda #{comanda_number} criada. PIN: {comanda.access_pin}', 'success')
+        flash(f'Mesa {table.table_number} aberta! Comanda #{comanda_number} criada. PIN do cliente: {customer_pin}', 'success')
         return redirect(url_for('pdv.comanda_detail', comanda_id=comanda.id))
     except Exception as e:
         db.session.rollback()
@@ -131,6 +136,11 @@ def close_table(table_id):
 def create_comanda():
     table_id = request.form.get('table_id', type=int)
     customer_name = request.form.get('customer_name', '')
+    customer_pin = request.form.get('customer_pin', '').strip()
+    
+    if not customer_pin or len(customer_pin) != 4 or not customer_pin.isdigit():
+        flash('Por favor, peça ao cliente para criar um PIN de 4 dígitos!', 'danger')
+        return redirect(request.referrer or url_for('pdv.index'))
     
     last_comanda = Comanda.query.order_by(Comanda.id.desc()).first()
     comanda_number = str((last_comanda.id if last_comanda else 0) + 1).zfill(6)
@@ -139,13 +149,13 @@ def create_comanda():
         comanda_number=comanda_number,
         table_id=table_id,
         customer_name=customer_name,
-        waiter_id=current_user.id
+        waiter_id=current_user.id,
+        access_pin=customer_pin
     )
-    comanda.generate_pin()
     db.session.add(comanda)
     db.session.commit()
     
-    flash(f'Comanda #{comanda_number} criada! PIN de acesso: {comanda.access_pin}', 'success')
+    flash(f'Comanda #{comanda_number} criada! PIN do cliente: {customer_pin}', 'success')
     return redirect(url_for('pdv.comanda_detail', comanda_id=comanda.id))
 
 @pdv_bp.route('/comanda/<int:comanda_id>')
@@ -316,40 +326,27 @@ def send_to_kitchen(comanda_id):
         db.session.rollback()
         return jsonify({'success': False, 'message': str(e)})
 
-@pdv_bp.route('/comanda/<int:comanda_id>/gerar-pin', methods=['POST'])
+@pdv_bp.route('/comanda/<int:comanda_id>/alterar-pin', methods=['POST'])
 @login_required
 @admin_or_waiter_required
-def generate_pin(comanda_id):
+def change_pin(comanda_id):
     comanda = Comanda.query.get_or_404(comanda_id)
     
     if comanda.status != 'open':
         return jsonify({'success': False, 'message': 'Comanda já está fechada'})
     
-    pin = comanda.generate_pin()
-    db.session.commit()
+    new_pin = request.form.get('new_pin', '').strip()
     
-    return jsonify({
-        'success': True, 
-        'pin': pin,
-        'message': f'PIN gerado com sucesso: {pin}'
-    })
-
-@pdv_bp.route('/comanda/<int:comanda_id>/resetar-pin', methods=['POST'])
-@login_required
-@admin_or_waiter_required
-def reset_pin(comanda_id):
-    comanda = Comanda.query.get_or_404(comanda_id)
+    if not new_pin or len(new_pin) != 4 or not new_pin.isdigit():
+        return jsonify({'success': False, 'message': 'PIN deve ter exatamente 4 dígitos numéricos'})
     
-    if comanda.status != 'open':
-        return jsonify({'success': False, 'message': 'Comanda já está fechada'})
-    
-    new_pin = comanda.generate_pin()
+    comanda.access_pin = new_pin
     db.session.commit()
     
     return jsonify({
         'success': True, 
         'pin': new_pin,
-        'message': f'PIN resetado com sucesso: {new_pin}'
+        'message': f'PIN alterado com sucesso para: {new_pin}'
     })
 
 @pdv_bp.route('/caixa')

@@ -26,11 +26,9 @@
                 <i class="fa fa-qrcode"></i> Gerar QR Code
             </a>
             {% if table.status != 'occupied' %}
-                <form method="POST" action="{{ url_for('pdv.open_table', table_id=table.id) }}" style="display: inline;">
-                    <button type="submit" class="btn btn-success">
-                        <i class="fa fa-unlock"></i> Abrir Mesa
-                    </button>
-                </form>
+                <button onclick="document.getElementById('openTableModal').style.display='block'" class="btn btn-success">
+                    <i class="fa fa-unlock"></i> Abrir Mesa
+                </button>
             {% else %}
                 <button onclick="document.getElementById('newComandaModal').style.display='block'" class="btn btn-primary">
                     <i class="fa fa-plus"></i> Nova Comanda
@@ -77,7 +75,31 @@
                 <label class="pdv-form-label">Nome do Cliente (opcional):</label>
                 <input type="text" name="customer_name" class="pdv-form-input">
             </div>
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Peça ao cliente para criar um PIN de 4 dígitos: *</label>
+                <input type="text" name="customer_pin" pattern="[0-9]{4}" maxlength="4" required class="pdv-form-input" placeholder="Ex: 1234" style="font-size: 24px; letter-spacing: 8px; text-align: center; font-weight: bold;">
+                <small style="color: #666; display: block; margin-top: 5px;">O cliente usará este PIN para acompanhar os pedidos</small>
+            </div>
             <button type="submit" class="btn btn-primary" style="width: 100%;">Criar Comanda</button>
+        </form>
+    </div>
+</div>
+
+<div id="openTableModal" class="pdv-modal">
+    <div class="pdv-modal-content" style="max-width: 500px;">
+        <div class="pdv-modal-header">
+            <h3>Abrir Mesa {{ table.table_number }}</h3>
+            <button onclick="document.getElementById('openTableModal').style.display='none'" class="pdv-modal-close">&times;</button>
+        </div>
+        <form method="POST" action="{{ url_for('pdv.open_table', table_id=table.id) }}">
+            <div class="pdv-form-group">
+                <label class="pdv-form-label">Peça ao cliente para criar um PIN de 4 dígitos: *</label>
+                <input type="text" name="customer_pin" pattern="[0-9]{4}" maxlength="4" required class="pdv-form-input" placeholder="Ex: 1234" style="font-size: 24px; letter-spacing: 8px; text-align: center; font-weight: bold;">
+                <small style="color: #666; display: block; margin-top: 5px;">O cliente usará este PIN para acompanhar os pedidos</small>
+            </div>
+            <button type="submit" class="btn btn-success" style="width: 100%;">
+                <i class="fa fa-unlock"></i> Abrir Mesa
+            </button>
         </form>
     </div>
 </div>
