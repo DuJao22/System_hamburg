@@ -230,7 +230,9 @@
                         <p class="ai-chat-status">Online • Powered by Gemini AI</p>
                     </div>
                 </div>
-                <button id="aiChatClose" class="ai-chat-close-btn">×</button>
+                <button id="aiChatBackBtn" class="ai-chat-back-btn">
+                    <i class="fa fa-arrow-left"></i> Voltar ao Menu
+                </button>
             </div>
             
             <div id="aiChatMessages" class="ai-chat-messages">
@@ -394,15 +396,24 @@
                 return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             }
             
+            const chatBackBtn = document.getElementById('aiChatBackBtn');
+            const chatWidget = document.getElementById('aiChatWidget');
+            
             chatToggle.addEventListener('click', () => {
-                chatWindow.classList.toggle('active');
-                if (chatWindow.classList.contains('active')) {
-                    chatInput.focus();
-                }
+                chatWindow.classList.add('active');
+                chatWindow.classList.add('fullscreen');
+                chatWidget.classList.add('fullscreen');
+                chatToggle.style.display = 'none';
+                document.body.style.overflow = 'hidden';
+                chatInput.focus();
             });
             
-            chatClose.addEventListener('click', () => {
+            chatBackBtn.addEventListener('click', () => {
                 chatWindow.classList.remove('active');
+                chatWindow.classList.remove('fullscreen');
+                chatWidget.classList.remove('fullscreen');
+                chatToggle.style.display = 'block';
+                document.body.style.overflow = '';
             });
             
             chatSend.addEventListener('click', sendMessage);
