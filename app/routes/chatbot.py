@@ -10,9 +10,39 @@ from datetime import datetime
 
 chatbot_bp = Blueprint('chatbot', __name__)
 
-# the newest Gemini model is "gemini-2.5-flash" which was released in 2025.
-# do not change this unless explicitly requested by the user
-client = genai.Client(api_key=os.environ.get("GEMINI_API_KEY"))
+def get_available_api_keys():
+    """Retorna lista de chaves API disponíveis"""
+    api_keys = []
+    
+    for i in range(1, 6):
+        key = os.environ.get(f"GEMINI_API_KEY_{i}")
+        if key:
+            api_keys.append(key)
+    
+    fallback_key = os.environ.get("GEMINI_API_KEY")
+    if fallback_key and fallback_key not in api_keys:
+        api_keys.append(fallback_key)
+    
+    return api_keys
+
+def create_gemini_client_with_rotation(api_keys):
+    """Tenta criar cliente com rotação de chaves"""
+    for key in api_keys:
+        try:
+            client = genai.Client(api_key=key)
+            return client, key
+        except Exception as e:
+            print(f"Falha ao inicializar com chave: {str(e)[:20]}...")
+            continue
+    
+    return None, None
+
+api_keys = get_available_api_keys()
+client, current_key = create_gemini_client_with_rotation(api_keys)
+
+if not client:
+    print("⚠️ AVISO: Nenhuma chave API válida encontrada!")
+    client = None
 
 def get_order_info(order_code=None, phone=None):
     """Buscar informações de pedidos"""
@@ -273,17 +303,45 @@ def chat():
                 )
             )
         
-        # Gerar resposta do Gemini
-        response = client.models.generate_content(
-            model='gemini-2.5-flash',
-            contents=messages,
-            config=types.GenerateContentConfig(
-                temperature=0.9,
-                max_output_tokens=1024,
-            )
-        )
+        # Gerar resposta do Gemini com rotação automática de chaves
+        ai_response = None
+        last_error = None
         
-        ai_response = response.text if response.text else 'Desculpe, não consegui processar sua mensagem.'
+        available_keys = get_available_api_keys()
+        
+        for api_key in available_keys:
+            try:
+                temp_client = genai.Client(api_key=api_key)
+                
+                response = temp_client.models.generate_content(
+                    model='gemini-2.5-flash',
+                    contents=messages,
+                    config=types.GenerateContentConfig(
+                        temperature=0.9,
+                        max_output_tokens=1024,
+                    )
+                )
+                
+                ai_response = response.text if response.text else 'Desculpe, não consegui processar sua mensagem.'
+                print(f"✅ Resposta gerada com sucesso usando chave: ...{api_key[-10:]}")
+                break
+                
+            except Exception as e:
+                error_str = str(e).lower()
+                last_error = str(e)
+                
+                if 'quota' in error_str or 'limit' in error_str or '429' in error_str or 'resource_exhausted' in error_str:
+                    print(f"⚠️ Limite atingido na chave ...{api_key[-10:]}, tentando próxima...")
+                    continue
+                elif 'invalid' in error_str or 'api_key' in error_str:
+                    print(f"❌ Chave inválida ...{api_key[-10:]}, tentando próxima...")
+                    continue
+                else:
+                    print(f"❌ Erro desconhecido com chave ...{api_key[-10:]}: {str(e)[:50]}")
+                    continue
+        
+        if not ai_response:
+            ai_response = f'Desculpe, todas as chaves API atingiram o limite. Tente novamente mais tarde. Erro: {last_error[:100] if last_error else "Desconhecido"}'
         
         # Salvar resposta do assistente
         save_message(conversation.id, 'assistant', ai_response)
