@@ -52,6 +52,14 @@ The following environment variables should be configured in production:
 See `.env.example` for a template.
 
 ## Recent Changes
+- **2025-11-06**:
+  - **Sistema de Gerenciamento de Usuários e Atendentes:** Implementado painel administrativo completo para gerenciar usuários do sistema:
+    - **Criação de Atendentes:** Admin pode criar usuários com diferentes papéis (roles): Cliente, Atendente, Cozinha, Gerente e Admin
+    - **Gestão de Permissões:** Sistema de controle de acesso baseado em roles - atendentes têm acesso ao PDV para abrir mesas, gerenciar caixa e lançar pedidos
+    - **Interface de Listagem:** Listagem completa de usuários com filtros por papel, busca por nome/email/CPF, e estatísticas por categoria
+    - **CRUD Completo:** Funcionalidades de criar, editar e deletar usuários com validação de dados (email único, CPF válido, etc)
+    - **Máscaras de Entrada:** Formatação automática para CPF e telefone nos formulários
+    - **Integração com PDV:** Atendentes criados podem fazer login e acessar o sistema PDV para operações de salão
 - **2025-11-05**:
   - **Sistema Completo de Gerenciamento de Status de Pedidos:** Implementado sistema robusto e visual para controle de pedidos com múltiplas etapas:
     - **Novos Status Intermediários:** Adicionados status "Em Preparo", "Pronto", "Saiu para Entrega" e "Retirado" para melhor rastreamento do ciclo de vida do pedido.
