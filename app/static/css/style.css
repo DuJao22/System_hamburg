@@ -593,15 +593,15 @@ body {
 }
 
 .carousel_slide.slide1 {
-    background-image: url('https://www.robocore.net/upload/lojavirtual/header_32_pt_H.png?1759419069');
+    background-image: url('/static/images/food_banner_fast_foo_0e2e6d2b.jpg');
 }
 
 .carousel_slide.slide2 {
-    background-image: url('https://www.robocore.net/upload/lojavirtual/header_40_pt_H.png?1759419175');
+    background-image: url('/static/images/food_banner_fast_foo_3736efc2.jpg');
 }
 
 .carousel_slide.slide3 {
-    background-image: url('https://www.robocore.net/upload/lojavirtual/header_53_pt_H.jpg?1759419193');
+    background-image: url('/static/images/food_banner_fast_foo_52f5db02.jpg');
 }
 
 .carousel_btn {
