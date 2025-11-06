@@ -214,10 +214,50 @@
 
     {% block content %}{% endblock %}
 
-    <!-- Botão flutuante do WhatsApp -->
-    <a href="https://wa.me/{{ store_settings.store_whatsapp }}" target="_blank" class="whatsapp-float" title="Fale conosco no WhatsApp">
-        <img src="{{ url_for('static', filename='images/sandwich_whatsapp_mascot.png') }}" alt="Mascote Sanduíche - WhatsApp">
-    </a>
+    <!-- Assistente Virtual AI -->
+    <div id="aiChatWidget" class="ai-chat-widget">
+        <button id="aiChatToggle" class="ai-chat-toggle" title="Assistente Virtual">
+            <img src="{{ url_for('static', filename='images/sandwich_whatsapp_mascot.png') }}" alt="Assistente Virtual" class="ai-chat-icon">
+            <span class="ai-chat-badge">AI</span>
+        </button>
+        
+        <div id="aiChatWindow" class="ai-chat-window">
+            <div class="ai-chat-header">
+                <div class="ai-chat-header-content">
+                    <div class="ai-chat-avatar">🍔</div>
+                    <div>
+                        <h3>Assistente Virtual</h3>
+                        <p class="ai-chat-status">Online • Powered by Gemini AI</p>
+                    </div>
+                </div>
+                <button id="aiChatClose" class="ai-chat-close-btn">×</button>
+            </div>
+            
+            <div id="aiChatMessages" class="ai-chat-messages">
+                <div class="ai-message">
+                    <div class="ai-message-avatar">🤖</div>
+                    <div class="ai-message-content">
+                        <p>Olá! 👋 Sou o assistente virtual da {{ store_settings.store_name }}!</p>
+                        <p>Posso ajudar você a:</p>
+                        <ul>
+                            <li>🍔 Fazer pedidos</li>
+                            <li>📋 Consultar cardápio</li>
+                            <li>📦 Verificar status do pedido</li>
+                            <li>❓ Responder suas dúvidas</li>
+                        </ul>
+                        <p>Como posso ajudar você hoje?</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="ai-chat-input-area">
+                <textarea id="aiChatInput" placeholder="Digite sua mensagem..." rows="1"></textarea>
+                <button id="aiChatSend" class="ai-chat-send-btn">
+                    <i class="fa fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
 
     <footer class="footer">
         <div class="footer_container">
@@ -336,6 +376,138 @@
 
     <script src="https://cdn.socket.io/4.5.4/socket.io.min.js"></script>
     <script src="{{ url_for('static', filename='js/order_notifications.js') }}"></script>
+    
+    <script>
+        // Assistente Virtual AI
+        (function() {
+            const chatToggle = document.getElementById('aiChatToggle');
+            const chatWindow = document.getElementById('aiChatWindow');
+            const chatClose = document.getElementById('aiChatClose');
+            const chatInput = document.getElementById('aiChatInput');
+            const chatSend = document.getElementById('aiChatSend');
+            const chatMessages = document.getElementById('aiChatMessages');
+            
+            let sessionId = localStorage.getItem('aiChatSessionId') || generateSessionId();
+            localStorage.setItem('aiChatSessionId', sessionId);
+            
+            function generateSessionId() {
+                return 'session_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            }
+            
+            chatToggle.addEventListener('click', () => {
+                chatWindow.classList.toggle('active');
+                if (chatWindow.classList.contains('active')) {
+                    chatInput.focus();
+                }
+            });
+            
+            chatClose.addEventListener('click', () => {
+                chatWindow.classList.remove('active');
+            });
+            
+            chatSend.addEventListener('click', sendMessage);
+            
+            chatInput.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    sendMessage();
+                }
+            });
+            
+            chatInput.addEventListener('input', function() {
+                this.style.height = 'auto';
+                this.style.height = Math.min(this.scrollHeight, 100) + 'px';
+            });
+            
+            function addMessage(content, isUser = false) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = isUser ? 'user-message' : 'ai-message';
+                
+                const avatar = document.createElement('div');
+                avatar.className = isUser ? 'user-message-avatar' : 'ai-message-avatar';
+                avatar.textContent = isUser ? '👤' : '🤖';
+                
+                const contentDiv = document.createElement('div');
+                contentDiv.className = isUser ? 'user-message-content' : 'ai-message-content';
+                contentDiv.innerHTML = formatMessage(content);
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(contentDiv);
+                chatMessages.appendChild(messageDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function formatMessage(text) {
+                return text
+                    .replace(/\n/g, '<br>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+            }
+            
+            function showTyping() {
+                const typingDiv = document.createElement('div');
+                typingDiv.id = 'typing-indicator';
+                typingDiv.className = 'ai-message';
+                typingDiv.innerHTML = `
+                    <div class="ai-message-avatar">🤖</div>
+                    <div class="ai-message-content">
+                        <div class="ai-typing-indicator">
+                            <div class="ai-typing-dot"></div>
+                            <div class="ai-typing-dot"></div>
+                            <div class="ai-typing-dot"></div>
+                        </div>
+                    </div>
+                `;
+                chatMessages.appendChild(typingDiv);
+                chatMessages.scrollTop = chatMessages.scrollHeight;
+            }
+            
+            function removeTyping() {
+                const typing = document.getElementById('typing-indicator');
+                if (typing) typing.remove();
+            }
+            
+            async function sendMessage() {
+                const message = chatInput.value.trim();
+                if (!message) return;
+                
+                addMessage(message, true);
+                chatInput.value = '';
+                chatInput.style.height = 'auto';
+                chatSend.disabled = true;
+                
+                showTyping();
+                
+                try {
+                    const response = await fetch('/api/chat', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            message: message,
+                            session_id: sessionId
+                        })
+                    });
+                    
+                    const data = await response.json();
+                    removeTyping();
+                    
+                    if (data.error) {
+                        addMessage('Desculpe, ocorreu um erro. Por favor, tente novamente.');
+                    } else {
+                        addMessage(data.response);
+                    }
+                } catch (error) {
+                    removeTyping();
+                    console.error('Erro ao enviar mensagem:', error);
+                    addMessage('Desculpe, não consegui processar sua mensagem. Verifique sua conexão e tente novamente.');
+                } finally {
+                    chatSend.disabled = false;
+                }
+            }
+        })();
+    </script>
     
     {% block extra_js %}{% endblock %}
 </body>
