@@ -26,6 +26,83 @@ def index():
                          table_number=table_number,
                          comanda_number=comanda_number)
 
+@digital_menu_bp.route('/minha-conta')
+def my_account():
+    return render_template('digital_menu/my_account_login.html')
+
+@digital_menu_bp.route('/minha-conta/entrar', methods=['POST'])
+def my_account_login():
+    table_number = request.form.get('table_number', '').strip()
+    table_pin = request.form.get('table_pin', '').strip()
+    
+    if not table_number or not table_pin:
+        flash('Por favor, informe o número da mesa e o PIN!', 'danger')
+        return redirect(url_for('digital_menu.my_account'))
+    
+    table = Table.query.filter_by(table_number=table_number).first()
+    
+    if not table:
+        flash(f'Mesa {table_number} não encontrada!', 'danger')
+        return redirect(url_for('digital_menu.my_account'))
+    
+    if not table.access_pin:
+        import secrets
+        table.access_pin = ''.join([str(secrets.randbelow(10)) for _ in range(4)])
+        db.session.commit()
+    
+    if table.access_pin != table_pin:
+        flash('PIN incorreto! Verifique o PIN na mesa e tente novamente.', 'danger')
+        return redirect(url_for('digital_menu.my_account'))
+    
+    session['customer_table_id'] = table.id
+    session['customer_table_number'] = table.table_number
+    
+    return redirect(url_for('digital_menu.view_account'))
+
+@digital_menu_bp.route('/minha-conta/ver')
+def view_account():
+    table_id = session.get('customer_table_id')
+    
+    if not table_id:
+        flash('Faça login para ver sua conta!', 'warning')
+        return redirect(url_for('digital_menu.my_account'))
+    
+    table = Table.query.get_or_404(table_id)
+    
+    comandas = Comanda.query.filter_by(table_id=table.id).all()
+    
+    all_items = []
+    total_geral = 0
+    
+    for comanda in comandas:
+        for item in comanda.items:
+            item_total = item.calculate_item_total()
+            all_items.append({
+                'comanda_number': comanda.comanda_number,
+                'product_name': item.product.name,
+                'quantity': item.quantity,
+                'price': item.price,
+                'extras': item.extras,
+                'status': item.status,
+                'total': item_total,
+                'created_at': item.created_at
+            })
+            total_geral += item_total
+    
+    all_items.sort(key=lambda x: x['created_at'], reverse=True)
+    
+    return render_template('digital_menu/view_account.html',
+                         table=table,
+                         items=all_items,
+                         total_geral=total_geral)
+
+@digital_menu_bp.route('/minha-conta/sair')
+def my_account_logout():
+    session.pop('customer_table_id', None)
+    session.pop('customer_table_number', None)
+    flash('Você saiu da sua conta!', 'success')
+    return redirect(url_for('digital_menu.my_account'))
+
 @digital_menu_bp.route('/produto/<int:product_id>')
 def product_detail(product_id):
     product = Product.query.get_or_404(product_id)

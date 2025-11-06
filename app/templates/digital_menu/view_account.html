@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Mesa {{ table.table_number }}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 20px;
+            border-bottom: 3px solid #00E65D;
+            box-shadow: 0 4px 15px rgba(0, 230, 93, 0.3);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #00E65D;
+            font-size: 24px;
+            font-weight: 700;
+        }
+
+        .header-info {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .table-badge {
+            background: rgba(0, 230, 93, 0.2);
+            color: #00E65D;
+            padding: 10px 20px;
+            border-radius: 8px;
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .btn-logout {
+            background: #FF4757;
+            color: #fff;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-logout:hover {
+            background: #ff3838;
+            transform: translateY(-2px);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .total-card {
+            background: linear-gradient(135deg, #00E65D 0%, #00C851 100%);
+            border-radius: 15px;
+            padding: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+            box-shadow: 0 8px 30px rgba(0, 230, 93, 0.4);
+        }
+
+        .total-card h2 {
+            margin: 0 0 10px 0;
+            color: #000;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .total-amount {
+            font-size: 48px;
+            font-weight: 800;
+            color: #000;
+            margin: 0;
+        }
+
+        .orders-section h2 {
+            color: #00E65D;
+            margin: 0 0 20px 0;
+            font-size: 22px;
+            font-weight: 700;
+        }
+
+        .order-item {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 2px solid rgba(0, 230, 93, 0.2);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .order-title {
+            flex: 1;
+        }
+
+        .order-title h3 {
+            margin: 0 0 5px 0;
+            color: #fff;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .order-meta {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+
+        .meta-item {
+            color: #999;
+            font-size: 13px;
+        }
+
+        .meta-item i {
+            color: #00E65D;
+            margin-right: 5px;
+        }
+
+        .order-price {
+            text-align: right;
+        }
+
+        .price-label {
+            color: #999;
+            font-size: 12px;
+            margin: 0;
+        }
+
+        .price-value {
+            color: #00E65D;
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            margin-top: 10px;
+        }
+
+        .status-pending {
+            background: rgba(255, 165, 0, 0.2);
+            color: #FFA500;
+        }
+
+        .status-preparing {
+            background: rgba(33, 150, 243, 0.2);
+            color: #2196F3;
+        }
+
+        .status-ready {
+            background: rgba(0, 230, 93, 0.2);
+            color: #00E65D;
+        }
+
+        .status-delivered {
+            background: rgba(128, 128, 128, 0.2);
+            color: #999;
+        }
+
+        .extras-list {
+            margin-top: 10px;
+            padding-left: 20px;
+        }
+
+        .extra-item {
+            color: #999;
+            font-size: 13px;
+            margin: 3px 0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state i {
+            font-size: 64px;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            color: #fff;
+            margin: 0 0 10px 0;
+        }
+
+        @media (max-width: 768px) {
+            .header-content {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .header-info {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .total-amount {
+                font-size: 36px;
+            }
+
+            .order-header {
+                flex-direction: column;
+            }
+
+            .order-price {
+                text-align: left;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <div class="header-content">
+            <h1><i class="fas fa-receipt"></i> Minha Conta</h1>
+            <div class="header-info">
+                <div class="table-badge">
+                    <i class="fas fa-table"></i> Mesa {{ table.table_number }}
+                </div>
+                <a href="{{ url_for('digital_menu.my_account_logout') }}" class="btn-logout">
+                    <i class="fas fa-sign-out-alt"></i> Sair
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <div class="total-card">
+            <h2><i class="fas fa-calculator"></i> Total da Conta</h2>
+            <p class="total-amount">R$ {{ "%.2f"|format(total_geral) }}</p>
+        </div>
+
+        <div class="orders-section">
+            <h2><i class="fas fa-list"></i> Seus Pedidos ({{ items|length }})</h2>
+
+            {% if items %}
+                {% for item in items %}
+                <div class="order-item">
+                    <div class="order-header">
+                        <div class="order-title">
+                            <h3>{{ item.quantity }}x {{ item.product_name }}</h3>
+                            <div class="order-meta">
+                                <span class="meta-item">
+                                    <i class="fas fa-hashtag"></i> Comanda {{ item.comanda_number }}
+                                </span>
+                                <span class="meta-item">
+                                    <i class="fas fa-clock"></i> {{ item.created_at.strftime('%d/%m/%Y %H:%M') }}
+                                </span>
+                            </div>
+
+                            {% if item.extras %}
+                            <div class="extras-list">
+                                {% for extra in item.extras %}
+                                <div class="extra-item">
+                                    <i class="fas fa-plus-circle"></i> {{ extra.quantity }}x {{ extra.extra.name }} (+R$ {{ "%.2f"|format(extra.price) }})
+                                </div>
+                                {% endfor %}
+                            </div>
+                            {% endif %}
+
+                            <span class="status-badge status-{{ item.status }}">
+                                {% if item.status == 'pending' %}
+                                    <i class="fas fa-hourglass-half"></i> Pendente
+                                {% elif item.status == 'preparing' %}
+                                    <i class="fas fa-fire"></i> Preparando
+                                {% elif item.status == 'ready' %}
+                                    <i class="fas fa-check-circle"></i> Pronto
+                                {% elif item.status == 'delivered' %}
+                                    <i class="fas fa-check-double"></i> Entregue
+                                {% else %}
+                                    {{ item.status }}
+                                {% endif %}
+                            </span>
+                        </div>
+
+                        <div class="order-price">
+                            <p class="price-label">Subtotal</p>
+                            <p class="price-value">R$ {{ "%.2f"|format(item.total) }}</p>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            {% else %}
+                <div class="empty-state">
+                    <i class="fas fa-shopping-bag"></i>
+                    <h3>Nenhum pedido ainda</h3>
+                    <p>Seus pedidos aparecerão aqui quando você fizer um pedido.</p>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</body>
+</html>

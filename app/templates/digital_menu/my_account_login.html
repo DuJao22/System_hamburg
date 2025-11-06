@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Minha Conta - Sandwich Gourmet</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            background: #0a0a0a;
+            color: #fff;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2d2d2d 100%);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #00E65D;
+            box-shadow: 0 4px 15px rgba(0, 230, 93, 0.3);
+        }
+
+        .header h1 {
+            margin: 0;
+            color: #00E65D;
+            font-size: 28px;
+            font-weight: 700;
+        }
+
+        .container {
+            flex: 1;
+            max-width: 500px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        .login-card {
+            background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 100%);
+            border-radius: 15px;
+            padding: 40px;
+            box-shadow: 0 8px 30px rgba(0, 230, 93, 0.2);
+            border: 2px solid rgba(0, 230, 93, 0.3);
+        }
+
+        .login-card h2 {
+            color: #00E65D;
+            margin: 0 0 10px 0;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .login-card p {
+            color: #999;
+            text-align: center;
+            margin: 0 0 30px 0;
+            font-size: 14px;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
+        .form-group label {
+            display: block;
+            color: #00E65D;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 15px;
+            background: #0a0a0a;
+            border: 2px solid #333;
+            border-radius: 8px;
+            color: #fff;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-sizing: border-box;
+        }
+
+        .form-group input:focus {
+            outline: none;
+            border-color: #00E65D;
+            box-shadow: 0 0 15px rgba(0, 230, 93, 0.3);
+        }
+
+        .form-group input[type="password"] {
+            font-size: 24px;
+            letter-spacing: 8px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #00E65D 0%, #00C851 100%);
+            color: #000;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(0, 230, 93, 0.4);
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 230, 93, 0.6);
+        }
+
+        .info-box {
+            background: rgba(0, 230, 93, 0.1);
+            border-left: 4px solid #00E65D;
+            padding: 15px;
+            margin-top: 30px;
+            border-radius: 8px;
+        }
+
+        .info-box i {
+            color: #00E65D;
+            margin-right: 10px;
+        }
+
+        .info-box p {
+            margin: 0;
+            color: #ccc;
+            font-size: 13px;
+            text-align: left;
+        }
+
+        .alert {
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            font-size: 14px;
+        }
+
+        .alert-danger {
+            background: rgba(255, 71, 87, 0.2);
+            border-left: 4px solid #FF4757;
+            color: #FF4757;
+        }
+
+        .alert-warning {
+            background: rgba(255, 165, 0, 0.2);
+            border-left: 4px solid #FFA500;
+            color: #FFA500;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                margin: 20px auto;
+                padding: 15px;
+            }
+
+            .login-card {
+                padding: 25px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1><i class="fas fa-receipt"></i> Minha Conta</h1>
+    </div>
+
+    <div class="container">
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                {% for category, message in messages %}
+                    <div class="alert alert-{{ category }}">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% endwith %}
+
+        <div class="login-card">
+            <h2><i class="fas fa-sign-in-alt"></i> Acessar Conta</h2>
+            <p>Informe o número da mesa e o PIN para ver seus pedidos</p>
+
+            <form method="POST" action="{{ url_for('digital_menu.my_account_login') }}">
+                <div class="form-group">
+                    <label for="table_number">
+                        <i class="fas fa-table"></i> Número da Mesa
+                    </label>
+                    <input type="text" 
+                           id="table_number" 
+                           name="table_number" 
+                           placeholder="Ex: 01, 02, 10..."
+                           required
+                           autofocus>
+                </div>
+
+                <div class="form-group">
+                    <label for="table_pin">
+                        <i class="fas fa-lock"></i> PIN (4 dígitos)
+                    </label>
+                    <input type="password" 
+                           id="table_pin" 
+                           name="table_pin" 
+                           placeholder="••••"
+                           maxlength="4"
+                           pattern="[0-9]{4}"
+                           required>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    <i class="fas fa-sign-in-alt"></i> Entrar
+                </button>
+            </form>
+
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <p>O PIN de 4 dígitos está escrito na sua mesa, próximo ao QR Code.</p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
