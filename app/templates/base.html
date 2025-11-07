@@ -452,7 +452,8 @@
                 return text
                     .replace(/\n/g, '<br>')
                     .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                    .replace(/\*(.*?)\*/g, '<em>$1</em>');
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" style="color: #00E65D; text-decoration: underline; font-weight: 500;">🔗 Ver produto</a>');
             }
             
             function showTyping() {

@@ -126,16 +126,37 @@ def get_store_context(user_message=''):
     store_phone = StoreSettings.get_setting('store_phone', '')
     store_address = StoreSettings.get_setting('store_address', '')
     
+    # Obter domínio do site (para construir URLs completas)
+    site_domain = os.environ.get('REPL_SLUG', '')
+    if site_domain:
+        site_url = f"https://{site_domain}.repl.co"
+    else:
+        site_url = request.host_url.rstrip('/')
+    
     categories = Category.query.all()
     products = Product.query.filter_by(active=True).all()
+    
+    # Organizar produtos por categoria para melhor apresentação
+    categories_info = []
+    for category in categories:
+        cat_products = [p for p in products if p.category_id == category.id][:5]
+        if cat_products:
+            categories_info.append({
+                'nome': category.name,
+                'link': f'{site_url}/categoria/{category.id}',
+                'produtos': len([p for p in products if p.category_id == category.id])
+            })
     
     products_info = []
     for product in products[:20]:  # Limitar a 20 produtos para não ultrapassar contexto
         products_info.append({
+            'id': product.id,
             'nome': product.name,
             'preço': f'R$ {product.price:.2f}',
             'descrição': product.description or '',
-            'categoria': product.category.name if product.category else ''
+            'categoria': product.category.name if product.category else '',
+            'link': f'{site_url}/produto/{product.id}',
+            'em_estoque': product.stock > 0 if product.stock is not None else True
         })
     
     # Detectar se o usuário está perguntando sobre pedido
@@ -188,6 +209,11 @@ INFORMAÇÕES DA LOJA:
 - Nome: {store_name}
 - Telefone: {store_phone}
 - Endereço: {store_address}
+- Site: {site_url}
+- Página de Compras: {site_url}/
+
+CATEGORIAS DISPONÍVEIS:
+{json.dumps(categories_info, ensure_ascii=False, indent=2)}
 
 PRODUTOS DISPONÍVEIS:
 {json.dumps(products_info, ensure_ascii=False, indent=2)}
@@ -218,13 +244,27 @@ STATUS DE PEDIDOS:
 - delivered: Pedido entregue
 - cancelled: Pedido cancelado
 
-INSTRUÇÕES IMPORTANTES:
+INSTRUÇÕES IMPORTANTES SOBRE LINKS:
+- SEMPRE que mencionar um produto específico, inclua o link direto: {site_url}/produto/[ID]
+- Quando listar múltiplos produtos, formate como lista com links clicáveis
+- Se o cliente perguntar sobre categorias, mostre os links: {site_url}/categoria/[ID]
+- Para ver todos os produtos, envie: {site_url}/
+- Apresente os links de forma amigável, exemplo: "🍔 Confira nosso X-Burger Especial aqui: [link]"
+- Use os links do campo 'link' de cada produto nas suas respostas
+
+FORMATO DE RESPOSTA COM PRODUTOS:
+Quando mostrar produtos, use este formato:
+🍔 [Nome do Produto] - R$ [preço]
+📝 [Descrição breve]
+🔗 Ver mais: [link do produto]
+
+INSTRUÇÕES GERAIS:
 - Seja amigável e use emojis ocasionalmente 🍔
-- Sugira produtos baseado no que o cliente pede
+- Sugira produtos baseado no que o cliente pede COM LINKS
 - Confirme sempre os detalhes antes de finalizar pedido
-- Para novos pedidos, oriente o cliente a usar o site para finalizar
+- Para novos pedidos, SEMPRE forneça o link do produto ou da página principal para o cliente finalizar a compra
 - Se não souber algo, seja honesto
-- Mantenha respostas concisas e objetivas
+- Mantenha respostas concisas mas sempre inclua links relevantes
 """
     return context
 
