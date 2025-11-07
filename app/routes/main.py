@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
-from app.models import Product, Category, Slide, Extra
-from sqlalchemy import or_
+from app.models import Product, Category, Slide, Extra, Order, OrderItem
+from sqlalchemy import or_, func, desc
+from flask_login import current_user
 
 main_bp = Blueprint('main', __name__)
 
@@ -24,7 +25,21 @@ def index():
             active=True
         ).limit(6).all()
     
-    return render_template('index.html', categories=categories, products=featured_products, slides=slides, category_products=category_products)
+    recent_orders = []
+    if current_user.is_authenticated:
+        recent_orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).limit(5).all()
+    
+    from app import db
+    best_sellers_query = db.session.query(
+        OrderItem.product_id,
+        func.sum(OrderItem.quantity).label('total_sold')
+    ).join(Product).filter(Product.active == True).group_by(OrderItem.product_id).order_by(desc('total_sold')).limit(6).all()
+    
+    best_seller_ids = [item.product_id for item in best_sellers_query]
+    best_sellers = Product.query.filter(Product.id.in_(best_seller_ids)).all() if best_seller_ids else []
+    best_sellers_sorted = sorted(best_sellers, key=lambda p: best_seller_ids.index(p.id))
+    
+    return render_template('index.html', categories=categories, products=featured_products, slides=slides, category_products=category_products, recent_orders=recent_orders, best_sellers=best_sellers_sorted)
 
 @main_bp.route('/produto/<int:product_id>')
 def product_detail(product_id):

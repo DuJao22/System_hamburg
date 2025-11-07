@@ -115,6 +115,94 @@
         </div>
     </div>
 
+    {% if current_user.is_authenticated and recent_orders %}
+    <section class="category_slider_section recent_orders_section">
+        <div class="section_header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 class="section_title" style="margin: 0;">
+                <i class="fa fa-history"></i> Seus Últimos Pedidos
+            </h2>
+            <a href="{{ url_for('orders.order_history') }}" style="color: #FFA500; text-decoration: none; font-weight: 600; font-size: 16px;">
+                Ver todos <i class="fa fa-arrow-right"></i>
+            </a>
+        </div>
+        
+        <div class="orders_grid">
+            {% for order in recent_orders %}
+            <div class="order_card">
+                <div class="order_header">
+                    <span class="order_number"><i class="fa fa-shopping-bag"></i> {{ order.order_number }}</span>
+                    <span class="order_status status_{{ order.status|lower|replace(' ', '_') }}">{{ order.status }}</span>
+                </div>
+                <div class="order_date">
+                    <i class="fa fa-calendar"></i> {{ order.created_at.strftime('%d/%m/%Y às %H:%M') }}
+                </div>
+                <div class="order_items">
+                    {% for item in order.items[:3] %}
+                    <div class="order_item_mini">
+                        <span>{{ item.quantity }}x {{ item.product.name }}</span>
+                    </div>
+                    {% endfor %}
+                    {% if order.items|length > 3 %}
+                    <div class="order_item_mini">
+                        <span style="color: #999;">+{{ order.items|length - 3 }} item(s)</span>
+                    </div>
+                    {% endif %}
+                </div>
+                <div class="order_total">
+                    Total: <strong style="color: #28a745;">R$ {{ "%.2f"|format(order.total) }}</strong>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+
+    {% if best_sellers %}
+    <section class="category_slider_section">
+        <div class="section_header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;">
+            <h2 class="section_title" style="margin: 0;">
+                <i class="fa fa-fire"></i> Mais Vendidos
+            </h2>
+        </div>
+        
+        <div class="category_slider_wrapper">
+            <button class="slider_nav_btn prev" onclick="scrollSlider('bestSellers', -1)">
+                <i class="fa fa-chevron-left"></i>
+            </button>
+            
+            <div class="category_slider" id="bestSellers">
+                {% for product in best_sellers %}
+                <div class="product_card_slider">
+                    <div class="bestseller_badge">
+                        <i class="fa fa-star"></i> TOP
+                    </div>
+                    <div class="product_image">
+                        {% if product.image_url %}
+                        <img src="{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 10px 10px 0 0;">
+                        {% else %}
+                        <div style="width: 100%; height: 200px; background: #f5f5f5; display: flex; align-items: center; justify-content: center; border-radius: 10px 10px 0 0;">
+                            <i class="fa fa-cutlery" style="font-size: 48px; color: #ddd;"></i>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div style="padding: 15px;">
+                        <div class="product_code" style="font-size: 11px; color: #999; margin-bottom: 5px;">Cód: {{ product.code }}</div>
+                        <div class="product_name" style="font-size: 16px; font-weight: 600; color: #111; margin-bottom: 10px; min-height: 40px;">{{ product.name }}</div>
+                        <div class="product_price" style="font-size: 20px; font-weight: 700; color: #28a745; margin-bottom: 5px;">R$ {{ "%.2f"|format(product.price) }}</div>
+                        <div class="product_pix" style="font-size: 13px; color: #666; margin-bottom: 15px;">R$ {{ "%.2f"|format(product.price * 0.95) }} no PIX</div>
+                        <a href="{{ url_for('main.product_detail', product_id=product.id) }}" class="btn_buy" style="display: block; text-align: center; background: #FFA500; color: #fff; padding: 12px; text-decoration: none; border-radius: 5px; font-weight: 600; transition: all 0.3s;">VER DETALHES</a>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            
+            <button class="slider_nav_btn next" onclick="scrollSlider('bestSellers', 1)">
+                <i class="fa fa-chevron-right"></i>
+            </button>
+        </div>
+    </section>
+    {% endif %}
+
     {% for category in categories %}
     {% if category_products.get(category.id) %}
     <section class="category_slider_section" id="produtos">
@@ -220,6 +308,126 @@
 </div>
 
 <style>
+.recent_orders_section {
+    margin: 50px 0;
+    padding: 0 20px;
+}
+
+.orders_grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+    padding: 20px 0;
+}
+
+.order_card {
+    background: #fff;
+    border-radius: 10px;
+    padding: 20px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border-left: 4px solid #FFA500;
+}
+
+.order_card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 25px rgba(255,165,0,0.3);
+}
+
+.order_header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.order_number {
+    font-weight: 700;
+    color: #111;
+    font-size: 16px;
+}
+
+.order_status {
+    padding: 5px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.status_pendente {
+    background: #ffc107;
+    color: #000;
+}
+
+.status_aceito, .status_em_preparo {
+    background: #17a2b8;
+    color: #fff;
+}
+
+.status_pronto, .status_saiu_para_entrega {
+    background: #007bff;
+    color: #fff;
+}
+
+.status_entregue, .status_finalizado {
+    background: #28a745;
+    color: #fff;
+}
+
+.status_cancelado {
+    background: #dc3545;
+    color: #fff;
+}
+
+.order_date {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 15px;
+}
+
+.order_items {
+    margin-bottom: 15px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 5px;
+}
+
+.order_item_mini {
+    padding: 5px 0;
+    font-size: 14px;
+    color: #333;
+    border-bottom: 1px solid #eee;
+}
+
+.order_item_mini:last-child {
+    border-bottom: none;
+}
+
+.order_total {
+    font-size: 16px;
+    color: #111;
+    padding-top: 10px;
+    border-top: 2px solid #eee;
+}
+
+.bestseller_badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: linear-gradient(135deg, #ff6b6b 0%, #ff8e53 100%);
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    z-index: 5;
+    box-shadow: 0 2px 8px rgba(255,107,107,0.4);
+}
+
+.product_card_slider {
+    position: relative;
+}
+
 .category_slider_section {
     margin: 50px 0;
     padding: 0 20px;
@@ -298,6 +506,10 @@
 }
 
 @media (max-width: 768px) {
+    .orders_grid {
+        grid-template-columns: 1fr;
+    }
+    
     .category_slider_wrapper {
         padding: 0 35px;
     }
