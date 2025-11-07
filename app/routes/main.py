@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request
 from app.models import Product, Category, Slide, Extra, Order, OrderItem
 from sqlalchemy import or_, func, desc
+from sqlalchemy.orm import selectinload
 from flask_login import current_user
 
 main_bp = Blueprint('main', __name__)
@@ -27,7 +28,9 @@ def index():
     
     recent_orders = []
     if current_user.is_authenticated:
-        recent_orders = Order.query.filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).limit(5).all()
+        recent_orders = Order.query.options(
+            selectinload(Order.items).selectinload(OrderItem.product)
+        ).filter_by(user_id=current_user.id).order_by(Order.created_at.desc()).limit(5).all()
     
     from app import db
     best_sellers_query = db.session.query(

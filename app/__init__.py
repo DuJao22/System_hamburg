@@ -2,11 +2,15 @@ from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager
 from flask_socketio import SocketIO
+from flask_compress import Compress
+from flask_caching import Cache
 import os
 
 db = SQLAlchemy()
 login_manager = LoginManager()
 socketio = SocketIO()
+compress = Compress()
+cache = Cache()
 
 def create_app():
     app = Flask(__name__)
@@ -15,10 +19,22 @@ def create_app():
     app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///ecommerce.db'
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     
+    app.config['CACHE_TYPE'] = 'SimpleCache'
+    app.config['CACHE_DEFAULT_TIMEOUT'] = 300
+    
+    app.config['COMPRESS_MIMETYPES'] = ['text/html', 'text/css', 'text/xml', 'application/json', 'application/javascript']
+    app.config['COMPRESS_LEVEL'] = 6
+    app.config['COMPRESS_MIN_SIZE'] = 500
+    
+    app.config['SEND_FILE_MAX_AGE_DEFAULT'] = 31536000
+    
     db.init_app(app)
     login_manager.init_app(app)
     login_manager.login_view = 'auth.login'
     login_manager.login_message = 'Por favor, faça login para acessar esta página.'
+    
+    compress.init_app(app)
+    cache.init_app(app)
     
     cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '*')
     if cors_origins != '*':
@@ -65,9 +81,10 @@ def create_app():
     app.register_blueprint(chatbot_bp)
     
     @app.context_processor
+    @cache.cached(timeout=600, key_prefix='all_categories')
     def inject_categories():
         from app.models import Category
-        categories = Category.query.all()
+        categories = Category.query.order_by(Category.name).all()
         return dict(categories=categories)
     
     @app.context_processor
