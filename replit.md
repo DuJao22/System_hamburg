@@ -30,6 +30,16 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
     - **Product Reviews:** Users can rate products and add comments, verified by purchase.
     - **Add-ons and Observations:** Allows selecting product extras and adding special observations during checkout, with quantity and price tracking.
     - **Payment Gateway:** Integration with Mercado Pago, including webhook handling for order status updates. Supports pickup and delivery.
+    - **Chatbot Sales Funnel (NEW - Nov 2025):**
+        - **Data Collection First:** Chatbot collects customer name and phone number BEFORE sending any product/sales links
+        - **Conversation State Machine:** Intelligent state tracking prevents links from being shared until both name and phone are captured
+        - **Auto-Registration:** System automatically creates user accounts when phone number is provided (register_user_from_chat function)
+        - **Smart Detection:** AI-powered recognition of names and Brazilian phone numbers in conversation
+        - **Seamless Onboarding:** Customers are automatically logged in and directed to sales page after data collection
+        - **Manual Payment Confirmation:** Staff (admins/managers/attendants) confirm payments manually via admin panel instead of online gateway
+        - **Payment Tracking:** Orders track who confirmed payment (payment_confirmed_by), when (payment_confirmed_at), and notes (payment_confirmation_notes)
+        - **Duplicate Prevention:** System detects existing users by phone number to avoid duplicate registrations
+        - **Clickable Links:** URLs in chatbot responses are automatically converted to clickable green links
     - **Delivery Area Control:** Geographic coverage validation restricts deliveries to a configurable radius from the store. Admin enters a ZIP code (CEP), and the system automatically fetches address details via ViaCEP and calculates coordinates using Nominatim/OpenStreetMap for radius validation. Includes reverse CEP search functionality.
     - **Homepage Category Sliders (NEW - Nov 2025):**
         - **Dynamic Category Sections:** Homepage displays specialized horizontal sliders for each product category
