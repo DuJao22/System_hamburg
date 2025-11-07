@@ -36,11 +36,16 @@ def create_app():
     compress.init_app(app)
     cache.init_app(app)
     
-    cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '*')
-    if cors_origins != '*':
-        cors_origins = cors_origins.split(',')
+    enable_socketio = os.environ.get('ENABLE_SOCKETIO', 'true').lower() == 'true'
     
-    socketio.init_app(app, cors_allowed_origins=cors_origins, async_mode='threading')
+    if enable_socketio:
+        cors_origins = os.environ.get('CORS_ALLOWED_ORIGINS', '*')
+        if cors_origins != '*':
+            cors_origins = cors_origins.split(',')
+        
+        socketio.init_app(app, cors_allowed_origins=cors_origins, async_mode='threading')
+    else:
+        app.logger.info("SocketIO is disabled. Set ENABLE_SOCKETIO=true to enable real-time features.")
     
     from app.models import User
     
