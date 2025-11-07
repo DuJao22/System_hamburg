@@ -25,9 +25,12 @@ class User(UserMixin, db.Model):
             self.password_hash = generate_password_hash(password)
     
     def check_password(self, password):
-        if self.password_hash:
-            return check_password_hash(self.password_hash, password)
-        return True
+        if not self.password_hash:
+            return False
+        return check_password_hash(self.password_hash, password)
+    
+    def has_password(self):
+        return self.password_hash is not None and self.password_hash != ''
 
 class Category(db.Model):
     id = db.Column(db.Integer, primary_key=True)

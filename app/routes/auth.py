@@ -77,14 +77,20 @@ def logout():
 @login_required
 def change_password():
     if request.method == 'POST':
-        current_password = request.form.get('current_password')
+        current_password = request.form.get('current_password', '')
         new_password = request.form.get('new_password')
         confirm_password = request.form.get('confirm_password')
         
-        # Verificar senha atual
-        if not current_user.check_password(current_password):
-            flash('Senha atual incorreta.', 'danger')
-            return render_template('change_password.html')
+        # Verificar se usuário tem senha atual (se não tiver, é cadastro por telefone)
+        if current_user.has_password():
+            # Se tem senha, precisa confirmar a senha atual
+            if not current_password:
+                flash('Digite sua senha atual.', 'danger')
+                return render_template('change_password.html')
+            
+            if not current_user.check_password(current_password):
+                flash('Senha atual incorreta.', 'danger')
+                return render_template('change_password.html')
         
         # Verificar se as novas senhas coincidem
         if new_password != confirm_password:
