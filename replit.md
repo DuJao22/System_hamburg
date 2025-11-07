@@ -47,6 +47,13 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
         - **Organized Display:** Products organized by categories like Sanduíches, Hambúrgueres, Bebidas, Batatas, Combos, Drinques
         - **Responsive Design:** Sliders adapt to different screen sizes with smooth scrolling
         - **Quick Access:** "Ver todos" links on each section for full category view
+    - **Recent Orders & Best Sellers Sections (NEW - Nov 2025):**
+        - **Customer Order History:** Authenticated users see their 5 most recent orders on homepage with order number, status, date, items preview, and total
+        - **Best Sellers Display:** Dedicated slider showcasing top 6 most-sold products based on aggregated order data
+        - **Visual Indicators:** Best seller badge highlights popular items, order status badges show current state with color coding
+        - **Smart Queries:** Efficient database queries using GROUP BY aggregation to calculate best sellers without loading unnecessary data
+        - **Conditional Display:** Sections appear only when relevant (recent orders for logged-in users, best sellers when order data exists)
+        - **Responsive Layout:** Order cards in grid layout, best sellers in horizontal slider with navigation arrows
     - **Real-Time Order Tracking (UPDATED - Nov 2025):**
         - **PIN Authentication:** Customers create their own 4-digit PIN when ordering, providing enhanced security and memorability
         - **Customer-Chosen PINs:** Waiters ask customers to create a 4-digit PIN that they'll use to track their orders
