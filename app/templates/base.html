@@ -430,6 +430,36 @@
                 this.style.height = Math.min(this.scrollHeight, 100) + 'px';
             });
             
+            // Fix para mobile: input sempre visível quando teclado aparece
+            if (window.visualViewport) {
+                const inputArea = document.querySelector('.ai-chat-input-area');
+                let lastHeight = window.visualViewport.height;
+                
+                window.visualViewport.addEventListener('resize', () => {
+                    const currentHeight = window.visualViewport.height;
+                    const diff = lastHeight - currentHeight;
+                    
+                    if (diff > 0) {
+                        // Teclado apareceu
+                        chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                        setTimeout(() => {
+                            chatMessages.scrollTop = chatMessages.scrollHeight;
+                        }, 300);
+                    }
+                    lastHeight = currentHeight;
+                });
+            }
+            
+            // Fallback para navegadores sem visualViewport
+            chatInput.addEventListener('focus', () => {
+                setTimeout(() => {
+                    chatInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                    setTimeout(() => {
+                        chatMessages.scrollTop = chatMessages.scrollHeight;
+                    }, 300);
+                }, 300);
+            });
+            
             function addMessage(content, isUser = false) {
                 const messageDiv = document.createElement('div');
                 messageDiv.className = isUser ? 'user-message' : 'ai-message';
