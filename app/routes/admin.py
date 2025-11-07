@@ -1193,6 +1193,74 @@ def delete_user(user_id):
     flash(f'Usuário "{user.username}" deletado com sucesso!', 'success')
     return redirect(url_for('admin.users'))
 
+@admin_bp.route('/usuarios/exportar')
+@login_required
+@admin_required
+def export_users():
+    import csv
+    from io import StringIO
+    from flask import make_response
+    
+    role_filter = request.args.get('role', '')
+    search = request.args.get('search', '')
+    
+    query = User.query
+    
+    if role_filter:
+        query = query.filter_by(role=role_filter)
+    
+    if search:
+        query = query.filter(
+            or_(
+                User.username.contains(search),
+                User.email.contains(search),
+                User.cpf.contains(search) if search else False
+            )
+        )
+    
+    users_list = query.order_by(User.created_at.desc()).all()
+    
+    si = StringIO()
+    writer = csv.writer(si)
+    
+    writer.writerow(['ID', 'Nome', 'Email', 'Telefone', 'CPF', 'Papel', 'Origem Cadastro', 
+                     'É Admin', 'Data Cadastro'])
+    
+    for user in users_list:
+        cpf = ''
+        if user.cpf and len(user.cpf) == 11:
+            cpf = f"{user.cpf[0:3]}.{user.cpf[3:6]}.{user.cpf[6:9]}-{user.cpf[9:11]}"
+        elif user.cpf:
+            cpf = user.cpf
+        
+        origem = 'Chat Bot' if (not user.email or not user.password_hash) else 'Login'
+        
+        papel_map = {
+            'customer': 'Cliente',
+            'waiter': 'Atendente',
+            'kitchen': 'Cozinha',
+            'manager': 'Gerente'
+        }
+        papel = papel_map.get(user.role, user.role)
+        
+        writer.writerow([
+            user.id,
+            user.username,
+            user.email or '-',
+            user.phone or '-',
+            cpf or '-',
+            papel,
+            origem,
+            'Sim' if user.is_admin else 'Não',
+            user.created_at.strftime('%d/%m/%Y %H:%M') if user.created_at else '-'
+        ])
+    
+    output = make_response(si.getvalue())
+    output.headers['Content-Disposition'] = 'attachment; filename=usuarios.csv'
+    output.headers['Content-type'] = 'text/csv; charset=utf-8'
+    
+    return output
+
 @admin_bp.route('/mesas')
 @login_required
 @admin_required

@@ -38,7 +38,7 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
     - **Product Catalog:** Listing with pagination, detailed pages, search, category filtering, featured products, and stock control.
     - **Shopping Cart:** Add/remove items, quantity updates, total calculation, stock verification, installment calculation, and PIX discount.
     - **Order System:** Checkout, user order history, status management, automatic stock deduction, and detailed order viewing.
-    - **Admin Panel:** Dashboard with statistics, CRUD for products, categories, coupons, and carousel slides. Advanced order management with filters, search, pagination, real-time statistics, status history, notes, and CSV export. Includes a user management system for creating and managing different roles (Client, Attendant, Kitchen, Manager, Admin) with corresponding permissions.
+    - **Admin Panel:** Dashboard with statistics, CRUD for products, categories, coupons, and carousel slides. Advanced order management with filters, search, pagination, real-time statistics, status history, notes, and CSV export. Includes a user management system for creating and managing different roles (Client, Attendant, Kitchen, Manager, Admin) with corresponding permissions and CSV export with registration origin indicator (Chat Bot or Login).
     - **Wishlist:** Functionality to manage desired products.
     - **Product Reviews:** Users can rate products and add comments, verified by purchase.
     - **Add-ons and Observations:** Allows selecting product extras and adding special observations during checkout, with quantity and price tracking.
