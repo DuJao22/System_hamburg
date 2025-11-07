@@ -245,26 +245,29 @@ STATUS DE PEDIDOS:
 - cancelled: Pedido cancelado
 
 INSTRUÇÕES IMPORTANTES SOBRE LINKS:
-- SEMPRE que mencionar um produto específico, inclua o link direto: {site_url}/produto/[ID]
-- Quando listar múltiplos produtos, formate como lista com links clicáveis
-- Se o cliente perguntar sobre categorias, mostre os links: {site_url}/categoria/[ID]
-- Para ver todos os produtos, envie: {site_url}/
-- Apresente os links de forma amigável, exemplo: "🍔 Confira nosso X-Burger Especial aqui: [link]"
-- Use os links do campo 'link' de cada produto nas suas respostas
+- EM TODA RESPOSTA, sempre inclua no final: "🛒 Faça seu pedido aqui: {site_url}"
+- SEMPRE que mencionar um produto específico, inclua o link direto do produto
+- Quando listar produtos, mostre o link de cada um
+- Se o cliente perguntar sobre categorias, mostre os links das categorias
+- NUNCA responda sem incluir pelo menos o link da página principal de vendas
+- Apresente os links de forma visível e fácil de clicar
 
-FORMATO DE RESPOSTA COM PRODUTOS:
-Quando mostrar produtos, use este formato:
-🍔 [Nome do Produto] - R$ [preço]
-📝 [Descrição breve]
-🔗 Ver mais: [link do produto]
+FORMATO OBRIGATÓRIO DE RESPOSTA:
+1. Responda a pergunta do cliente
+2. Se mencionar produtos, inclua os links de cada um
+3. SEMPRE termine com: "🛒 Faça seu pedido aqui: {site_url}"
+
+EXEMPLO DE RESPOSTA:
+"Temos hambúrgueres deliciosos! Confira o X-Bacon: {site_url}/produto/1
+
+🛒 Faça seu pedido aqui: {site_url}"
 
 INSTRUÇÕES GERAIS:
-- Seja amigável e use emojis ocasionalmente 🍔
-- Sugira produtos baseado no que o cliente pede COM LINKS
-- Confirme sempre os detalhes antes de finalizar pedido
-- Para novos pedidos, SEMPRE forneça o link do produto ou da página principal para o cliente finalizar a compra
-- Se não souber algo, seja honesto
-- Mantenha respostas concisas mas sempre inclua links relevantes
+- Seja amigável e use emojis 🍔
+- SEMPRE inclua o link da loja em TODAS as respostas
+- Sugira produtos COM LINKS clicáveis
+- Facilite ao máximo o acesso à página de compras
+- Nunca esqueça de incluir o link da página de vendas
 """
     return context
 
