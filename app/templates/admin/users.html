@@ -67,6 +67,7 @@
                     <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Email</th>
                     <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Papel</th>
                     <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Telefone</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Origem</th>
                     <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Cadastrado em</th>
                     <th style="padding: 15px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Ações</th>
                 </tr>
@@ -95,6 +96,17 @@
                             {% endif %}
                         </td>
                         <td style="padding: 15px;">{{ user.phone or '-' }}</td>
+                        <td style="padding: 15px; text-align: center;">
+                            {% if not user.email or not user.password_hash %}
+                                <span style="background: #00E65D; color: #000; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa fa-comments"></i> Chat Bot
+                                </span>
+                            {% else %}
+                                <span style="background: #667eea; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                    <i class="fa fa-user-circle"></i> Login
+                                </span>
+                            {% endif %}
+                        </td>
                         <td style="padding: 15px;">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
                         <td style="padding: 15px; text-align: center;">
                             <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" style="color: #667eea; text-decoration: none; margin-right: 10px;" title="Editar">
@@ -112,7 +124,7 @@
                     {% endfor %}
                 {% else %}
                     <tr>
-                        <td colspan="7" style="padding: 40px; text-align: center; color: #999;">
+                        <td colspan="8" style="padding: 40px; text-align: center; color: #999;">
                             <i class="fa fa-users" style="font-size: 48px; margin-bottom: 10px; opacity: 0.3;"></i>
                             <div>Nenhum usuário encontrado</div>
                         </td>
