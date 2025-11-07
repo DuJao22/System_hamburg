@@ -13,12 +13,15 @@ The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQ
 - **Modular Structure:** The application is organized into logical modules (e.g., `main`, `auth`, `cart`, `admin`) for maintainability and scalability.
 - **Database:** SQLite3 is used for development, with PostgreSQL recommended for production.
 - **Authentication:** Secure user authentication uses Flask-Login with Werkzeug for password hashing, including role-based access control for users and administrators.
+    - **Simplified Registration (UPDATED - Nov 2025):** Users can register with just name and phone number for faster signup. Email and password are optional fields.
+    - **Phone-Based Login (UPDATED - Nov 2025):** Login uses phone number as the primary identifier instead of email, streamlining the authentication process.
+    - **Security:** Password hashing remains secure; users without passwords can set one later via password change functionality.
 - **UI/UX:**
     - **Design:** Professional and organized layouts with focus on usability, responsive across devices.
     - **Color Scheme:** Updated to use `#00E65D` (vibrant green) with enhanced contrast for better visibility. Shadows and borders strengthened for improved visual hierarchy.
     - **Dynamic Content:** Product categories display images on hover, and the homepage carousel loads dynamically from the database.
 - **Core Features:**
-    - **User Management:** Registration with CPF and phone validation, login/logout, and session management.
+    - **User Management:** Simplified registration requiring only name and phone number. Automatic login after registration. Login via phone number only. Optional password setup for enhanced security.
     - **Product Catalog:** Listing with pagination, detailed pages, search, category filtering, featured products, and stock control.
     - **Shopping Cart:** Add/remove items, quantity updates, total calculation, stock verification, installment calculation, and PIX discount.
     - **Order System:** Checkout, user order history, status management, automatic stock deduction, and detailed order viewing.
