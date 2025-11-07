@@ -120,8 +120,12 @@ def create_app():
         if User.query.count() == 0:
             admin_password = os.environ.get('ADMIN_PASSWORD')
             if not admin_password:
-                admin_password = '30031936Vo.'
-                print("WARNING: Using default admin password. Set ADMIN_PASSWORD environment variable for production!")
+                print("=" * 80)
+                print("ERRO CRÍTICO: Variável ADMIN_PASSWORD não configurada!")
+                print("Configure a variável de ambiente ADMIN_PASSWORD antes de iniciar a aplicação.")
+                print("Exemplo: export ADMIN_PASSWORD='sua-senha-segura-aqui'")
+                print("=" * 80)
+                raise ValueError("ADMIN_PASSWORD environment variable is required for initial setup!")
             
             admin = User(
                 username='admin',

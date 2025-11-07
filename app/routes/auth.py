@@ -31,6 +31,30 @@ def login():
     
     return render_template('login.html')
 
+@auth_bp.route('/admin/login', methods=['GET', 'POST'])
+def admin_login():
+    if current_user.is_authenticated and current_user.is_admin:
+        return redirect(url_for('admin.dashboard'))
+    
+    if request.method == 'POST':
+        email = request.form.get('email')
+        password = request.form.get('password')
+        
+        if not email or not password:
+            flash('Por favor, preencha email e senha.', 'danger')
+            return render_template('admin_login.html')
+        
+        user = User.query.filter_by(email=email, is_admin=True).first()
+        
+        if user and user.check_password(password):
+            login_user(user)
+            flash('Login administrativo realizado com sucesso!', 'success')
+            return redirect(url_for('admin.dashboard'))
+        else:
+            flash('Email ou senha incorretos, ou usuário não é administrador.', 'danger')
+    
+    return render_template('admin_login.html')
+
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
