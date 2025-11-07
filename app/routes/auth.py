@@ -11,18 +11,23 @@ def login():
         return redirect(url_for('main.index'))
     
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        phone = request.form.get('phone')
         
-        user = User.query.filter_by(email=email).first()
+        if not phone:
+            flash('Por favor, digite seu telefone.', 'danger')
+            return render_template('login.html')
         
-        if user and user.check_password(password):
+        phone_normalized = ''.join(filter(str.isdigit, phone))
+        
+        user = User.query.filter_by(phone=phone_normalized).first()
+        
+        if user:
             login_user(user)
             next_page = request.args.get('next')
             flash('Login realizado com sucesso!', 'success')
             return redirect(next_page) if next_page else redirect(url_for('main.index'))
         else:
-            flash('Email ou senha incorretos.', 'danger')
+            flash('Telefone não encontrado. Cadastre-se primeiro.', 'danger')
     
     return render_template('login.html')
 
@@ -33,42 +38,31 @@ def register():
     
     if request.method == 'POST':
         username = request.form.get('username')
-        cpf = request.form.get('cpf')
         phone = request.form.get('phone')
-        email = request.form.get('email')
-        password = request.form.get('password')
-        confirm_password = request.form.get('confirm_password')
         
-        if password != confirm_password:
-            flash('As senhas não coincidem.', 'danger')
+        if not username or not phone:
+            flash('Nome e telefone são obrigatórios.', 'danger')
             return render_template('register.html')
         
-        if User.query.filter_by(email=email).first():
-            flash('Este email já está cadastrado.', 'danger')
+        phone_normalized = ''.join(filter(str.isdigit, phone))
+        
+        if len(phone_normalized) < 10:
+            flash('Telefone inválido. Digite um número válido.', 'danger')
             return render_template('register.html')
         
-        if User.query.filter_by(username=username).first():
-            flash('Este nome de usuário já está em uso.', 'danger')
+        if User.query.filter_by(phone=phone_normalized).first():
+            flash('Este telefone já está cadastrado.', 'danger')
             return render_template('register.html')
         
-        cpf_normalized = ''.join(filter(str.isdigit, cpf)) if cpf else None
-        
-        if cpf_normalized and len(cpf_normalized) != 11:
-            flash('CPF inválido. Digite 11 dígitos.', 'danger')
-            return render_template('register.html')
-        
-        if cpf_normalized and User.query.filter_by(cpf=cpf_normalized).first():
-            flash('Este CPF já está cadastrado.', 'danger')
-            return render_template('register.html')
-        
-        user = User(username=username, email=email, cpf=cpf_normalized, phone=phone)
-        user.set_password(password)
+        user = User(username=username, phone=phone_normalized)
         
         db.session.add(user)
         db.session.commit()
         
-        flash('Cadastro realizado com sucesso! Faça login.', 'success')
-        return redirect(url_for('auth.login'))
+        login_user(user)
+        
+        flash('Cadastro realizado com sucesso!', 'success')
+        return redirect(url_for('main.index'))
     
     return render_template('register.html')
 

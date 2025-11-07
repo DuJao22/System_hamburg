@@ -7,24 +7,30 @@
     <div style="background: #1f1f1f; padding: 40px; border-radius: 8px; box-shadow: 0 4px 15px rgba(0,0,0,0.5); border: 2px solid #00E65D;">
         <h2 style="text-align: center; margin-bottom: 30px; color: #ffffff;">
             <i class="fa fa-user-circle" style="font-size: 48px; color: var(--color-red);"></i><br>
-            Fazer Login
+            Login Rápido
         </h2>
         
         <form method="POST" action="{{ url_for('auth.login') }}">
-            <div style="margin-bottom: 20px;">
-                <label for="email" style="display: block; margin-bottom: 5px; font-weight: 600; color: #00E65D;">Email:</label>
-                <input type="email" id="email" name="email" required style="width: 100%; padding: 12px; font-size: 14px; border: 2px solid #00E65D; border-radius: 4px; background: #0d0d0d; color: #ffffff;">
-            </div>
-            
             <div style="margin-bottom: 30px;">
-                <label for="password" style="display: block; margin-bottom: 5px; font-weight: 600; color: #00E65D;">Senha:</label>
-                <input type="password" id="password" name="password" required style="width: 100%; padding: 12px; font-size: 14px; border: 2px solid #00E65D; border-radius: 4px; background: #0d0d0d; color: #ffffff;">
+                <label for="phone" style="display: block; margin-bottom: 5px; font-weight: 600; color: #00E65D;">Telefone:</label>
+                <input type="text" id="phone" name="phone" required maxlength="15" placeholder="(00) 00000-0000" style="width: 100%; padding: 12px; font-size: 14px; border: 2px solid #00E65D; border-radius: 4px; background: #0d0d0d; color: #ffffff;">
             </div>
             
             <button type="submit" class="btn_buy" style="width: 100%; padding: 15px; font-size: 16px;">
                 <i class="fa fa-sign-in"></i> ENTRAR
             </button>
         </form>
+        
+        <script>
+            document.getElementById('phone').addEventListener('input', function(e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    value = value.replace(/^(\d{2})(\d)/g, '($1) $2');
+                    value = value.replace(/(\d)(\d{4})$/, '$1-$2');
+                }
+                e.target.value = value;
+            });
+        </script>
         
         <div style="text-align: center; margin-top: 20px; padding-top: 20px; border-top: 1px solid #333333;">
             <p style="color: #ffffff;">Ainda não tem uma conta?</p>
