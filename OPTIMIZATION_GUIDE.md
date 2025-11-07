@@ -44,11 +44,13 @@ gunicorn -c gunicorn_config.py run:app
 
 ### 7. SocketIO Opcional
 - **Feature Flag**: `ENABLE_SOCKETIO` (padrão: true)
+- **Async Mode**: gevent (compatível com Gunicorn gevent worker)
 - Para desabilitar e economizar recursos:
   ```bash
   export ENABLE_SOCKETIO=false
   ```
 - Reduz uso de memória em ~30% quando desabilitado
+- **Importante**: SocketIO configurado em modo gevent para compatibilidade total com workers Gunicorn
 
 ## Como Usar no Render
 

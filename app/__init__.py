@@ -43,7 +43,7 @@ def create_app():
         if cors_origins != '*':
             cors_origins = cors_origins.split(',')
         
-        socketio.init_app(app, cors_allowed_origins=cors_origins, async_mode='threading')
+        socketio.init_app(app, cors_allowed_origins=cors_origins, async_mode='gevent')
     else:
         app.logger.info("SocketIO is disabled. Set ENABLE_SOCKETIO=true to enable real-time features.")
     
