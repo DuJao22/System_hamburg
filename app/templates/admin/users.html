@@ -67,59 +67,59 @@
         <table style="width: 100%; border-collapse: collapse;">
             <thead style="background: #f8f9fa;">
                 <tr>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">ID</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Nome</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Email</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Papel</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Telefone</th>
-                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Origem</th>
-                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Cadastrado em</th>
-                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #666; border-bottom: 2px solid #ddd;">Ações</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">ID</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Nome</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Email</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Papel</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Telefone</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Origem</th>
+                    <th style="padding: 15px; text-align: left; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Cadastrado em</th>
+                    <th style="padding: 15px; text-align: center; font-weight: 600; color: #333; border-bottom: 2px solid #ddd;">Ações</th>
                 </tr>
             </thead>
             <tbody>
                 {% if users %}
                     {% for user in users %}
                     <tr style="border-bottom: 1px solid #eee;">
-                        <td style="padding: 15px;">{{ user.id }}</td>
-                        <td style="padding: 15px;">
-                            <strong>{{ user.username }}</strong>
+                        <td style="padding: 15px; color: #333; font-weight: 500;">{{ user.id }}</td>
+                        <td style="padding: 15px; color: #333;">
+                            <strong style="color: #111;">{{ user.username }}</strong>
                             {% if user.is_admin %}
                             <span style="background: #111; color: #fff; padding: 2px 8px; border-radius: 3px; font-size: 11px; margin-left: 5px;">ADMIN</span>
                             {% endif %}
                         </td>
-                        <td style="padding: 15px;">{{ user.email }}</td>
+                        <td style="padding: 15px; color: #333;">{{ user.email }}</td>
                         <td style="padding: 15px;">
                             {% if user.role == 'waiter' %}
-                                <span style="background: #667eea; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Atendente</span>
+                                <span style="background: #667eea; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">Atendente</span>
                             {% elif user.role == 'kitchen' %}
-                                <span style="background: #ff9800; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Cozinha</span>
+                                <span style="background: #ff9800; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">Cozinha</span>
                             {% elif user.role == 'manager' %}
-                                <span style="background: #00C851; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Gerente</span>
+                                <span style="background: #00C851; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">Gerente</span>
                             {% else %}
-                                <span style="background: #999; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px;">Cliente</span>
+                                <span style="background: #6c757d; color: #fff; padding: 4px 12px; border-radius: 4px; font-size: 12px; font-weight: 600;">Cliente</span>
                             {% endif %}
                         </td>
-                        <td style="padding: 15px;">{{ user.phone or '-' }}</td>
+                        <td style="padding: 15px; color: #333;">{{ user.phone or '-' }}</td>
                         <td style="padding: 15px; text-align: center;">
                             {% if not user.email or not user.password_hash %}
-                                <span style="background: #00E65D; color: #000; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <span style="background: #00E65D; color: #000; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                                     <i class="fa fa-comments"></i> Chat Bot
                                 </span>
                             {% else %}
-                                <span style="background: #667eea; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 600; display: inline-flex; align-items: center; gap: 4px;">
+                                <span style="background: #667eea; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; font-weight: 700; display: inline-flex; align-items: center; gap: 4px;">
                                     <i class="fa fa-user-circle"></i> Login
                                 </span>
                             {% endif %}
                         </td>
-                        <td style="padding: 15px;">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
+                        <td style="padding: 15px; color: #333;">{{ user.created_at.strftime('%d/%m/%Y') }}</td>
                         <td style="padding: 15px; text-align: center;">
-                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" style="color: #667eea; text-decoration: none; margin-right: 10px;" title="Editar">
+                            <a href="{{ url_for('admin.edit_user', user_id=user.id) }}" style="color: #667eea; text-decoration: none; margin-right: 15px; font-size: 16px;" title="Editar">
                                 <i class="fa fa-edit"></i>
                             </a>
                             {% if user.id != current_user.id %}
                             <form method="POST" action="{{ url_for('admin.delete_user', user_id=user.id) }}" style="display: inline;" onsubmit="return confirm('Tem certeza que deseja deletar este usuário?');">
-                                <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0;" title="Deletar">
+                                <button type="submit" style="background: none; border: none; color: #dc3545; cursor: pointer; padding: 0; font-size: 16px;" title="Deletar">
                                     <i class="fa fa-trash"></i>
                                 </button>
                             </form>
