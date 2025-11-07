@@ -6,6 +6,19 @@ This project is a comprehensive e-commerce platform built with Python Flask, des
 ## User Preferences
 I want to prioritize iterative development, focusing on one feature at a time. I prefer clear and direct communication, with explanations that are easy to understand. Please ask for confirmation before implementing significant changes or refactoring large parts of the codebase. I value code readability and maintainability.
 
+## Recent Changes (November 2025)
+
+### Security & Authentication Enhancement
+- **Admin Login Separation (NEW):** Implemented dedicated admin login at `/admin/login` with email and password authentication for enhanced security
+- **Hardcoded Password Removal:** Eliminated hardcoded admin password from codebase, now requires `ADMIN_PASSWORD` environment variable (security best practice)
+- **Environment Variable Enforcement:** System will not start without proper `ADMIN_PASSWORD` configuration, preventing accidental insecure deployments
+- **Admin Credentials:** Email: `admin@hamburguer.com`, Password: Set via `ADMIN_PASSWORD` environment variable
+
+### Mobile UX Improvements
+- **Chatbot Mobile Optimization:** AI chatbot now provides professional full-screen experience on mobile devices (768px and below)
+- **Responsive Chat Design:** Optimized font sizes, button sizes, and spacing for touchscreen devices
+- **Enhanced Mobile Usability:** Chat interface adapts seamlessly from desktop to mobile with dedicated CSS breakpoints at 768px and 380px
+
 ## System Architecture
 The platform is developed using Python 3.11 with Flask 3.0.0 for the backend, SQLAlchemy ORM with SQLite3 for the database, and Flask-Login for authentication. The frontend is built with HTML5, CSS3, and Vanilla JavaScript, ensuring a responsive design across devices.
 
