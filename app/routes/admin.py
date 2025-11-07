@@ -561,6 +561,32 @@ def add_order_note(order_id):
     
     return redirect(url_for('admin.order_detail', order_id=order_id))
 
+@admin_bp.route('/pedidos/<int:order_id>/confirmar-pagamento', methods=['POST'])
+@login_required
+def confirm_payment(order_id):
+    """Confirmar pagamento manual do pedido - Disponível para admins, gerentes e colaboradores autorizados"""
+    order = Order.query.get_or_404(order_id)
+    
+    if not current_user.is_admin and current_user.role not in ['manager', 'attendant']:
+        flash('Você não tem permissão para confirmar pagamentos.', 'danger')
+        return redirect(url_for('main.index'))
+    
+    if order.payment_status == 'Pago':
+        flash('Este pagamento já foi confirmado anteriormente.', 'info')
+        return redirect(url_for('admin.order_detail', order_id=order_id))
+    
+    confirmation_notes = request.form.get('confirmation_notes', '').strip()
+    
+    order.payment_status = 'Pago'
+    order.payment_confirmed_by = current_user.id
+    order.payment_confirmed_at = datetime.utcnow()
+    order.payment_confirmation_notes = confirmation_notes or f'Pagamento confirmado manualmente por {current_user.username}'
+    
+    db.session.commit()
+    
+    flash(f'Pagamento confirmado com sucesso!', 'success')
+    return redirect(url_for('admin.order_detail', order_id=order_id))
+
 @admin_bp.route('/pedidos/exportar')
 @login_required
 @admin_required

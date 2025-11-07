@@ -16,7 +16,6 @@ class User(UserMixin, db.Model):
     role = db.Column(db.String(20), default='customer')
     created_at = db.Column(db.DateTime, default=utcnow_brasilia)
     
-    orders = db.relationship('Order', backref='user', lazy=True)
     wishlists = db.relationship('Wishlist', backref='user', lazy=True, cascade='all, delete-orphan')
     reviews = db.relationship('Review', backref='user', lazy=True, cascade='all, delete-orphan')
     
@@ -78,6 +77,9 @@ class Order(db.Model):
     payment_status = db.Column(db.String(50), default='Pendente')
     payment_id = db.Column(db.String(200))
     payment_method = db.Column(db.String(50))
+    payment_confirmed_by = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=True)
+    payment_confirmed_at = db.Column(db.DateTime, nullable=True)
+    payment_confirmation_notes = db.Column(db.Text, nullable=True)
     delivery_type = db.Column(db.String(20), default='delivery')
     delivery_address = db.Column(db.Text)
     customer_name = db.Column(db.String(200))
@@ -104,6 +106,8 @@ class Order(db.Model):
     items = db.relationship('OrderItem', backref='order', lazy=True, cascade='all, delete-orphan')
     status_history = db.relationship('OrderStatusHistory', backref='order', lazy=True, cascade='all, delete-orphan')
     notes = db.relationship('OrderNote', backref='order', lazy=True, cascade='all, delete-orphan')
+    user = db.relationship('User', foreign_keys=[user_id], backref='orders')
+    payment_confirmer = db.relationship('User', foreign_keys=[payment_confirmed_by], backref='confirmed_payments')
     
     @property
     def order_number(self):

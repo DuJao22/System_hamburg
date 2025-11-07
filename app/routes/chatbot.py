@@ -6,6 +6,7 @@ from google.genai import types
 import os
 import uuid
 import json
+import re
 from datetime import datetime
 
 chatbot_bp = Blueprint('chatbot', __name__)
@@ -219,12 +220,20 @@ PRODUTOS DISPONÍVEIS:
 {json.dumps(products_info, ensure_ascii=False, indent=2)}
 {order_context}
 
+PROTOCOLO DE ATENDIMENTO (SIGA RIGOROSAMENTE):
+1. PRIMEIRA INTERAÇÃO: Pergunte o NOME do cliente de forma amigável
+2. SEGUNDA INTERAÇÃO: Pergunte o TELEFONE (com DDD) do cliente
+3. APÓS COLETAR DADOS: Confirme os dados (Nome + Telefone) com o cliente
+4. SOMENTE DEPOIS: Envie o link da página de compras e ajude com produtos
+5. Durante todo processo, seja amigável e use emojis 😊
+
 SUAS CAPACIDADES:
-1. Ajudar clientes a fazer pedidos (colete: nome, telefone, endereço e itens desejados)
-2. Responder perguntas sobre produtos e cardápio
-3. Consultar status de pedidos (por código do pedido ou telefone)
-4. Fornecer informações sobre a loja
-5. Ser educado, prestativo e profissional
+1. Coletar nome e telefone do cliente ANTES de qualquer outra coisa
+2. Ajudar clientes a escolher produtos
+3. Responder perguntas sobre produtos e cardápio
+4. Consultar status de pedidos (por código do pedido ou telefone)
+5. Fornecer informações sobre a loja
+6. Ser educado, prestativo e profissional
 
 CONSULTA DE PEDIDOS:
 - Se o cliente quiser consultar um pedido, peça o código do pedido OU telefone cadastrado
@@ -244,30 +253,31 @@ STATUS DE PEDIDOS:
 - delivered: Pedido entregue
 - cancelled: Pedido cancelado
 
-INSTRUÇÕES IMPORTANTES SOBRE LINKS:
-- EM TODA RESPOSTA, sempre inclua no final: "🛒 Faça seu pedido aqui: {site_url}"
-- SEMPRE que mencionar um produto específico, inclua o link direto do produto
+INSTRUÇÕES IMPORTANTES SOBRE COLETA DE DADOS:
+- NUNCA envie o link de vendas ANTES de coletar Nome e Telefone
+- Seja persistente mas educado ao pedir os dados
+- Se o cliente tentar desviar, lembre gentilmente que precisa dos dados para continuar
+- Após coletar, confirme: "Perfeito! Nome: [nome], Telefone: [telefone]. Está correto?"
+- Somente após confirmação, envie o link de vendas
+
+FORMATO DE COLETA DE DADOS:
+1ª mensagem do cliente → Pergunte: "Olá! 👋 Qual é o seu nome?"
+2ª mensagem (nome fornecido) → Pergunte: "Prazer, [Nome]! 😊 Qual é o seu telefone (com DDD)?"
+3ª mensagem (telefone fornecido) → Confirme: "Perfeito! Nome: [nome], Telefone: [telefone]. Está correto?"
+4ª mensagem (confirmação) → Envie link e ajude: "Ótimo! Agora você pode fazer seu pedido aqui: {site_url}"
+
+INSTRUÇÕES SOBRE LINKS (APÓS COLETA DE DADOS):
+- Após coletar e confirmar dados, SEMPRE inclua: "🛒 Faça seu pedido aqui: {site_url}"
+- Quando mencionar produtos, inclua os links diretos
 - Quando listar produtos, mostre o link de cada um
-- Se o cliente perguntar sobre categorias, mostre os links das categorias
-- NUNCA responda sem incluir pelo menos o link da página principal de vendas
-- Apresente os links de forma visível e fácil de clicar
-
-FORMATO OBRIGATÓRIO DE RESPOSTA:
-1. Responda a pergunta do cliente
-2. Se mencionar produtos, inclua os links de cada um
-3. SEMPRE termine com: "🛒 Faça seu pedido aqui: {site_url}"
-
-EXEMPLO DE RESPOSTA:
-"Temos hambúrgueres deliciosos! Confira o X-Bacon: {site_url}/produto/1
-
-🛒 Faça seu pedido aqui: {site_url}"
+- Facilite o acesso à página de compras
 
 INSTRUÇÕES GERAIS:
 - Seja amigável e use emojis 🍔
-- SEMPRE inclua o link da loja em TODAS as respostas
-- Sugira produtos COM LINKS clicáveis
+- NÃO pule a etapa de coleta de dados
+- PRIMEIRO coleta dados, DEPOIS envia links
+- Sugira produtos COM LINKS clicáveis (após coletar dados)
 - Facilite ao máximo o acesso à página de compras
-- Nunca esqueça de incluir o link da página de vendas
 """
     return context
 
@@ -281,6 +291,34 @@ def get_or_create_conversation(session_id):
         db.session.commit()
     
     return conversation
+
+def extract_phone_from_text(text):
+    """Extrair telefone da mensagem"""
+    phone_normalized = re.sub(r'[^\d]', '', text)
+    phone_match = re.search(r'\d{10,11}', phone_normalized)
+    if phone_match:
+        return phone_match.group()
+    return None
+
+def register_user_from_chat(name, phone):
+    """Registrar usuário automaticamente via chatbot"""
+    try:
+        phone_normalized = ''.join(filter(str.isdigit, phone))
+        
+        if len(phone_normalized) < 10:
+            return None, "Telefone inválido. Digite um número com DDD (ex: 31987654321)"
+        
+        existing_user = User.query.filter_by(phone=phone_normalized).first()
+        if existing_user:
+            return existing_user, None
+        
+        new_user = User(username=name, phone=phone_normalized, role='customer')
+        db.session.add(new_user)
+        db.session.commit()
+        
+        return new_user, None
+    except Exception as e:
+        return None, f"Erro ao criar conta: {str(e)}"
 
 def get_conversation_history(conversation, limit=10):
     """Obter histórico de mensagens"""
@@ -325,14 +363,54 @@ def chat():
         # Obter ou criar conversa
         conversation = get_or_create_conversation(session_id)
         
+        # Detectar e salvar nome/telefone
+        phone_detected = extract_phone_from_text(user_message)
+        
+        # Se ainda não tem nome e parece ser um nome (não tem números), salvar
+        if not conversation.user_name and not any(char.isdigit() for char in user_message) and len(user_message.split()) <= 3:
+            conversation.user_name = user_message.strip()
+            db.session.commit()
+            print(f"📝 Nome salvo: {conversation.user_name}")
+        
+        # Se já tem nome mas não tem telefone, e detectou telefone na mensagem
+        if conversation.user_name and not conversation.user_phone and phone_detected:
+            conversation.user_phone = phone_detected
+            db.session.commit()
+            print(f"📞 Telefone salvo: {conversation.user_phone}")
+            
+            # Tentar criar usuário automaticamente
+            user, error = register_user_from_chat(conversation.user_name, conversation.user_phone)
+            if user:
+                conversation.user_id = user.id
+                db.session.commit()
+                print(f"✅ Usuário criado/encontrado: {user.username} ({user.phone})")
+        
         # Salvar mensagem do usuário
         save_message(conversation.id, 'user', user_message)
         
         # Obter histórico
         history = get_conversation_history(conversation)
         
+        # Obter domínio do site
+        site_domain = os.environ.get('REPL_SLUG', '')
+        if site_domain:
+            site_url = f"https://{site_domain}.repl.co"
+        else:
+            site_url = request.host_url.rstrip('/')
+        
+        # Adicionar informação sobre status da coleta de dados ao contexto
+        data_collection_status = ""
+        if not conversation.user_name:
+            data_collection_status = "\n\n⚠️ ATENÇÃO: Cliente ainda NÃO forneceu o NOME. PERGUNTE O NOME AGORA e NÃO envie links."
+        elif not conversation.user_phone:
+            data_collection_status = f"\n\n⚠️ ATENÇÃO: Cliente {conversation.user_name} ainda NÃO forneceu o TELEFONE. PERGUNTE O TELEFONE AGORA e NÃO envie links."
+        elif not conversation.user_id:
+            data_collection_status = f"\n\n✅ Dados coletados: {conversation.user_name} - {conversation.user_phone}. CONFIRME com o cliente se os dados estão corretos. Se sim, envie o link: {site_url}"
+        else:
+            data_collection_status = f"\n\n✅ Cliente cadastrado: {conversation.user_name} - {conversation.user_phone}. PODE enviar links e ajudar com produtos."
+        
         # Preparar contexto (passa a mensagem do usuário para detectar consultas de pedido)
-        store_context = get_store_context(user_message)
+        store_context = get_store_context(user_message) + data_collection_status
         
         # Preparar mensagens para o Gemini
         messages = [
